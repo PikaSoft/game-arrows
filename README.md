@@ -135,8 +135,12 @@ pauses; the game also pauses when a card opens or the tab is hidden.
 
 - **Moving:** the snake moves one cell per step. Turning straight back is ignored, and
   up to two quick turns are remembered, so a fast U-turn works.
-- **Eating:** each apple adds one cell. Apples appear on a random empty cell.
-- **Crashing:** the edge of the board, walls and your own body end the run. Moving into
+- **Eating:** each apple adds one cell. Three apples are on the board at once; each
+  one eaten is replaced on a random empty cell.
+- **Poison:** one poison berry sits on the board. Every 24 steps it jumps to the cell
+  your tail just left (or a clear cell beside the tail), and it flickers for the last
+  3 steps before it moves. It never lands on an apple or next to your head.
+- **Crashing:** the edge of the board, walls, the poison and your own body end the run. Moving into
   the cell your tail is leaving is fine, unless you are growing on that step.
 
 ### Snake

@@ -62,8 +62,8 @@ export function createSnakeGame(shell: Shell, mode: SnakeMode): GameModule {
     <h1>${name}</h1>
     <p>${
       classic
-        ? 'Eat apples, grow longer, and keep clear of the edges and your own tail.'
-        : 'Steer around the walls and eat enough apples to clear each level.'
+        ? 'Eat apples, grow longer, and keep clear of the edges, your own tail and the poison.'
+        : 'Steer around the walls and the poison, and eat enough apples to clear each level.'
     }</p>
     ${homeExtra}
     <button class="btn" id="${P}-play"></button>

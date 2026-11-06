@@ -16,6 +16,7 @@ const make = (opts: Partial<ConstructorParameters<typeof SnakeSim>[0]> = {}) =>
     ],
     dir: 0,
     rng: new Rng(1),
+    poisonEvery: 0,
     ...opts,
   });
 const at = (s: SnakeSim, x: number, y: number) => y * s.w + x;
@@ -50,6 +51,7 @@ describe('snake rules', () => {
     expect(s.length).toBe(4);
     expect(s.eaten).toBe(1);
     expect(s.lastTail).toBeNull();
+    expect(s.foods.length).toBe(3);
     expect(s.isSnake(s.food) || s.isWall(s.food)).toBe(false);
   });
 
@@ -82,10 +84,26 @@ describe('snake rules', () => {
   test('food never lands on the snake or a wall', () => {
     const walls = Array.from({ length: 8 }, (_, x) => 7 * 8 + x);
     const s = make({ walls });
-    for (let k = 0; k < 200; k++) {
-      s.spawnFood();
-      expect(s.isWall(s.food) || s.isSnake(s.food)).toBe(false);
+    for (let k = 0; k < 40; k++) {
+      s.placeFood();
+      s.fillFood();
+      for (const f of s.foods) expect(s.isWall(f) || s.isSnake(f)).toBe(false);
     }
+  });
+
+  test('several apples at once, topped up after eating', () => {
+    const s = make({ poisonEvery: 24 });
+    expect(s.foods.length).toBe(3);
+    expect(new Set(s.foods).size).toBe(3);
+    expect(s.foods).not.toContain(s.poison);
+    s.placeFood(at(s, 3, 3), at(s, 0, 0), at(s, 7, 0));
+    expect(s.step().ate).toBe(true);
+    expect(s.foods.length).toBe(3);
+    expect(s.foods).toContain(at(s, 0, 0));
+    expect(s.foods).toContain(at(s, 7, 0));
+    expect(s.foods).not.toContain(at(s, 3, 3));
+    const one = make({ foodCount: 1 });
+    expect(one.foods.length).toBe(1);
   });
 
   test('wins on reaching the target', () => {
@@ -96,6 +114,44 @@ describe('snake rules', () => {
     s.placeFood(at(s, 3, 2));
     expect(s.step().won).toBe(true);
     expect(s.step()).toEqual({ ate: false, died: false, won: false }); // frozen
+  });
+
+  test('poison starts behind the tail and is fatal', () => {
+    const s = make({ poisonEvery: 24 });
+    expect(s.poison).toBe(at(s, 3, 7));
+    const p = make({ poisonEvery: 24 });
+    p.placeFood(at(p, 0, 0));
+    p.placePoison(at(p, 3, 3));
+    const r = p.step();
+    expect(r.died).toBe(true);
+    expect(p.crashCell).toBe(at(p, 3, 3));
+  });
+
+  test('poison jumps to the cell the tail just left, on a timer', () => {
+    const s = make({ poisonEvery: 3 });
+    s.placeFood(at(s, 0, 0));
+    s.step();
+    s.step();
+    expect(s.poison).toBe(at(s, 3, 7));
+    s.step(); // third step: tail leaves (3,4)
+    expect(s.poison).toBe(at(s, 3, 4));
+    expect(s.isSnake(s.poison)).toBe(false);
+    expect(s.poisonIn).toBe(3);
+  });
+
+  test('poison never lands on the snake, an apple or beside the head', () => {
+    const s = new SnakeSim({ w: 12, h: 12, start: [{ x: 6, y: 6 }, { x: 6, y: 7 }, { x: 6, y: 8 }], dir: 0, rng: new Rng(5), poisonEvery: 2 });
+    const turns = [1, 2, 3, 0];
+    for (let k = 0; k < 400 && !s.dead; k++) {
+      // Walk a square spiral-ish path that stays on the board.
+      if (k % 4 === 0) s.turn(turns[(k / 4) % 4] as 0 | 1 | 2 | 3);
+      s.step();
+      if (s.dead) break;
+      if (s.poison >= 0) {
+        expect(s.isSnake(s.poison)).toBe(false);
+        expect(s.foods).not.toContain(s.poison);
+      }
+    }
   });
 
   test('stars by time', () => {
