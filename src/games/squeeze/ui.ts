@@ -160,8 +160,9 @@ export function createSqueeze(shell: Shell): GameModule {
     winShown = false;
     lastTick = performance.now();
     renderer.setView(session);
-    renderer.resize();
+    // Fill the tip first: it changes the stage's height, which resize() measures.
     $('#sq-tip').textContent = level.tip ?? '';
+    renderer.resize();
     updateHud();
   }
 
@@ -424,9 +425,10 @@ export function createSqueeze(shell: Shell): GameModule {
     }, 700);
   }
 
-  window.addEventListener('resize', () => {
+  // Re-measure whenever the stage changes size (window resize, the tip or HUD reflowing).
+  new ResizeObserver(() => {
     if (session) renderer.resize();
-  });
+  }).observe($('#sq-stage'));
 
   setInterval(() => {
     const now = performance.now();

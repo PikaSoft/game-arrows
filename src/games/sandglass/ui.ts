@@ -154,8 +154,9 @@ export function createSandglass(shell: Shell): GameModule {
     stuckShown = false;
     lastTick = performance.now();
     renderer.setView(session);
-    renderer.resize();
+    // Fill the tip first: it changes the stage's height, which resize() measures.
     $('#sg-tip').textContent = level.tip ?? '';
+    renderer.resize();
     updateHud();
   }
 
@@ -359,9 +360,10 @@ export function createSandglass(shell: Shell): GameModule {
     }, 700);
   }
 
-  window.addEventListener('resize', () => {
+  // Re-measure whenever the stage changes size (window resize, the tip or HUD reflowing).
+  new ResizeObserver(() => {
     if (session) renderer.resize();
-  });
+  }).observe($('#sg-stage'));
 
   setInterval(() => {
     const now = performance.now();
