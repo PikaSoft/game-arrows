@@ -6,6 +6,12 @@ export interface SolveResult {
   depth: number;
   /** Arrows free on the starting board. */
   initialFree: number;
+  /**
+   * Average share of the remaining arrows that are free, over a playthrough that
+   * removes free arrows oldest first. Steps after every remaining arrow is free are
+   * skipped, as the game finishes those itself. Lower means fewer obvious moves.
+   */
+  freeShare: number;
   /** Ids of arrows left when stuck (empty when solvable). */
   stuck: number[];
 }
@@ -55,8 +61,17 @@ export function solve(level: Pick<Level, 'w' | 'h' | 'arrows'>): SolveResult {
   const wave = new Int32Array(n);
   let removed = 0;
   let depth = 0;
+  let shareSum = 0;
+  let shareSteps = 0;
   for (let qi = 0; qi < queue.length; qi++) {
     const i = queue[qi];
+    // Every queued arrow not yet removed is free; every other arrow still waits on a
+    // blocker that is still on the board.
+    const freeNow = queue.length - qi;
+    if (freeNow < n - qi) {
+      shareSum += freeNow / (n - qi);
+      shareSteps++;
+    }
     let wv = 1;
     for (const r of rayOwners[i]) wv = Math.max(wv, wave[r] + 1);
     wave[i] = wv;
@@ -70,12 +85,14 @@ export function solve(level: Pick<Level, 'w' | 'h' | 'arrows'>): SolveResult {
     }
     waiting[i] = [];
   }
-  if (removed === n) return { solvable: true, depth, initialFree, stuck: [] };
+  const freeShare = shareSteps ? shareSum / shareSteps : 1;
+  if (removed === n) return { solvable: true, depth, initialFree, freeShare, stuck: [] };
   const done = new Set(queue);
   return {
     solvable: false,
     depth,
     initialFree,
+    freeShare,
     stuck: arrows.filter((_, i) => !done.has(i)).map((a) => a.id),
   };
 }

@@ -13,13 +13,14 @@ interface Tier {
   maxLen: number;
   straightness: number;
   candidates: number;
+  tighten: number;
 }
 
 export const TIERS: Tier[] = [
-  { label: 'Easy', w: [7, 10], minLen: 2, maxLen: 6, straightness: 0.6, candidates: 1 },
-  { label: 'Medium', w: [11, 15], minLen: 3, maxLen: 9, straightness: 0.5, candidates: 2 },
-  { label: 'Hard', w: [16, 22], minLen: 3, maxLen: 13, straightness: 0.45, candidates: 2 },
-  { label: 'Super Hard', w: [23, 30], minLen: 4, maxLen: 18, straightness: 0.4, candidates: 2 },
+  { label: 'Easy', w: [7, 10], minLen: 2, maxLen: 6, straightness: 0.6, candidates: 2, tighten: 6 },
+  { label: 'Medium', w: [11, 15], minLen: 3, maxLen: 9, straightness: 0.5, candidates: 3, tighten: 8 },
+  { label: 'Hard', w: [16, 22], minLen: 3, maxLen: 13, straightness: 0.45, candidates: 3, tighten: 8 },
+  { label: 'Super Hard', w: [23, 30], minLen: 4, maxLen: 18, straightness: 0.4, candidates: 3, tighten: 8 },
 ];
 
 /** After the ramp, harder levels are more common. */
@@ -60,6 +61,7 @@ export function specFor(levelNumber: number): LevelSpec {
       maxLen: tier.maxLen,
       straightness: tier.straightness,
       candidates: tier.candidates,
+      tighten: tier.tighten,
     },
   };
 }

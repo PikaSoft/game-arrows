@@ -56,6 +56,10 @@ describe('board', () => {
     expect(solve({ w: 2, h: 1, arrows: cyc }).solvable).toBe(false);
     expect(solve({ w: 3, h: 3, arrows }).solvable).toBe(true);
   });
+  test('solver reports the share of free arrows during play', () => {
+    // One of two arrows is free at the start; after that the last one finishes itself.
+    expect(solve({ w: 3, h: 3, arrows }).freeShare).toBe(0.5);
+  });
 });
 
 describe('generator', () => {
@@ -67,6 +71,20 @@ describe('generator', () => {
       checkShape(g, true);
       expect(solve(g).solvable).toBe(true);
     }
+  });
+  test('tightening keeps boards solvable and cuts the free moves', () => {
+    let before = 0;
+    let after = 0;
+    for (let seed = 1; seed <= 8; seed++) {
+      const p = { w: 12, h: 19, minLen: 3, maxLen: 9, straightness: 0.5, candidates: 1 };
+      const loose = generate(seed, p);
+      const tight = generate(seed, { ...p, tighten: 8 });
+      checkShape(tight, true);
+      expect(solve(tight).solvable).toBe(true);
+      before += loose.freeShare;
+      after += tight.freeShare;
+    }
+    expect(after).toBeLessThan(before * 0.8);
   });
   test('deterministic per seed', () => {
     const p = { w: 10, h: 16, minLen: 3, maxLen: 9, straightness: 0.5, candidates: 2 };
