@@ -68,3 +68,11 @@ and settings are stored in the browser's localStorage.
 `.github/workflows/pages.yml` tests, builds and publishes to GitHub Pages on every push
 to `main`. To enable it, go to **Settings → Pages** in the repo and set **Source** to
 **GitHub Actions**.
+
+### Update prompt
+
+Each build gets an id (the commit SHA in CI, a timestamp locally). It is baked into the
+game and also written to `dist/version.json`. The running game fetches `version.json` on
+start, when the tab comes back into view and every 15 minutes. If the live id differs
+from its own, a banner offers to reload to the new version. The check is off in
+`npm run dev`.

@@ -8,6 +8,7 @@ import { attachGestures } from './input/gestures';
 import { Renderer } from './render/renderer';
 import { heartIcon, icons, logo, starIcon } from './ui/icons';
 import { applyTheme, resolveTheme, THEME_ORDER, themeLabel } from './ui/themes';
+import { startUpdateCheck } from './ui/updateCheck';
 
 const progress: Progress = load();
 const sfx = new Sfx();
@@ -430,3 +431,4 @@ setInterval(() => {
 };
 
 show('home');
+startUpdateCheck();
