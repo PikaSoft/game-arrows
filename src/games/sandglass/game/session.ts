@@ -1,4 +1,4 @@
-import { canPour, clone, isComplete, isSolved, pour, topRun, usefulMoves } from '../core/rules';
+import { canPour, clone, isComplete, isShuttling, isSolved, pour, topRun, usefulMoves } from '../core/rules';
 import { Bottle, SandLevel } from '../core/types';
 
 export type PourResult =
@@ -33,8 +33,15 @@ export class Session {
     return this.history.length > 0;
   }
   /** No pour left that could change anything. */
-  get stuck(): boolean {
+  get noMoves(): boolean {
     return !this.won && usefulMoves(this.bottles, this.capacity).length === 0;
+  }
+  /** The only pours left move one colour back and forth between the same two bottles. */
+  get shuttling(): boolean {
+    return !this.won && isShuttling(this.bottles, this.capacity);
+  }
+  get stuck(): boolean {
+    return this.noMoves || this.shuttling;
   }
 
   canPour(from: number, to: number): boolean {

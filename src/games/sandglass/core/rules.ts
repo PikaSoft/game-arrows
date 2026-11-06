@@ -87,6 +87,40 @@ export function usefulMoves(bottles: Bottle[], cap: number): [number, number][] 
   return out;
 }
 
+/**
+ * True when the only pours left just shuttle one colour back and forth between the
+ * same two bottles. Follows every position those pours lead to: if any of them opens
+ * up a different pour (or finishes the puzzle), the player is not stuck.
+ */
+export function isShuttling(bottles: Bottle[], cap: number): boolean {
+  let pair: [number, number] | null = null;
+  let color = -1;
+  const seen = new Set<string>([bottles.map((b) => b.join(',')).join('|')]);
+  const queue = [clone(bottles)];
+  while (queue.length) {
+    const cur = queue.shift()!;
+    if (isSolved(cur, cap)) return false;
+    for (const [from, to] of usefulMoves(cur, cap)) {
+      const c = top(cur[from]);
+      const lo = Math.min(from, to);
+      const hi = Math.max(from, to);
+      if (!pair) {
+        pair = [lo, hi];
+        color = c;
+      } else if (pair[0] !== lo || pair[1] !== hi || c !== color) return false;
+      const next = clone(cur);
+      pour(next, cap, from, to);
+      const key = next.map((b) => b.join(',')).join('|');
+      if (seen.has(key)) continue;
+      // Shuttling between two bottles only ever reaches a handful of positions.
+      if (seen.size >= 16) return false;
+      seen.add(key);
+      queue.push(next);
+    }
+  }
+  return pair !== null;
+}
+
 /** Same position regardless of bottle order. */
 export function stateKey(bottles: Bottle[]): string {
   return bottles.map((b) => b.join(',')).sort().join('|');
