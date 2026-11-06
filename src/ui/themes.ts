@@ -5,6 +5,8 @@ export interface Theme {
   surface: string;
   line: string;
   accent: string;
+  /** Arrows that are sliding off the board. */
+  moving: string;
   danger: string;
   text: string;
   muted: string;
@@ -20,6 +22,7 @@ export const THEMES: Theme[] = [
     surface: '#fbf5ea',
     line: '#6a4a2c',
     accent: '#e3a23b',
+    moving: '#3f8f6b',
     danger: '#c9473d',
     text: '#5b3c22',
     muted: '#a58a6d',
@@ -33,6 +36,7 @@ export const THEMES: Theme[] = [
     surface: '#26221e',
     line: '#e7d5b6',
     accent: '#f2b84f',
+    moving: '#6fd0a8',
     danger: '#ff6f61',
     text: '#f0e4d0',
     muted: '#8f806c',
@@ -46,6 +50,7 @@ export const THEMES: Theme[] = [
     surface: '#f1f5ec',
     line: '#3d5839',
     accent: '#d8873b',
+    moving: '#2f7fb5',
     danger: '#b9443a',
     text: '#33492f',
     muted: '#86977f',
@@ -59,6 +64,7 @@ export const THEMES: Theme[] = [
     surface: '#f4f7fa',
     line: '#253a55',
     accent: '#e8a637',
+    moving: '#2f9a7a',
     danger: '#c84a4a',
     text: '#22344c',
     muted: '#8090a5',

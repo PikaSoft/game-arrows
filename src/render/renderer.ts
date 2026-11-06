@@ -234,13 +234,13 @@ export class Renderer {
     this.exits = this.exits.filter((e) => {
       const t = (now - e.start) / e.duration;
       if (t < 0) {
-        this.drawArrow(e.route, 0, theme.line, 1);
+        this.drawArrow(e.route, 0, theme.moving, 1);
         return true;
       }
       if (t >= 1) return false;
       const p = easeIn(Math.min(1, t * 1.05)) * 0.35 + t * 0.65;
       const alpha = p < e.fadeFrom ? 1 : Math.max(0, 1 - (p - e.fadeFrom) / (1 - e.fadeFrom));
-      this.drawArrow(e.route, p * e.travel, theme.line, alpha);
+      this.drawArrow(e.route, p * e.travel, theme.moving, alpha);
       return true;
     });
     ctx.restore();
