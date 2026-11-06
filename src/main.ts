@@ -1,142 +1,52 @@
 import './styles.css';
-import { Sfx, vibrate } from './audio/sfx';
-import { Level } from './core/types';
-import { LevelSource } from './game/levelSource';
-import { Session, START_HEARTS, TapResult } from './game/session';
-import { load, Progress, recordClear, resetProgress, save } from './game/storage';
-import { attachGestures } from './input/gestures';
-import { Renderer } from './render/renderer';
-import { heartIcon, icons, logo, starIcon } from './ui/icons';
-import { applyTheme, resolveTheme, THEME_ORDER, themeLabel } from './ui/themes';
-import { startUpdateCheck } from './ui/updateCheck';
+import { createArrows } from './games/arrows/ui';
+import { createSandglass } from './games/sandglass/ui';
+import { GameModule, Shell } from './games/types';
+import { hubLogo, starIcon } from './shared/icons';
+import { loadSettings, saveSettings } from './shared/settings';
+import { Sfx, vibrate } from './shared/sfx';
+import { applyTheme, resolveTheme, Theme, THEME_ORDER, themeLabel } from './shared/themes';
+import { startUpdateCheck } from './shared/updateCheck';
 
-const progress: Progress = load();
+const settings = loadSettings();
 const sfx = new Sfx();
-sfx.enabled = progress.settings.sound;
-const levels = new LevelSource();
+sfx.enabled = settings.sound;
 
 const $ = <T extends HTMLElement = HTMLElement>(sel: string, root: ParentNode = document) => root.querySelector(sel) as T;
 const app = $('#app');
 
 app.innerHTML = `
-  <section class="screen home" id="home">
-    <div class="logo">${logo}</div>
-    <h1>Arrow Escape</h1>
-    <p>Tap an arrow to send it off the board. It can only go if nothing is in its way.</p>
-    <button class="btn" id="play"></button>
-    <button class="btn secondary" id="open-levels">Levels</button>
-    <button class="btn secondary" id="open-settings-home">Settings</button>
-    <div class="total" id="total-stars"></div>
-  </section>
-
-  <section class="screen" id="levels">
-    <div class="levels-head">
-      <button class="icon-btn" id="levels-back" aria-label="Back">${icons.back}</button>
-      <h2>Levels</h2>
+  <section class="screen hub" id="hub">
+    <div class="hub-head">
+      <div class="logo">${hubLogo}</div>
+      <h1>Pocket Puzzles</h1>
+      <p>Pick a puzzle. Your progress in each one is saved on this device.</p>
     </div>
-    <div class="level-grid" id="level-grid"></div>
+    <div class="game-cards" id="game-cards"></div>
+    <button class="btn secondary" id="hub-settings">Settings</button>
   </section>
-
-  <section class="screen" id="game">
-    <header class="topbar">
-      <button class="icon-btn" id="game-back" aria-label="Back">${icons.back}</button>
-      <div class="title"><b id="level-title"></b><span id="level-diff"></span></div>
-      <button class="icon-btn" id="restart" aria-label="Restart level">${icons.restart}</button>
-      <button class="icon-btn" id="theme" aria-label="Change colours">${icons.palette}</button>
-      <button class="icon-btn" id="open-settings" aria-label="Settings">${icons.gear}</button>
-    </header>
-    <div class="hud">
-      <div class="hearts" id="hearts" aria-label="Hearts"></div>
-      <div class="stats" id="stats"></div>
-      <div class="timer" id="timer">0:00</div>
-      <button class="icon-btn" id="hint" aria-label="Hint">${icons.bulb}<span class="badge" id="hint-count"></span></button>
-    </div>
-    <p class="tip" id="tip"></p>
-    <div class="stage" id="stage">
-      <canvas id="board"></canvas>
-      <div class="loading" id="loading" hidden>Building level…</div>
-      <button class="icon-btn fit-btn" id="fit" aria-label="Fit board to screen" hidden>${icons.fit}</button>
-    </div>
-  </section>
-
   <div class="modal" id="modal" hidden><div class="card" id="card"></div></div>
   <div class="toast" id="toast"></div>
 `;
 
 // ---------- Theme ----------
-let theme = resolveTheme(progress.theme);
+let theme = resolveTheme(settings.theme);
 applyTheme(theme);
-const renderer = new Renderer($<HTMLCanvasElement>('#board'), theme);
+const themeListeners: ((t: Theme) => void)[] = [];
 function setTheme(id: string) {
-  progress.theme = id;
-  save(progress);
+  settings.theme = id;
+  saveSettings(settings);
   theme = resolveTheme(id);
   applyTheme(theme);
-  renderer.theme = theme;
-  renderer.invalidate();
+  for (const fn of themeListeners) fn(theme);
 }
 try {
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-    if (progress.theme === 'auto') setTheme('auto');
+    if (settings.theme === 'auto') setTheme('auto');
   });
 } catch {
   /* old browsers */
 }
-
-// ---------- Screens ----------
-type ScreenId = 'home' | 'levels' | 'game';
-function show(id: ScreenId) {
-  for (const s of app.querySelectorAll('.screen')) s.classList.toggle('active', s.id === id);
-  if (id === 'home') renderHome();
-  if (id === 'levels') renderLevels();
-  if (id === 'game') requestAnimationFrame(() => renderer.resize());
-}
-
-function totalStars(): number {
-  return Object.values(progress.levels).reduce((s, l) => s + l.stars, 0);
-}
-
-function renderHome() {
-  $('#play').textContent = progress.current === 1 && !progress.levels[1] ? 'Play' : `Play level ${progress.current}`;
-  const t = totalStars();
-  $('#total-stars').innerHTML = t ? `${starIcon(true)} ${t} stars collected` : '';
-}
-
-function renderLevels() {
-  const grid = $('#level-grid');
-  const tiles: string[] = [];
-  for (let n = 1; n <= progress.unlocked + 1; n++) {
-    if (n > progress.unlocked) {
-      tiles.push(`<button class="tile locked" disabled aria-label="Level ${n}, locked">${icons.lock}</button>`);
-      break;
-    }
-    const rec = progress.levels[n];
-    const stars = rec ? [0, 1, 2].map((i) => starIcon(i < rec.stars)).join('') : '';
-    const cls = n === progress.current ? 'tile current' : 'tile';
-    tiles.push(`<button class="${cls}" data-level="${n}" aria-label="Level ${n}"><b>${n}</b><span class="stars">${stars}</span></button>`);
-  }
-  grid.innerHTML = tiles.join('');
-  grid.querySelector('.current')?.scrollIntoView({ block: 'center' });
-}
-
-$('#level-grid').addEventListener('click', (e) => {
-  const t = (e.target as HTMLElement).closest<HTMLElement>('[data-level]');
-  if (t) startLevel(Number(t.dataset.level));
-});
-$('#play').addEventListener('click', () => startLevel(progress.current));
-$('#open-levels').addEventListener('click', () => show('levels'));
-$('#levels-back').addEventListener('click', () => show('home'));
-$('#game-back').addEventListener('click', () => {
-  closeModal();
-  show('home');
-});
-$('#open-settings-home').addEventListener('click', openSettings);
-$('#open-settings').addEventListener('click', openSettings);
-$('#theme').addEventListener('click', () => {
-  const next = THEME_ORDER[(THEME_ORDER.indexOf(progress.theme) + 1) % THEME_ORDER.length];
-  setTheme(next);
-  toast(themeLabel(next));
-});
 
 // ---------- Toast & modal ----------
 let toastTimer = 0;
@@ -165,38 +75,89 @@ function closeModal() {
   $('#modal').hidden = true;
 }
 const modalOpen = () => !$('#modal').hidden;
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && modalOpen() && !(session?.awaitingContinue)) closeModal();
+
+// ---------- Screens & routing ----------
+function show(id: string) {
+  for (const s of app.querySelectorAll('.screen')) s.classList.toggle('active', s.id === id);
+}
+
+const games: GameModule[] = [];
+let activeGame: GameModule | null = null;
+
+function goHub() {
+  if (location.hash && location.hash !== '#/') location.hash = '#/';
+  else route();
+}
+
+function route() {
+  const id = location.hash.replace(/^#\/?/, '').split('/')[0];
+  const game = games.find((g) => g.id === id) ?? null;
+  closeModal();
+  if (activeGame && activeGame !== game) activeGame.leave();
+  activeGame = game;
+  if (game) game.enter();
+  else {
+    renderHub();
+    show('hub');
+  }
+}
+
+function renderHub() {
+  $('#game-cards').innerHTML = games
+    .map((g) => {
+      const s = g.summary();
+      return `<button class="game-card" data-game="${g.id}">
+        <span class="game-icon">${g.icon}</span>
+        <span class="game-text">
+          <b>${g.name}</b>
+          <span class="tagline">${g.tagline}</span>
+          <span class="game-status">${s.status}${s.stars ? ` · ${starIcon(true)} ${s.stars}` : ''}</span>
+        </span>
+      </button>`;
+    })
+    .join('');
+}
+
+$('#game-cards').addEventListener('click', (e) => {
+  const c = (e.target as HTMLElement).closest<HTMLElement>('[data-game]');
+  if (!c) return;
+  sfx.unlock();
+  location.hash = `#/${c.dataset.game}`;
 });
 
+// ---------- Settings ----------
 function openSettings() {
   const sw = (id: string, on: boolean) => `<button class="switch" role="switch" data-action="${id}" aria-checked="${on}"></button>`;
-  const opts = THEME_ORDER.map((id) => `<option value="${id}" ${id === progress.theme ? 'selected' : ''}>${themeLabel(id)}</option>`).join('');
+  const opts = THEME_ORDER.map((id) => `<option value="${id}" ${id === settings.theme ? 'selected' : ''}>${themeLabel(id)}</option>`).join('');
+  const resets = games
+    .map((g) => `<button class="btn small secondary" data-action="reset" data-game="${g.id}">Reset ${g.name}</button>`)
+    .join('');
   openModal(
     `<h2>Settings</h2>
-     <div class="setting"><span>Sound</span>${sw('sound', progress.settings.sound)}</div>
-     <div class="setting"><span>Vibration</span>${sw('haptics', progress.settings.haptics)}</div>
+     <div class="setting"><span>Sound</span>${sw('sound', settings.sound)}</div>
+     <div class="setting"><span>Vibration</span>${sw('haptics', settings.haptics)}</div>
      <div class="setting"><span>Colours</span><select class="select" id="theme-select">${opts}</select></div>
      <div class="actions" style="margin-top:18px">
        <button class="btn small" data-action="close">Done</button>
-       <button class="btn small secondary" data-action="reset">Reset progress</button>
+       <div class="row">${resets}</div>
      </div>`,
     (action, el) => {
       if (action === 'sound' || action === 'haptics') {
-        progress.settings[action] = !progress.settings[action];
-        el.setAttribute('aria-checked', String(progress.settings[action]));
-        sfx.enabled = progress.settings.sound;
-        save(progress);
-        if (action === 'haptics' && progress.settings.haptics) vibrate(30);
+        settings[action] = !settings[action];
+        el.setAttribute('aria-checked', String(settings[action]));
+        sfx.enabled = settings.sound;
+        saveSettings(settings);
+        if (action === 'haptics' && settings.haptics) vibrate(30);
       } else if (action === 'reset') {
+        const g = games.find((x) => x.id === el.dataset.game)!;
         if (el.dataset.confirm) {
-          resetProgress(progress);
+          g.resetProgress();
           closeModal();
-          toast('Progress reset');
-          show('home');
+          toast(`${g.name} progress reset`);
+          route();
         } else {
           el.dataset.confirm = '1';
-          el.textContent = 'Tap again to erase all progress';
+          el.textContent = `Tap again to erase ${g.name} progress`;
           el.classList.add('danger');
         }
       } else if (action === 'close') closeModal();
@@ -204,231 +165,41 @@ function openSettings() {
   );
   $<HTMLSelectElement>('#theme-select').addEventListener('change', (e) => setTheme((e.target as HTMLSelectElement).value));
 }
+$('#hub-settings').addEventListener('click', openSettings);
 
-// ---------- Game ----------
-let session: Session | null = null;
-let loadToken = 0;
-let lastTick = performance.now();
-let winShown = false;
-
-async function startLevel(n: number) {
-  closeModal();
-  show('game');
-  const token = ++loadToken;
-  session = null;
-  winShown = false;
-  renderer.board = null;
-  renderer.invalidate();
-  $('#level-title').textContent = `Level ${n}`;
-  $('#level-diff').textContent = '';
-  $('#tip').textContent = '';
-  $('#stats').textContent = '';
-  $('#loading').hidden = false;
-  const level = await levels.get(n);
-  if (token !== loadToken) return;
-  $('#loading').hidden = true;
-  beginSession(level);
-  void levels.get(n + 1); // warm up the next one
-}
-
-function beginSession(level: Level) {
-  session = new Session(level);
-  const diffEl = $('#level-diff');
-  diffEl.textContent = level.difficulty;
-  diffEl.className = `diff-${level.difficulty.split(' ')[0]}`;
-  diffEl.title = level.search
-    ? `About ${Math.round(level.search)} arrows to check per move on average`
-    : '';
-  winShown = false;
-  lastTick = performance.now();
-  renderer.setBoard(session.board);
-  renderer.resize();
-  $('#tip').textContent = level.tip ?? '';
-  updateHud();
-  updateFitButton();
-}
-
-function updateHud(lostHeart = false) {
-  const s = session;
-  if (!s) return;
-  const hearts = $('#hearts');
-  hearts.innerHTML = Array.from({ length: START_HEARTS }, (_, i) => heartIcon(i < s.hearts)).join('');
-  if (lostHeart) hearts.children[s.hearts]?.classList.add('lost');
-  $('#stats').innerHTML = `Free <b>${s.freeCount}</b> · Left <b>${s.remaining}</b>`;
-  $('#hint-count').textContent = String(s.hints);
-  $<HTMLButtonElement>('#hint').disabled = s.hints === 0 || s.won || s.autoFinishing;
-  updateTimer();
-}
-
-function fmt(ms: number): string {
-  const total = Math.floor(ms / 1000);
-  const m = Math.floor(total / 60);
-  const sec = String(total % 60).padStart(2, '0');
-  return m >= 60 ? `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
-}
-function updateTimer() {
-  if (session) $('#timer').textContent = fmt(session.elapsedMs);
-}
-
-function updateFitButton() {
-  $('#fit').hidden = renderer.camera.isFitted;
-}
-
-function handleTap(x: number, y: number) {
-  const s = session;
-  if (!s || modalOpen()) return;
-  const id = renderer.hitTest(x, y);
-  if (id === null) return;
-  const res: TapResult = s.tap(id);
-  if (res.kind === 'exit') {
-    renderer.addExit(res.arrow, res.distToEdge);
-    renderer.hintId = s.hintId;
-    sfx.whoosh();
-    if (s.shouldAutoFinish()) autoFinish();
-    updateHud();
-  } else if (res.kind === 'blocked') {
-    renderer.addBump(res.arrow, res.distToBlocker);
-    sfx.thud();
-    if (progress.settings.haptics) vibrate(res.lostHeart ? [30, 40, 30] : 25);
-    updateHud(res.lostHeart);
-    if (res.outOfHearts) setTimeout(showOutOfHearts, 450);
-  }
-}
-
-function autoFinish() {
-  const s = session!;
-  const list = s.startAutoFinish();
-  renderer.hintId = null;
-  // Fire the arrows off one at a time in quick succession. The gap is long enough
-  // that each launch reads as its own beat, and shrinks on big boards so the
-  // whole sequence stays under about two and a half seconds.
-  const gap = Math.max(45, Math.min(120, 2500 / Math.max(1, list.length)));
-  list.forEach(({ arrow, distToEdge }, i) => {
-    renderer.addExit(arrow, distToEdge, i * gap, 450);
-    setTimeout(() => sfx.whoosh(0.12), i * gap);
-  });
-  if (list.length) toast('All clear! Finishing up…');
-}
-
-function showOutOfHearts() {
-  const s = session;
-  if (!s || !s.awaitingContinue) return;
-  openModal(
-    `<h2>Out of hearts</h2>
-     <p>You can keep going, but this clear won't earn any stars.</p>
-     <div class="actions">
-       <button class="btn" data-action="continue">Keep going</button>
-       <button class="btn secondary" data-action="restart">Restart level</button>
-     </div>`,
-    (action) => {
-      if (action === 'continue') {
-        s.continueWithoutHearts();
-        closeModal();
-        updateHud();
-      } else restartLevel();
-    },
-    false,
-  );
-}
-
-function restartLevel() {
-  if (!session) return;
-  closeModal();
-  beginSession(session.level);
-}
-
-function showWin() {
-  const s = session!;
-  winShown = true;
-  const stars = s.stars();
-  const { newBest } = recordClear(progress, s.level.number, stars, s.elapsedMs);
-  sfx.chime();
-  renderer.confetti();
-  if (progress.settings.haptics) vibrate([20, 60, 20]);
-  const prev = progress.levels[s.level.number];
-  setTimeout(() => {
-    if (session !== s) return;
-    openModal(
-      `<h2>Level ${s.level.number} cleared</h2>
-       <div class="big-stars">${[0, 1, 2].map((i) => starIcon(i < stars)).join('')}</div>
-       <div class="result-line">Time ${fmt(s.elapsedMs)} ${
-         newBest ? '<span class="best">· New best!</span>' : `· Best ${fmt(prev.bestMs)}`
-       }</div>
-       ${s.continued ? '<p>Finished after running out of hearts: no stars this time.</p>' : ''}
-       <div class="actions">
-         <button class="btn" data-action="next">Next level</button>
-         <div class="row">
-           <button class="btn small secondary" data-action="replay">Replay</button>
-           <button class="btn small secondary" data-action="levels">${'Levels'}</button>
-         </div>
-       </div>`,
-      (action) => {
-        if (action === 'next') startLevel(s.level.number + 1);
-        else if (action === 'replay') startLevel(s.level.number);
-        else if (action === 'levels') {
-          closeModal();
-          show('levels');
-        }
-      },
-      false,
-    );
-  }, 700);
-}
-
-$('#hint').addEventListener('click', () => {
-  sfx.unlock();
-  const s = session;
-  if (!s) return;
-  const a = s.useHint();
-  if (!a) return;
-  renderer.hintId = a.id;
-  const head = a.cells[a.cells.length - 1];
-  renderer.camera.reveal(head.x + 0.5, head.y + 0.5);
-  sfx.blip();
-  updateHud();
-  updateFitButton();
-  renderer.invalidate();
-});
-$('#restart').addEventListener('click', restartLevel);
-$('#fit').addEventListener('click', () => {
-  renderer.camera.fit();
-  renderer.invalidate();
-  updateFitButton();
-});
-
-attachGestures($('#board'), renderer.camera, {
-  onTap: handleTap,
-  onViewChange: () => {
-    renderer.invalidate();
-    updateFitButton();
+// ---------- Games ----------
+const shell: Shell = {
+  app,
+  sfx,
+  settings,
+  theme: () => theme,
+  onTheme: (fn) => themeListeners.push(fn),
+  setTheme,
+  cycleTheme: () => {
+    const next = THEME_ORDER[(THEME_ORDER.indexOf(settings.theme) + 1) % THEME_ORDER.length];
+    setTheme(next);
+    toast(themeLabel(next));
   },
-  onFirstTouch: () => sfx.unlock(),
-});
-
-window.addEventListener('resize', () => renderer.resize());
-
-// Timer and win check.
-setInterval(() => {
-  const now = performance.now();
-  const dt = now - lastTick;
-  lastTick = now;
-  const s = session;
-  if (!s) return;
-  if (s.timerRunning && !modalOpen() && document.visibilityState === 'visible') {
-    s.elapsedMs += Math.min(dt, 1000);
-    updateTimer();
-  }
-  if (s.won && !winShown && !renderer.exitsRunning) showWin();
-}, 200);
-
-// Expose a tiny hook for automated browser tests.
-(window as unknown as { __game: unknown }).__game = {
-  get session() {
-    return session;
+  show,
+  goHub,
+  toast,
+  openModal,
+  closeModal,
+  modalOpen,
+  openSettings,
+  vibrate: (p) => {
+    if (settings.haptics) vibrate(p);
   },
-  renderer,
-  progress,
 };
 
-show('home');
+games.push(createArrows(shell), createSandglass(shell));
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && modalOpen() && !activeGame?.modalLocked?.()) closeModal();
+});
+window.addEventListener('hashchange', route);
+
+(window as unknown as { __shell: unknown }).__shell = { settings, games };
+
+route();
 startUpdateCheck();

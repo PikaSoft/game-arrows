@@ -9,8 +9,6 @@ export interface Progress {
   /** Level the Play button resumes. */
   current: number;
   levels: Record<number, LevelRecord>;
-  settings: { sound: boolean; haptics: boolean };
-  theme: string;
 }
 
 const KEY = 'arrow-escape.v1';
@@ -19,17 +17,16 @@ const defaults = (): Progress => ({
   unlocked: 1,
   current: 1,
   levels: {},
-  settings: { sound: true, haptics: true },
-  theme: 'auto',
 });
 
 export function load(): Progress {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return defaults();
+    // Older saves also hold settings and theme; those now live in the shared settings
+    // and are carried over from here by loadSettings(). They are kept in place untouched.
     const p = JSON.parse(raw) as Partial<Progress>;
-    const d = defaults();
-    return { ...d, ...p, settings: { ...d.settings, ...(p.settings ?? {}) }, levels: p.levels ?? {} };
+    return { ...defaults(), ...p, levels: p.levels ?? {} };
   } catch {
     return defaults();
   }

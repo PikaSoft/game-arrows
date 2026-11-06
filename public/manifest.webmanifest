@@ -1,6 +1,6 @@
 {
-  "name": "Arrow Escape",
-  "short_name": "Arrows",
+  "name": "Pocket Puzzles",
+  "short_name": "Puzzles",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f5ecdc",

@@ -1,4 +1,4 @@
-import { Rng } from './rng';
+import { Rng } from '../../../shared/rng';
 import { solve } from './solver';
 import { Arrow, Cell, DELTA, DIRS, Dir, OPPOSITE, dirBetween } from './types';
 
