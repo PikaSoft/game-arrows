@@ -11,6 +11,7 @@ stars and settings.
 | Sandglass | Pour sand between bottles until each one holds a single colour. |
 | Snake | Classic endless snake: eat apples, grow, beat your best. |
 | Snake Trails | Snake with walls: eat enough apples to clear each numbered level. |
+| Squeeze | Slide blocks of different shapes out through gaps in the frame. |
 
 ## Arrow Escape
 
@@ -157,6 +158,60 @@ the snake starts with at least 5 clear cells ahead. Par allows about half the bo
 width plus height in steps per apple. The difficulty label blends speed, apple count
 and how much of the board is wall.
 
+## Squeeze
+
+The board is a framed grid with one or more gaps cut into the frame, and it is packed
+with blocks of different shapes. Drag a block and it follows your finger one cell at a
+time, as far as the way is clear. Pull it through a gap it fits and it slides out. Clear
+every block to finish.
+
+### Rules
+
+- **Fitting:** shapes never turn. A block fits through a gap only if every column it
+  covers (for a gap in the top or bottom) or every row it covers (left or right) lies
+  inside the gap, and nothing stands between it and the gap.
+- **Gaps light up** while you drag a block that fits them.
+- **Tap to send out:** tapping a block that is already lined up with a clear gap sends
+  it out.
+- **Moves and stars:** one drag is one move, however far the block goes and however
+  many turns it takes, including a drag that ends with the block leaving. Each level
+  has a par from the solver. Finish within par for three stars, within par + 25% for
+  two, otherwise one. Every move can be reversed, so nothing can fail.
+- **Undo:** unlimited and free, but an undone move still counts.
+- **Coloured gates:** from level 20, about one level in three has gaps marked with a
+  dashed bar in a colour. A coloured gate only lets blocks of its colour through; plain
+  gaps take any block.
+
+### Levels
+
+Levels 1 to 5 are tutorials. After that, level N is generated from N as the seed, so
+everyone gets the same board. Boards grow from 5x5 to 8x8 over the first 35 levels,
+then vary; L, T, S and Z shapes join at level 9, and five and six cell shapes at level 30.
+
+The generator (`src/games/squeeze/core/levels.ts`) cuts the gaps, scatters blocks at
+random until roughly three quarters of the board is covered (each block must fit at
+least one gap), and keeps only boards the solver can clear. The solver
+(`src/games/squeeze/core/solver.ts`) is a breadth-first search where one move takes a
+block anywhere it can slide to, or out, so its answer is the shortest. Whenever some
+block can leave, it only tries that: taking a block out never blocks anything else, so
+it is always at least as good. The work per level is capped by solver states, not by
+time, so every device builds the same board.
+
+The difficulty label counts setup moves: moves in the shortest solution that do not
+take a block out. Every block costs one move to leave; anything beyond that is a block
+that has to be shifted out of the way first, which is the part that takes thought.
+Each level aims for a setup count that ramps up from 1 to about 6 over the first 35
+levels and then varies, with the odd easier breather:
+
+| Label | Setup moves |
+| --- | --- |
+| Easy | 0 or 1 |
+| Medium | 2 or 3 |
+| Hard | 4 or 5 |
+| Super Hard | 6 or more |
+
+Hover the label in game to see the number.
+
 ## Development
 
 ```bash
@@ -168,16 +223,17 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
 ```
-src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails), settings
+src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze), settings
 src/shared/            sound, themes, icons, update check, seeded RNG, worker level loader
 src/games/arrows/      Arrow Escape: core rules, generator and solver, rendering, input, UI
 src/games/sandglass/   Sandglass: the same split
 src/games/snake/       Snake and Snake Trails: rules, level builder, renderer, swipe input, UI
+src/games/squeeze/     Squeeze: the same split as Sandglass
 ```
 
 Each game exports a `GameModule` (`src/games/types.ts`): it builds its own screens and

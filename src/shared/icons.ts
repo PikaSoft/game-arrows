@@ -45,3 +45,6 @@ export const snakeLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="none
 
 /** Snake Trails logo: a snake winding between walls in a box. */
 export const trailsLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="52" height="52" rx="9" stroke="var(--line)" stroke-width="4"/><path d="M22 16v16M42 32v16" stroke="var(--line)" stroke-width="6"/><path d="M15 48h17V22h12" stroke="var(--line)" stroke-width="9"/><path d="M15 48h17V22h12" stroke="#5aa457" stroke-width="4.5"/><circle cx="49" cy="18" r="4.5" fill="var(--accent)" stroke="var(--line)" stroke-width="2.5"/></svg>`;
+
+/** Squeeze logo: a framed board with a gap and an L block sliding out of it. */
+export const squeezeLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M34 8H8v48h48V8h-8" stroke="var(--line)" stroke-width="4.5"/><rect x="14" y="36" width="14" height="14" rx="3" fill="#4f9ed8"/><path d="M36 2h8v14h8v8H36z" fill="#d9584a"/><rect x="32" y="36" width="18" height="7" rx="3" fill="#e8b93a"/></svg>`;
