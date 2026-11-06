@@ -26,6 +26,7 @@ export interface Generated {
   depth: number;
   initialFree: number;
   freeShare: number;
+  search: number;
 }
 
 /**
@@ -61,6 +62,7 @@ export function generate(seed: number, p: GenParams): Generated {
       depth: res.depth,
       initialFree: res.initialFree,
       freeShare: res.freeShare,
+      search: res.search,
     };
     if (!best || score(g) > score(best)) best = g;
   }

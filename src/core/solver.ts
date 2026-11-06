@@ -12,6 +12,15 @@ export interface SolveResult {
    * skipped, as the game finishes those itself. Lower means fewer obvious moves.
    */
   freeShare: number;
+  /** Average number of free arrows per step, over the same playthrough as freeShare. */
+  avgFree: number;
+  /**
+   * Average of (remaining + 1) / (free + 1) per step, over the same playthrough. This
+   * is how many arrows a player checking at random looks at, on average, before
+   * finding one that can leave. It grows when moves are scarce in absolute terms and
+   * when they are a small share of a big board. Higher means harder.
+   */
+  search: number;
   /** Ids of arrows left when stuck (empty when solvable). */
   stuck: number[];
 }
@@ -63,6 +72,8 @@ export function solve(level: Pick<Level, 'w' | 'h' | 'arrows'>): SolveResult {
   let depth = 0;
   let shareSum = 0;
   let shareSteps = 0;
+  let freeSum = 0;
+  let searchSum = 0;
   for (let qi = 0; qi < queue.length; qi++) {
     const i = queue[qi];
     // Every queued arrow not yet removed is free; every other arrow still waits on a
@@ -70,6 +81,8 @@ export function solve(level: Pick<Level, 'w' | 'h' | 'arrows'>): SolveResult {
     const freeNow = queue.length - qi;
     if (freeNow < n - qi) {
       shareSum += freeNow / (n - qi);
+      freeSum += freeNow;
+      searchSum += (n - qi + 1) / (freeNow + 1);
       shareSteps++;
     }
     let wv = 1;
@@ -86,13 +99,14 @@ export function solve(level: Pick<Level, 'w' | 'h' | 'arrows'>): SolveResult {
     waiting[i] = [];
   }
   const freeShare = shareSteps ? shareSum / shareSteps : 1;
-  if (removed === n) return { solvable: true, depth, initialFree, freeShare, stuck: [] };
+  const avgFree = shareSteps ? freeSum / shareSteps : n;
+  const search = shareSteps ? searchSum / shareSteps : 1;
+  const metrics = { depth, initialFree, freeShare, avgFree, search };
+  if (removed === n) return { solvable: true, ...metrics, stuck: [] };
   const done = new Set(queue);
   return {
     solvable: false,
-    depth,
-    initialFree,
-    freeShare,
+    ...metrics,
     stuck: arrows.filter((_, i) => !done.has(i)).map((a) => a.id),
   };
 }

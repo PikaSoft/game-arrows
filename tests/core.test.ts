@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { Board } from '../src/core/board';
-import { specFor, TUTORIAL_COUNT } from '../src/core/difficulty';
+import { rate, specFor, TUTORIAL_COUNT } from '../src/core/difficulty';
 import { generate } from '../src/core/generator';
 import { buildLevel } from '../src/core/levels';
 import { solve } from '../src/core/solver';
@@ -58,7 +58,16 @@ describe('board', () => {
   });
   test('solver reports the share of free arrows during play', () => {
     // One of two arrows is free at the start; after that the last one finishes itself.
-    expect(solve({ w: 3, h: 3, arrows }).freeShare).toBe(0.5);
+    const r = solve({ w: 3, h: 3, arrows });
+    expect(r.freeShare).toBe(0.5);
+    expect(r.avgFree).toBe(1);
+    expect(r.search).toBe(1.5); // (2 + 1) / (1 + 1)
+  });
+  test('difficulty rating follows how hard moves are to find', () => {
+    expect(rate(3)).toBe('Easy');
+    expect(rate(5)).toBe('Medium');
+    expect(rate(7)).toBe('Hard');
+    expect(rate(12)).toBe('Super Hard');
   });
 });
 
@@ -105,14 +114,14 @@ describe('levels', () => {
       const l = buildLevel(n);
       checkShape(l, true);
       expect(solve(l).solvable).toBe(true);
-      expect(l.difficulty).toBe(specFor(n).difficulty);
+      expect(l.difficulty).toBe(rate(solve(l).search));
     }
   }, 60000);
-  test('difficulty ramps then favours harder levels', () => {
-    expect(specFor(TUTORIAL_COUNT + 1).difficulty).toBe('Easy');
-    expect(specFor(TUTORIAL_COUNT + 30).difficulty).toBe('Super Hard');
+  test('generation tiers ramp then favour bigger boards', () => {
+    expect(specFor(TUTORIAL_COUNT + 1).tier).toBe('Easy');
+    expect(specFor(TUTORIAL_COUNT + 30).tier).toBe('Super Hard');
     const counts: Record<string, number> = {};
-    for (let n = 40; n < 440; n++) counts[specFor(n).difficulty] = (counts[specFor(n).difficulty] ?? 0) + 1;
+    for (let n = 40; n < 440; n++) counts[specFor(n).tier] = (counts[specFor(n).tier] ?? 0) + 1;
     expect(counts['Hard'] + counts['Super Hard']).toBeGreaterThan(counts['Easy'] + counts['Medium']);
   });
 });

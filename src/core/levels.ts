@@ -1,4 +1,4 @@
-import { specFor, TUTORIAL_COUNT } from './difficulty';
+import { rate, specFor, TUTORIAL_COUNT } from './difficulty';
 import { generate } from './generator';
 import { Arrow, Cell, Dir, Level } from './types';
 
@@ -55,10 +55,6 @@ export function isGenerated(n: number): boolean {
   return n > TUTORIAL_COUNT;
 }
 
-export function difficultyOf(n: number): Level['difficulty'] {
-  return n <= TUTORIAL_COUNT ? 'Tutorial' : specFor(n).difficulty;
-}
-
 /** Build level n (1-based). Deterministic: the same n always gives the same board. */
 export function buildLevel(n: number): Level {
   if (n <= HANDMADE.length) {
@@ -69,7 +65,6 @@ export function buildLevel(n: number): Level {
     const g = generate(t.seed, { w: t.w, h: t.h, minLen: 2, maxLen: 5, straightness: 0.6, candidates: 1 });
     return { number: n, w: g.w, h: g.h, arrows: g.arrows, difficulty: 'Tutorial', tip: t.tip };
   }
-  const spec = specFor(n);
-  const g = generate(n, spec.params);
-  return { number: n, w: g.w, h: g.h, arrows: g.arrows, difficulty: spec.difficulty };
+  const g = generate(n, specFor(n).params);
+  return { number: n, w: g.w, h: g.h, arrows: g.arrows, difficulty: rate(g.search), search: g.search };
 }

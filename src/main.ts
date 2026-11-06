@@ -1,6 +1,5 @@
 import './styles.css';
 import { Sfx, vibrate } from './audio/sfx';
-import { difficultyOf } from './core/levels';
 import { Level } from './core/types';
 import { LevelSource } from './game/levelSource';
 import { Session, START_HEARTS, TapResult } from './game/session';
@@ -220,10 +219,7 @@ async function startLevel(n: number) {
   renderer.board = null;
   renderer.invalidate();
   $('#level-title').textContent = `Level ${n}`;
-  const diff = difficultyOf(n);
-  const diffEl = $('#level-diff');
-  diffEl.textContent = diff;
-  diffEl.className = `diff-${diff.split(' ')[0]}`;
+  $('#level-diff').textContent = '';
   $('#tip').textContent = '';
   $('#stats').textContent = '';
   $('#loading').hidden = false;
@@ -236,6 +232,12 @@ async function startLevel(n: number) {
 
 function beginSession(level: Level) {
   session = new Session(level);
+  const diffEl = $('#level-diff');
+  diffEl.textContent = level.difficulty;
+  diffEl.className = `diff-${level.difficulty.split(' ')[0]}`;
+  diffEl.title = level.search
+    ? `About ${Math.round(level.search)} arrows to check per move on average`
+    : '';
   winShown = false;
   lastTick = performance.now();
   renderer.setBoard(session.board);
