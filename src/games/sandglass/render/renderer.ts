@@ -1,5 +1,6 @@
 import { Theme } from '../../../shared/themes';
-import { Bottle } from '../core/types';
+import { landingIndex, sandCount } from '../core/rules';
+import { Bottle, isLiquid, LIQUID_BASE } from '../core/types';
 
 /** Twelve sand colours chosen to stay apart from each other on light and dark themes. */
 export const SAND_COLORS = [
@@ -16,6 +17,19 @@ export const SAND_COLORS = [
   '#b5d34a', // lime
   '#9a9a9a', // grey
 ];
+
+/** Liquid colours: bright, glassy tones that read apart from the grainy sand. */
+export const LIQUID_COLORS = [
+  '#22c3e6', // aqua
+  '#d63fa0', // magenta
+  '#2fd39a', // mint
+  '#7c5cff', // indigo
+  '#ffb21f', // amber
+  '#f2f2f2', // milk
+];
+
+export const colorOf = (c: number): string =>
+  isLiquid(c) ? LIQUID_COLORS[(c - LIQUID_BASE) % LIQUID_COLORS.length] : SAND_COLORS[c % SAND_COLORS.length];
 
 export interface Slot {
   x: number; // centre
@@ -221,7 +235,7 @@ export class SandRenderer {
     const t0 = performance.now() + delay;
     this.completedAt.set(i, t0);
     const b = this.view.bottles[i];
-    const color = SAND_COLORS[b[0] % SAND_COLORS.length];
+    const color = colorOf(b[0]);
     for (let k = 0; k < 14; k++) {
       const a = -Math.PI / 2 + (Math.random() - 0.5) * 2.2;
       const sp = 0.08 + Math.random() * 0.12;
@@ -279,8 +293,11 @@ export class SandRenderer {
     if (more) this.invalidate();
   }
 
-  /** Layers to draw for bottle i right now, with a fraction for the moving top. */
-  private contents(i: number, now: number): { layers: number[]; extra: number; extraColor: number; mound: number } {
+  /**
+   * Layers to draw for bottle i right now, with a fraction for the moving sand or liquid.
+   * `at` is where that fraction sits: on top, or under the liquid when sand sinks.
+   */
+  private contents(i: number, now: number): { layers: number[]; extra: number; extraColor: number; at: number; mound: number } {
     const v = this.view!;
     const p = this.pourAnim;
     if (p && (i === p.from || i === p.to)) {
@@ -291,9 +308,9 @@ export class SandRenderer {
       if (i === p.from) {
         const keep = before.length - p.amount;
         const remaining = p.amount - moved;
-        return { layers: before.slice(0, keep), extra: remaining, extraColor: p.color, mound: 0 };
+        return { layers: before.slice(0, keep), extra: remaining, extraColor: p.color, at: keep, mound: 0 };
       }
-      return { layers: before.slice(), extra: moved, extraColor: p.color, mound: f > 0 ? 1 : 0 };
+      return { layers: before.slice(), extra: moved, extraColor: p.color, at: landingIndex(before, p.color), mound: f > 0 ? 1 : 0 };
     }
     let mound = 0;
     const st = this.settle.get(i);
@@ -302,7 +319,7 @@ export class SandRenderer {
       if (k >= 1) this.settle.delete(i);
       else mound = 1 - easeInOut(k);
     }
-    return { layers: v.bottles[i], extra: 0, extraColor: 0, mound };
+    return { layers: v.bottles[i], extra: 0, extraColor: 0, at: v.bottles[i].length, mound };
   }
 
   /** Returns true if this bottle still needs animation frames. */
@@ -389,20 +406,38 @@ export class SandRenderer {
     glass();
     ctx.closePath();
     ctx.clip();
-    const { layers, extra, extraColor, mound } = this.contents(i, now);
+    const { layers, extra, extraColor, at, mound } = this.contents(i, now);
     const pad = w * 0.09;
     const layerH = (-bodyTop - pad) / v.capacity;
     const yAt = (k: number) => -pad - k * layerH;
     const hiddenFill = this.mix(this.theme.muted, this.theme.surface, 0.35);
+    // Layers above the moving fraction ride up on it.
+    const pos = (k: number) => k + (k >= at ? extra : 0);
+    const topIsExtra = extra > 0 && at === layers.length;
+    // Liquid surfaces are drawn last so a band of sand sinking under them never covers the line.
+    const liquidTops: number[] = [];
     for (let k = 0; k < layers.length; k++) {
       const covered = v.isHidden(i, k);
-      this.drawLayer(-r, yAt(k + 1), w, layerH, covered ? hiddenFill : SAND_COLORS[layers[k] % SAND_COLORS.length], k === layers.length - 1 && !extra ? mound : 0, w);
-      if (covered) this.drawQuestion(0, yAt(k) - layerH / 2, layerH);
+      const c = layers[k];
+      const y = yAt(pos(k) + 1);
+      if (!covered && isLiquid(c)) {
+        this.drawLiquid(-r, y, w, layerH, colorOf(c), k);
+        if (k === layers.length - 1 || layers[k + 1] !== c) liquidTops.push(y);
+        continue;
+      }
+      const isTop = k === layers.length - 1 && !topIsExtra;
+      this.drawLayer(-r, y, w, layerH, covered ? hiddenFill : colorOf(c), isTop ? mound : 0, w);
+      if (covered) this.drawQuestion(0, yAt(pos(k)) - layerH / 2, layerH);
     }
     if (extra > 0) {
       const eh = layerH * extra;
-      this.drawLayer(-r, yAt(layers.length) - eh, w, eh, SAND_COLORS[extraColor % SAND_COLORS.length], i === p?.to ? mound : 0, w);
+      const y = yAt(at) - eh;
+      if (isLiquid(extraColor)) {
+        this.drawLiquid(-r, y, w, eh, colorOf(extraColor), at);
+        liquidTops.push(y);
+      } else this.drawLayer(-r, y, w, eh, colorOf(extraColor), i === p?.to && topIsExtra ? mound : 0, w);
     }
+    for (const y of liquidTops) this.drawSurface(-r, y, w);
     ctx.restore();
 
     // Outline and lip.
@@ -475,6 +510,46 @@ export class SandRenderer {
     ctx.stroke();
   }
 
+  /** A glassy band of liquid: no grain, a soft shine and a few bubbles. */
+  private drawLiquid(x: number, y: number, w: number, h: number, color: string, seed: number): void {
+    const ctx = this.ctx;
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, w, h + 0.5);
+    // Darker towards the bottom of the band, lighter at the top.
+    const g = ctx.createLinearGradient(0, y, 0, y + h);
+    g.addColorStop(0, 'rgba(255,255,255,0.22)');
+    g.addColorStop(1, 'rgba(0,0,0,0.14)');
+    ctx.fillStyle = g;
+    ctx.fillRect(x, y, w, h + 0.5);
+    // A vertical streak of shine.
+    ctx.fillStyle = 'rgba(255,255,255,0.28)';
+    ctx.fillRect(x + w * 0.62, y, w * 0.1, h + 0.5);
+    // Bubbles, fixed per layer so they do not flicker between frames.
+    if (h > 4) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+      ctx.lineWidth = 1;
+      for (let k = 0; k < 2; k++) {
+        const fx = ((seed * 37 + k * 53) % 100) / 100;
+        const fy = ((seed * 61 + k * 29) % 100) / 100;
+        const br = Math.max(1.2, w * (0.035 + 0.02 * k));
+        ctx.beginPath();
+        ctx.arc(x + w * (0.2 + fx * 0.35), y + h * (0.25 + fy * 0.5), br, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+  }
+
+  /** The top of a liquid band: a bright meniscus line. */
+  private drawSurface(x: number, y: number, w: number): void {
+    const ctx = this.ctx;
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+    ctx.lineWidth = Math.max(1.5, w * 0.04);
+    ctx.beginPath();
+    ctx.moveTo(x, y + 1);
+    ctx.quadraticCurveTo(x + w / 2, y + Math.max(2, w * 0.06), x + w, y + 1);
+    ctx.stroke();
+  }
+
   private drawQuestion(x: number, y: number, size: number): void {
     const ctx = this.ctx;
     ctx.fillStyle = this.theme.line;
@@ -498,16 +573,25 @@ export class SandRenderer {
     const y0 = dst.base - dst.h - dst.w * 0.3;
     const pad = dst.w * 0.09;
     const layerH = (dst.h - dst.w * 0.35 - pad) / v.capacity;
-    const fill = p.before[p.to].length + p.amount * easeInOut(clamp01((t - 0.3) / 0.45));
+    // Sand falls through any liquid to land on the sand below it.
+    const floor = isLiquid(p.color) ? p.before[p.to].length : sandCount(p.before[p.to]);
+    const fill = floor + p.amount * easeInOut(clamp01((t - 0.3) / 0.45));
     const y1 = dst.base - pad - fill * layerH;
     const ctx = this.ctx;
-    const color = SAND_COLORS[p.color % SAND_COLORS.length];
+    const color = colorOf(p.color);
+    const liquid = isLiquid(p.color);
     const fade = Math.min(1, (t - 0.27) / 0.05, (0.8 - t) / 0.06);
     ctx.save();
     ctx.globalAlpha = fade;
     ctx.fillStyle = color;
     const len = y1 - y0;
     ctx.fillRect(x0 - dst.w * 0.05, y0, dst.w * 0.1, Math.max(0, len));
+    if (liquid) {
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.fillRect(x0 - dst.w * 0.015, y0, dst.w * 0.03, Math.max(0, len));
+      ctx.restore();
+      return;
+    }
     for (let k = 0; k < 18; k++) {
       const ph = ((now / 300 + k / 18) % 1);
       const y = y0 + ph * len;

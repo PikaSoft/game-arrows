@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest';
-import { HIDDEN_INTRO, rateSand, sandSpecFor, TUTORIAL_COUNT } from '../src/games/sandglass/core/difficulty';
+import { HIDDEN_INTRO, LIQUID_INTRO, rateSand, sandSpecFor, TUTORIAL_COUNT } from '../src/games/sandglass/core/difficulty';
 import { buildSandLevel } from '../src/games/sandglass/core/levels';
-import { canPour, isSolved, pour, pourAmount, usefulMoves } from '../src/games/sandglass/core/rules';
+import { canPour, isSolved, pour, pourAmount, sandCount, usefulMoves } from '../src/games/sandglass/core/rules';
 import { runsOver, solve } from '../src/games/sandglass/core/solver';
-import { SandLevel } from '../src/games/sandglass/core/types';
+import { isLiquid, LIQUID_BASE, SandLevel } from '../src/games/sandglass/core/types';
 import { Session } from '../src/games/sandglass/game/session';
 
 const lvl = (bottles: number[][], capacity = 4, hidden?: number[], par = 3): SandLevel => ({
@@ -45,6 +45,68 @@ describe('pour rules', () => {
     expect(m).not.toContainEqual([1, 3]); // same as pouring into bottle 2
     expect(m).not.toContainEqual([0, 2]); // a one-colour bottle into an empty one
   });
+});
+
+describe('liquids', () => {
+  const A = LIQUID_BASE;
+  const B = LIQUID_BASE + 1;
+
+  test('only the top colour pours, so liquid goes before the sand under it', () => {
+    const b = [[0, 0, A], [], [0]];
+    expect(canPour(b, 4, 0, 2)).toBe(false); // the liquid on top cannot land on sand
+    expect(pour(b, 4, 0, 1)).toBe(1);
+    expect(b).toEqual([[0, 0], [A], [0]]);
+    expect(pour(b, 4, 0, 2)).toBe(2);
+    expect(b).toEqual([[], [A], [0, 0, 0]]);
+  });
+
+  test('sand sinks below liquid onto matching sand, or to the bottom', () => {
+    const b = [[1, 1], [1, A, A], [B], [2, B]];
+    expect(canPour(b, 4, 0, 1)).toBe(true);
+    expect(pour(b, 4, 0, 1)).toBe(1); // only one space left
+    expect(b[1]).toEqual([1, 1, A, A]);
+    expect(pour(b, 4, 0, 2)).toBe(1); // a bottle holding only liquid
+    expect(b[2]).toEqual([1, B]);
+    expect(canPour([[1], [2, B]], 4, 0, 1)).toBe(false); // the sand under the liquid is another colour
+  });
+
+  test('liquid lands only on the same liquid or in an empty bottle', () => {
+    const b = [[0, A], [A], [B], [0], []];
+    expect(canPour(b, 4, 0, 1)).toBe(true);
+    expect(canPour(b, 4, 0, 2)).toBe(false);
+    expect(canPour(b, 4, 0, 3)).toBe(false);
+    expect(canPour(b, 4, 0, 4)).toBe(true);
+    expect(pourAmount([[A, A, A], [A, A]], 4, 0, 1)).toBe(2);
+  });
+
+  test('a board with liquids solves to one colour per bottle', () => {
+    const start = [[0, 1, A], [1, 0, A], [0, 1, A], [], []];
+    const res = solve(start, 3)!;
+    expect(res).not.toBeNull();
+    const b = start.map((x) => x.slice());
+    for (const [f, t] of res.moves) expect(pour(b, 3, f, t)).toBeGreaterThan(0);
+    expect(isSolved(b, 3)).toBe(true);
+  });
+
+  test('liquid levels arrive later, never with covered sand, and deal settled bottles', () => {
+    for (let n = 1; n < LIQUID_INTRO; n++) expect(sandSpecFor(n).liquids).toBe(0);
+    expect(sandSpecFor(LIQUID_INTRO).liquids).toBe(2);
+    let count = 0;
+    for (let n = LIQUID_INTRO; n <= 150; n++) {
+      const s = sandSpecFor(n);
+      if (s.liquids) count++;
+      if (s.liquids) expect(s.hidden).toBe(false);
+    }
+    expect(count).toBeGreaterThan(15);
+    for (const n of [LIQUID_INTRO, 59, 72]) {
+      const a = buildSandLevel(n);
+      expect(a).toEqual(buildSandLevel(n));
+      expect(new Set(a.bottles.flat().filter(isLiquid)).size).toBe(a.liquids);
+      for (const bottle of a.bottles) expect(bottle.slice(sandCount(bottle)).every(isLiquid)).toBe(true);
+      expect(solve(a.bottles, a.capacity)).not.toBeNull();
+    }
+    expect(buildSandLevel(LIQUID_INTRO).difficulty).not.toBe('Tutorial');
+  }, 120000);
 });
 
 describe('solver', () => {

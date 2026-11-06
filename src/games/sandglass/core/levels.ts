@@ -1,8 +1,8 @@
 import { Rng } from '../../../shared/rng';
-import { blunderScore, rateSand, sandSpecFor, SandSpec } from './difficulty';
+import { blunderScore, LIQUID_INTRO, rateSand, sandSpecFor, SandSpec, TUTORIAL_COUNT } from './difficulty';
 import { isComplete, topRun } from './rules';
 import { solve } from './solver';
-import { Bottle, SandLevel } from './types';
+import { Bottle, isLiquid, LIQUID_BASE, SandLevel } from './types';
 
 interface Candidate {
   bottles: Bottle[];
@@ -10,13 +10,28 @@ interface Candidate {
   score: number;
 }
 
-/** Deal every layer of sand into the bottles at random, leaving the spares empty. */
+/** Colour ids for a spec: sand from 0, then the liquids from LIQUID_BASE. */
+export function colourIds(spec: SandSpec): number[] {
+  const sand = spec.colors - spec.liquids;
+  const ids: number[] = [];
+  for (let c = 0; c < sand; c++) ids.push(c);
+  for (let c = 0; c < spec.liquids; c++) ids.push(LIQUID_BASE + c);
+  return ids;
+}
+
+/**
+ * Deal every layer into the bottles at random, leaving the spares empty. Then let each
+ * bottle settle: sand sinks below liquid, keeping its order.
+ */
 export function deal(spec: SandSpec, rng: Rng): Bottle[] {
   const units: number[] = [];
-  for (let c = 0; c < spec.colors; c++) for (let i = 0; i < spec.capacity; i++) units.push(c);
+  for (const c of colourIds(spec)) for (let i = 0; i < spec.capacity; i++) units.push(c);
   rng.shuffle(units);
   const bottles: Bottle[] = [];
-  for (let b = 0; b < spec.colors; b++) bottles.push(units.slice(b * spec.capacity, (b + 1) * spec.capacity));
+  for (let b = 0; b < spec.colors; b++) {
+    const mix = units.slice(b * spec.capacity, (b + 1) * spec.capacity);
+    bottles.push([...mix.filter((c) => !isLiquid(c)), ...mix.filter(isLiquid)]);
+  }
   for (let e = 0; e < spec.empties; e++) bottles.push([]);
   return bottles;
 }
@@ -41,7 +56,10 @@ export function generate(spec: SandSpec, rng: Rng, wanted: number, pickHardest: 
   for (let attempt = 0; attempt < 400 && found < wanted; attempt++) {
     const bottles = deal(spec, rng);
     if (!wellMixed(bottles, spec.capacity)) continue;
-    const res = solve(bottles, spec.capacity, spec.colors > 8 ? 15000 : 30000);
+    // Liquids roughly double the pours worth trying from each position, so the exact
+    // search gets less room before falling back to the quicker ones.
+    const budget = (spec.colors > 8 ? 15000 : 30000) / (spec.liquids ? 2 : 1);
+    const res = solve(bottles, spec.capacity, budget);
     if (!res) continue;
     found++;
     const score = blunderScore(bottles, spec.capacity, res.moves);
@@ -56,9 +74,11 @@ export function generate(spec: SandSpec, rng: Rng, wanted: number, pickHardest: 
 export function buildSandLevel(n: number): SandLevel {
   const spec = sandSpecFor(n);
   const rng = new Rng(n * 104729 + 7);
-  const tutorial = spec.tip !== undefined && !spec.hidden;
+  const tutorial = n <= TUTORIAL_COUNT;
   const big = spec.colors * spec.capacity > 40;
-  const c = generate(spec, rng, tutorial || big ? 3 : 4, !tutorial);
+  // The first liquid level is a gentle introduction: keep its easiest board.
+  const gentle = tutorial || n === LIQUID_INTRO;
+  const c = generate(spec, rng, tutorial || big || spec.liquids ? 3 : 4, !gentle);
   // Covered layers: everything below each bottle's top run.
   const hidden = c.bottles.map((b) => (spec.hidden && b.length ? b.length - topRun(b) : 0));
   const covered = hidden.reduce((s, h) => s + h, 0);
@@ -74,5 +94,6 @@ export function buildSandLevel(n: number): SandLevel {
     difficulty: tutorial ? 'Tutorial' : rateSand(c.score),
     score: c.score,
     tip: spec.tip,
+    liquids: spec.liquids,
   };
 }

@@ -6,20 +6,24 @@ import { Bottle, Difficulty } from './types';
 export const TUTORIAL_COUNT = 4;
 /** First level with covered layers. */
 export const HIDDEN_INTRO = 20;
+/** First level where some colours are liquid. */
+export const LIQUID_INTRO = 35;
 
 export interface SandSpec {
   colors: number;
   capacity: number;
   empties: number;
   hidden: boolean;
+  /** How many of the colours are liquid instead of sand. */
+  liquids: number;
   tip?: string;
 }
 
 const TUTORIALS: SandSpec[] = [
-  { colors: 2, capacity: 4, empties: 1, hidden: false, tip: 'Tap a bottle, then tap another to pour. Sand only lands on the same colour or in an empty bottle.' },
-  { colors: 3, capacity: 4, empties: 2, hidden: false, tip: 'You can also drag a bottle onto another. Finish with one colour per bottle.' },
-  { colors: 3, capacity: 4, empties: 1, hidden: false, tip: 'Undo is free. Once per level you can add an empty bottle, but that caps you at two stars.' },
-  { colors: 4, capacity: 4, empties: 2, hidden: false, tip: 'Finish within par for three stars.' },
+  { colors: 2, capacity: 4, empties: 1, hidden: false, liquids: 0, tip: 'Tap a bottle, then tap another to pour. Sand only lands on the same colour or in an empty bottle.' },
+  { colors: 3, capacity: 4, empties: 2, hidden: false, liquids: 0, tip: 'You can also drag a bottle onto another. Finish with one colour per bottle.' },
+  { colors: 3, capacity: 4, empties: 1, hidden: false, liquids: 0, tip: 'Undo is free. Once per level you can add an empty bottle, but that caps you at two stars.' },
+  { colors: 4, capacity: 4, empties: 2, hidden: false, liquids: 0, tip: 'Finish within par for three stars.' },
 ];
 
 /** What level n should look like. Same n, same spec, on every device. */
@@ -53,7 +57,20 @@ export function sandSpecFor(n: number): SandSpec {
     capacity = 4;
     empties = 2;
   } else if (n > HIDDEN_INTRO && rng.next() < 0.25) hidden = true;
-  return { colors, capacity, empties, hidden, tip };
+  // Liquids: sand sinks below them. Kept apart from covered sand, since a sinking pour
+  // would land on layers the player cannot see.
+  let liquids = 0;
+  if (n === LIQUID_INTRO) {
+    hidden = false;
+    liquids = 2;
+    tip = 'Some colours are liquid. Sand sinks below liquid, and only the top colour pours. Liquid lands only on the same liquid or in an empty bottle.';
+    colors = Math.min(colors, 6);
+    capacity = 4;
+    empties = 2;
+  } else if (n > LIQUID_INTRO && !hidden && rng.next() < 0.3) {
+    liquids = rng.int(2, Math.max(2, Math.min(4, Math.floor(colors / 2))));
+  }
+  return { colors, capacity, empties, hidden, liquids, tip };
 }
 
 /**
