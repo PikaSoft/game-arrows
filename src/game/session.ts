@@ -1,21 +1,21 @@
 import { Board } from '../core/board';
 import { Arrow, Level } from '../core/types';
 
-export const START_DROPS = 3;
+export const START_HEARTS = 3;
 export const START_HINTS = 3;
 
 export type TapResult =
   | { kind: 'exit'; arrow: Arrow; distToEdge: number }
-  | { kind: 'blocked'; arrow: Arrow; distToBlocker: number; lostDrop: boolean; outOfDrops: boolean }
+  | { kind: 'blocked'; arrow: Arrow; distToBlocker: number; lostHeart: boolean; outOfHearts: boolean }
   | { kind: 'none' };
 
 /** Rules for one play-through of a level. No rendering or timing in here. */
 export class Session {
   readonly level: Level;
   readonly board: Board;
-  drops = START_DROPS;
+  hearts = START_HEARTS;
   hints = START_HINTS;
-  /** True once the player chose to keep going after running out of drops. */
+  /** True once the player chose to keep going after running out of hearts. */
   continued = false;
   /** Player input is locked while the remaining arrows auto-finish. */
   autoFinishing = false;
@@ -45,14 +45,14 @@ export class Session {
     return !this.won && !this.autoFinishing;
   }
 
-  /** Waiting on the player to decide after the last drop was spent. */
+  /** Waiting on the player to decide after the last heart was spent. */
   get awaitingContinue(): boolean {
-    return this.drops === 0 && !this.continued;
+    return this.hearts === 0 && !this.continued;
   }
 
   stars(): number {
     if (this.continued) return 0;
-    return this.drops;
+    return this.hearts;
   }
 
   tap(id: number): TapResult {
@@ -61,14 +61,14 @@ export class Session {
     if (!arrow) return { kind: 'none' };
     const block = this.board.blocker(arrow);
     if (!block) return { kind: 'exit', arrow, distToEdge: this.exit(arrow) };
-    const lostDrop = this.drops > 0 && !this.continued;
-    if (lostDrop) this.drops--;
+    const lostHeart = this.hearts > 0 && !this.continued;
+    if (lostHeart) this.hearts--;
     return {
       kind: 'blocked',
       arrow,
       distToBlocker: block.dist,
-      lostDrop,
-      outOfDrops: lostDrop && this.drops === 0,
+      lostHeart,
+      outOfHearts: lostHeart && this.hearts === 0,
     };
   }
 
@@ -96,7 +96,7 @@ export class Session {
     return all.map((a) => ({ arrow: a, distToEdge: this.exit(a) }));
   }
 
-  continueWithoutDrops(): void {
+  continueWithoutHearts(): void {
     this.continued = true;
   }
 

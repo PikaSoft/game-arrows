@@ -8,7 +8,7 @@ export interface Theme {
   danger: string;
   text: string;
   muted: string;
-  drop: string;
+  heart: string;
   confetti: string[];
 }
 
@@ -23,7 +23,7 @@ export const THEMES: Theme[] = [
     danger: '#c9473d',
     text: '#5b3c22',
     muted: '#a58a6d',
-    drop: '#4fa3e6',
+    heart: '#e0475b',
     confetti: ['#e3a23b', '#c9473d', '#4fa3e6', '#6a9a4c', '#6a4a2c'],
   },
   {
@@ -36,7 +36,7 @@ export const THEMES: Theme[] = [
     danger: '#ff6f61',
     text: '#f0e4d0',
     muted: '#8f806c',
-    drop: '#5fb3f0',
+    heart: '#ff6b7f',
     confetti: ['#f2b84f', '#ff6f61', '#5fb3f0', '#8fcf6a', '#e7d5b6'],
   },
   {
@@ -49,7 +49,7 @@ export const THEMES: Theme[] = [
     danger: '#b9443a',
     text: '#33492f',
     muted: '#86977f',
-    drop: '#4c9bd6',
+    heart: '#d6455a',
     confetti: ['#d8873b', '#b9443a', '#4c9bd6', '#3d5839', '#e0c04a'],
   },
   {
@@ -62,7 +62,7 @@ export const THEMES: Theme[] = [
     danger: '#c84a4a',
     text: '#22344c',
     muted: '#8090a5',
-    drop: '#3f95dc',
+    heart: '#dc4459',
     confetti: ['#e8a637', '#c84a4a', '#3f95dc', '#253a55', '#5fb08a'],
   },
 ];
@@ -95,6 +95,6 @@ export function applyTheme(t: Theme): void {
   r.setProperty('--danger', t.danger);
   r.setProperty('--text', t.text);
   r.setProperty('--muted', t.muted);
-  r.setProperty('--drop', t.drop);
+  r.setProperty('--heart', t.heart);
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', t.bg);
 }
