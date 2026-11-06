@@ -128,6 +128,25 @@ describe('session', () => {
     expect(s.stuck).toBe(false);
   });
 
+  test('stuck when the only pour shuttles one colour between two bottles', () => {
+    // Bottles 0 and 1 can only trade a single 2 back and forth; 2 and 3 are dead.
+    const s = new Session(lvl([[0, 2, 2], [1, 2], [0, 1], [1, 1, 0]], 3));
+    expect(s.noMoves).toBe(false);
+    expect(s.shuttling).toBe(true);
+    expect(s.stuck).toBe(true);
+    s.pour(0, 1);
+    expect(s.shuttling).toBe(true);
+    s.addBottle();
+    expect(s.stuck).toBe(false);
+  });
+
+  test('not stuck when a back-and-forth pour can lead somewhere', () => {
+    // Pouring the 1 from bottle 0 onto bottle 1 frees bottle 0's 0 to join bottle 2.
+    const s = new Session(lvl([[0, 1], [1], [0]], 2));
+    expect(s.shuttling).toBe(false);
+    expect(s.stuck).toBe(false);
+  });
+
   test('undo history follows an added bottle', () => {
     const s = new Session(lvl([[0, 1, 1, 0], [1, 0, 0, 1], []]));
     s.pour(0, 2);

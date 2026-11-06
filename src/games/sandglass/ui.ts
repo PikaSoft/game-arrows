@@ -297,9 +297,13 @@ export function createSandglass(shell: Shell): GameModule {
     const s = session;
     if (!s || !s.stuck || stuckShown || modalOpen()) return;
     stuckShown = true;
+    const body = s.shuttling
+      ? `<h2>Going in circles</h2>
+       <p>The only pour left moves the same colour back and forth between two bottles. Step back, add a spare bottle, or start over.</p>`
+      : `<h2>No moves left</h2>
+       <p>There is nowhere left to pour. Step back, add a spare bottle, or start over.</p>`;
     openModal(
-      `<h2>No moves left</h2>
-       <p>There is nowhere left to pour. Step back, add a spare bottle, or start over.</p>
+      `${body}
        <div class="actions">
          <button class="btn" data-action="undo">Undo</button>
          ${s.addedBottle ? '' : '<button class="btn secondary" data-action="add">Add a bottle</button>'}
