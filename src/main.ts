@@ -1,6 +1,7 @@
 import './styles.css';
 import { createArrows } from './games/arrows/ui';
 import { createSandglass } from './games/sandglass/ui';
+import { createSnakeGame } from './games/snake/ui';
 import { createSqueeze } from './games/squeeze/ui';
 import { GameModule, Shell } from './games/types';
 import { hubLogo, starIcon } from './shared/icons';
@@ -193,7 +194,13 @@ const shell: Shell = {
   },
 };
 
-games.push(createArrows(shell), createSandglass(shell), createSqueeze(shell));
+games.push(
+  createArrows(shell),
+  createSandglass(shell),
+  createSnakeGame(shell, 'classic'),
+  createSnakeGame(shell, 'trails'),
+  createSqueeze(shell),
+);
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && modalOpen() && !activeGame?.modalLocked?.()) closeModal();

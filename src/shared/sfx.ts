@@ -113,6 +113,14 @@ export class Sfx {
     this.tone(ctx, 1568, t + 0.08, 0.45, 0.09);
   }
 
+  /** Quick bite when the snake eats. */
+  chomp(): void {
+    const ctx = this.ready();
+    if (!ctx) return;
+    this.tone(ctx, 620, ctx.currentTime, 0.08, 0.12);
+    this.tone(ctx, 930, ctx.currentTime + 0.05, 0.1, 0.1);
+  }
+
   private tone(ctx: AudioContext, freq: number, t: number, dur: number, vol: number): void {
     const o = ctx.createOscillator();
     o.type = 'triangle';
