@@ -28,8 +28,26 @@ const WEIGHTS = [0.1, 0.2, 0.35, 0.35];
 const ASPECT = 1.6;
 
 export interface LevelSpec {
-  difficulty: Tier['label'];
+  /** Generation tier (board size and arrow shapes). Not the label players see. */
+  tier: Tier['label'];
   params: GenParams;
+}
+
+/**
+ * Upper bounds on the search score for each label, see SolveResult.search: roughly,
+ * how many arrows a player has to look at, on average, to find one that can leave.
+ * Calibrated on generated levels, where it runs from about 2.5 to 14.
+ */
+export const RATING: { label: Exclude<Difficulty, 'Tutorial'>; below: number }[] = [
+  { label: 'Easy', below: 4.5 },
+  { label: 'Medium', below: 6.5 },
+  { label: 'Hard', below: 8.5 },
+  { label: 'Super Hard', below: Infinity },
+];
+
+/** Rate a board by how hard its moves are to find during play. */
+export function rate(search: number): Exclude<Difficulty, 'Tutorial'> {
+  return RATING.find((r) => search < r.below)!.label;
 }
 
 /** Map a level number (generated levels start after the tutorials) to its settings. */
@@ -53,7 +71,7 @@ export function specFor(levelNumber: number): LevelSpec {
   const w = Math.round(tier.w[0] + (tier.w[1] - tier.w[0]) * wFrac);
   const h = Math.round(w * ASPECT);
   return {
-    difficulty: tier.label,
+    tier: tier.label,
     params: {
       w,
       h,

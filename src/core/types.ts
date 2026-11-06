@@ -19,7 +19,10 @@ export interface Level {
   w: number;
   h: number;
   arrows: Arrow[];
+  /** Rated from the finished board; see rate() in difficulty.ts. */
   difficulty: Difficulty;
+  /** Average arrows to check per move (SolveResult.search). Absent on tutorials. */
+  search?: number;
   /** Optional one-line tip shown on tutorial levels. */
   tip?: string;
 }

@@ -21,7 +21,25 @@ following its own path. Clear every arrow to finish the level.
 
 Levels 1 to 5 are tutorials. After that, levels are generated from the level number as
 the seed, so level N is the same board for everyone. Generated levels ramp up over the
-first 30, then vary, with Hard and Super Hard most common.
+first 30, then vary, with bigger boards most common.
+
+The difficulty label is measured from the finished board, not from its size. The
+solver plays the level through and, at each step, works out how many arrows a player
+checking at random would look at before finding one that can leave:
+(arrows left + 1) / (free arrows + 1). The label comes from the average over the
+level, ignoring the auto-finish at the end:
+
+| Label | Arrows checked per move |
+| --- | --- |
+| Easy | under 4.5 |
+| Medium | 4.5 to 6.5 |
+| Hard | 6.5 to 8.5 |
+| Super Hard | 8.5 or more |
+
+This blends the two obvious measures. A raw count of free moves alone would call big
+boards easy, since they always have more free arrows in absolute terms. A percentage
+alone would treat 1 free arrow out of 5 the same as 20 out of 100, though the small
+board is far quicker to scan. Hover the label in game to see the number.
 
 The generator (`src/core/generator.ts`) builds boards backwards. It places arrows one
 at a time, each with a clear exit line when placed, so the reverse order is always a
