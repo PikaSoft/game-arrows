@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { isOutdated } from '../src/ui/updateCheck';
+import { isOutdated } from '../src/shared/updateCheck';
 
 describe('isOutdated', () => {
   test('flags a different live build', () => {

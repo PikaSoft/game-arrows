@@ -79,6 +79,40 @@ export class Sfx {
     [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => this.tone(ctx, f, t + i * 0.1, 0.5, 0.16));
   }
 
+  /** Soft hiss of sand running out of a bottle. */
+  pour(duration = 0.45, volume = 0.16): void {
+    const ctx = this.ready();
+    if (!ctx || !this.noise) return;
+    const t = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = this.noise;
+    src.loop = true;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(2600, t);
+    lp.frequency.linearRampToValueAtTime(1500, t + duration);
+    const hp = ctx.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = 500;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(volume, t + 0.06);
+    g.gain.setValueAtTime(volume, t + duration * 0.7);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+    src.connect(hp).connect(lp).connect(g).connect(ctx.destination);
+    src.start(t);
+    src.stop(t + duration + 0.05);
+  }
+
+  /** Two bright notes when a bottle is finished. */
+  ding(delay = 0): void {
+    const ctx = this.ready();
+    if (!ctx) return;
+    const t = ctx.currentTime + delay;
+    this.tone(ctx, 1046.5, t, 0.35, 0.11);
+    this.tone(ctx, 1568, t + 0.08, 0.45, 0.09);
+  }
+
   private tone(ctx: AudioContext, freq: number, t: number, dur: number, vol: number): void {
     const o = ctx.createOscillator();
     o.type = 'triangle';

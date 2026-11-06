@@ -26,3 +26,14 @@ export function starIcon(full: boolean): string {
 
 /** Small logo: a bent arrow leaving a frame. */
 export const logo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="var(--line)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 50V30h18V16h14"/><path d="M42 9l9 7-9 7" fill="var(--line)"/><path d="M14 58h40" stroke="var(--accent)"/></svg>`;
+
+/** Collection logo: a little box of puzzle tiles. */
+export const hubLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="var(--line)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"><rect x="8" y="8" width="21" height="21" rx="5"/><rect x="35" y="8" width="21" height="21" rx="5" fill="var(--accent)" stroke="var(--line)"/><rect x="8" y="35" width="21" height="21" rx="5" fill="var(--accent)" stroke="var(--line)"/><rect x="35" y="35" width="21" height="21" rx="5"/></svg>`;
+
+/** Sandglass logo: a bottle with layers of sand. */
+export const sandLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="var(--line)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"><path d="M26 6h12M27 6v10c0 2-7 5-7 10v28a4 4 0 0 0 4 4h16a4 4 0 0 0 4-4V26c0-5-7-8-7-10V6"/><path d="M22 47h20v7a2 2 0 0 1-2 2H24a2 2 0 0 1-2-2z" fill="#d9a441" stroke="none"/><path d="M22 38h20v9H22z" fill="#4f9ed8" stroke="none"/><path d="M22 31c4-2 7 1 10 0s6-2 10 0v7H22z" fill="#d9584a" stroke="none"/></svg>`;
+
+export const extraIcons = {
+  undo: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>`,
+  addBottle: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h6M9 3v4L7 10v9a2 2 0 0 0 2 2h4"/><path d="M13 3v4l2 3v2"/><path d="M18 15v6M15 18h6"/></svg>`,
+};

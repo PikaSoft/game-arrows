@@ -1,5 +1,5 @@
 import { GenParams } from './generator';
-import { Rng } from './rng';
+import { Rng } from '../../../shared/rng';
 import { Difficulty } from './types';
 
 export const TUTORIAL_COUNT = 5;

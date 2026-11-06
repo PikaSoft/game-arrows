@@ -1,6 +1,6 @@
 import { Board } from '../core/board';
 import { Arrow } from '../core/types';
-import { Theme } from '../ui/themes';
+import { Theme } from '../../../shared/themes';
 import { Camera } from './camera';
 import { bodyAt, buildRoute, Pt, Route, TIP } from './path';
 

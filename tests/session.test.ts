@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { Session } from '../src/game/session';
-import { Level } from '../src/core/types';
+import { Session } from '../src/games/arrows/game/session';
+import { Level } from '../src/games/arrows/core/types';
 
 // A chain: 2 blocks 1 blocks 0, plus a free arrow 3.
 const level: Level = {

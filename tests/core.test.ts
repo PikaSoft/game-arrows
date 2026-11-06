@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import { Board } from '../src/core/board';
-import { rate, specFor, TUTORIAL_COUNT } from '../src/core/difficulty';
-import { generate } from '../src/core/generator';
-import { buildLevel } from '../src/core/levels';
-import { solve } from '../src/core/solver';
-import { Arrow, DELTA, Level, dirBetween } from '../src/core/types';
+import { Board } from '../src/games/arrows/core/board';
+import { rate, specFor, TUTORIAL_COUNT } from '../src/games/arrows/core/difficulty';
+import { generate } from '../src/games/arrows/core/generator';
+import { buildLevel } from '../src/games/arrows/core/levels';
+import { solve } from '../src/games/arrows/core/solver';
+import { Arrow, DELTA, Level, dirBetween } from '../src/games/arrows/core/types';
 
 function checkShape(level: Pick<Level, 'w' | 'h' | 'arrows'>, packed: boolean) {
   const seen = new Set<string>();
