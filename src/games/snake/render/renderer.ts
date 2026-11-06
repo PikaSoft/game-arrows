@@ -156,10 +156,10 @@ export class SnakeRenderer {
         ctx.fill();
       }
 
-      // Apple
-      if (s.food >= 0) {
-        const [fx, fy] = this.centre(s.food);
-        const pulse = 1 + Math.sin(now / 180) * 0.06;
+      // Apples
+      const pulse = 1 + Math.sin(now / 180) * 0.06;
+      for (const f of s.foods) {
+        const [fx, fy] = this.centre(f);
         const r = c * 0.36 * pulse;
         ctx.fillStyle = t.accent;
         ctx.beginPath();
@@ -175,11 +175,45 @@ export class SnakeRenderer {
         again = true;
       }
 
+      if (s.poison >= 0) {
+        this.drawPoison(s, c, now);
+        again = true;
+      }
+
       this.drawSnake(s, c, now);
       ctx.restore();
     }
     if (this.drawParticles(now)) again = true;
     if (again) this.invalidate();
+  }
+
+  /** A dark berry with a cross on it. Flickers for the last few steps before it jumps. */
+  private drawPoison(s: SnakeSim, c: number, now: number): void {
+    const ctx = this.ctx;
+    const t = this.theme;
+    const [px, py] = this.centre(s.poison);
+    const warn = !s.dead && !s.won && s.poisonIn <= 3;
+    ctx.save();
+    if (warn) ctx.globalAlpha = 0.45 + 0.55 * Math.abs(Math.cos(now / 90));
+    const r = c * 0.34;
+    ctx.fillStyle = this.mix(t.danger, '#2a0a3a', 0.45);
+    ctx.beginPath();
+    ctx.arc(px, py, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = this.mix(t.danger, '#000000', 0.35);
+    ctx.lineWidth = Math.max(1, c * 0.06);
+    ctx.stroke();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = Math.max(1.5, c * 0.09);
+    ctx.lineCap = 'round';
+    const k = r * 0.45;
+    ctx.beginPath();
+    ctx.moveTo(px - k, py - k);
+    ctx.lineTo(px + k, py + k);
+    ctx.moveTo(px + k, py - k);
+    ctx.lineTo(px - k, py + k);
+    ctx.stroke();
+    ctx.restore();
   }
 
   private drawSnake(s: SnakeSim, c: number, now: number): void {
