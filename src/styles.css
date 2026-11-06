@@ -144,3 +144,16 @@ button { font: inherit; color: inherit; cursor: pointer; }
   opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 20; white-space: nowrap;
 }
 .toast.show { opacity: 1; }
+
+/* New version prompt */
+.update-banner {
+  position: fixed; left: 0; right: 0; margin: 0 auto; top: calc(12px + env(safe-area-inset-top));
+  width: min(560px, calc(100% - 32px)); display: flex; align-items: center; gap: 10px;
+  background: var(--surface); color: var(--text); border-radius: 16px; padding: 10px 10px 10px 16px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.22), inset 0 0 0 2px var(--line); z-index: 30;
+  font-size: 15px; font-weight: 600; animation: drop 0.25s ease-out;
+}
+@keyframes drop { from { transform: translateY(-16px); opacity: 0; } }
+.update-banner span { flex: 1; line-height: 1.3; }
+.update-banner .btn.small { padding: 8px 16px; }
+.update-close { border: 0; background: transparent; color: var(--muted); font-size: 24px; line-height: 1; width: 32px; height: 32px; border-radius: 8px; }
