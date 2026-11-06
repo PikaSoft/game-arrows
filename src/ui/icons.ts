@@ -16,8 +16,8 @@ export const icons = {
   grid: svg('<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/>'),
 };
 
-export function dropIcon(full: boolean): string {
-  return `<svg viewBox="0 0 24 30" aria-hidden="true"><path d="M12 2C12 2 3 13 3 19.5a9 9 0 0 0 18 0C21 13 12 2 12 2z" fill="${full ? 'var(--drop)' : 'none'}" stroke="var(--drop)" stroke-width="2"/></svg>`;
+export function heartIcon(full: boolean): string {
+  return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3 15 3 8.8A4.8 4.8 0 0 1 12 6.3a4.8 4.8 0 0 1 9 2.5C21 15 12 20.5 12 20.5z" fill="${full ? 'var(--heart)' : 'none'}" stroke="var(--heart)" stroke-width="2" stroke-linejoin="round"/></svg>`;
 }
 
 export function starIcon(full: boolean): string {

@@ -3,11 +3,11 @@ import { Sfx, vibrate } from './audio/sfx';
 import { difficultyOf } from './core/levels';
 import { Level } from './core/types';
 import { LevelSource } from './game/levelSource';
-import { Session, START_DROPS, TapResult } from './game/session';
+import { Session, START_HEARTS, TapResult } from './game/session';
 import { load, Progress, recordClear, resetProgress, save } from './game/storage';
 import { attachGestures } from './input/gestures';
 import { Renderer } from './render/renderer';
-import { dropIcon, icons, logo, starIcon } from './ui/icons';
+import { heartIcon, icons, logo, starIcon } from './ui/icons';
 import { applyTheme, resolveTheme, THEME_ORDER, themeLabel } from './ui/themes';
 
 const progress: Progress = load();
@@ -46,7 +46,7 @@ app.innerHTML = `
       <button class="icon-btn" id="open-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">
-      <div class="drops" id="drops" aria-label="Water drops"></div>
+      <div class="hearts" id="hearts" aria-label="Hearts"></div>
       <div class="stats" id="stats"></div>
       <div class="timer" id="timer">0:00</div>
       <button class="icon-btn" id="hint" aria-label="Hint">${icons.bulb}<span class="badge" id="hint-count"></span></button>
@@ -245,12 +245,12 @@ function beginSession(level: Level) {
   updateFitButton();
 }
 
-function updateHud(lostDrop = false) {
+function updateHud(lostHeart = false) {
   const s = session;
   if (!s) return;
-  const drops = $('#drops');
-  drops.innerHTML = Array.from({ length: START_DROPS }, (_, i) => dropIcon(i < s.drops)).join('');
-  if (lostDrop) drops.children[s.drops]?.classList.add('lost');
+  const hearts = $('#hearts');
+  hearts.innerHTML = Array.from({ length: START_HEARTS }, (_, i) => heartIcon(i < s.hearts)).join('');
+  if (lostHeart) hearts.children[s.hearts]?.classList.add('lost');
   $('#stats').innerHTML = `Free <b>${s.freeCount}</b> · Left <b>${s.remaining}</b>`;
   $('#hint-count').textContent = String(s.hints);
   $<HTMLButtonElement>('#hint').disabled = s.hints === 0 || s.won || s.autoFinishing;
@@ -286,9 +286,9 @@ function handleTap(x: number, y: number) {
   } else if (res.kind === 'blocked') {
     renderer.addBump(res.arrow, res.distToBlocker);
     sfx.thud();
-    if (progress.settings.haptics) vibrate(res.lostDrop ? [30, 40, 30] : 25);
-    updateHud(res.lostDrop);
-    if (res.outOfDrops) setTimeout(showOutOfDrops, 450);
+    if (progress.settings.haptics) vibrate(res.lostHeart ? [30, 40, 30] : 25);
+    updateHud(res.lostHeart);
+    if (res.outOfHearts) setTimeout(showOutOfHearts, 450);
   }
 }
 
@@ -302,11 +302,11 @@ function autoFinish() {
   if (list.length) toast('All clear! Finishing up…');
 }
 
-function showOutOfDrops() {
+function showOutOfHearts() {
   const s = session;
   if (!s || !s.awaitingContinue) return;
   openModal(
-    `<h2>Out of water</h2>
+    `<h2>Out of hearts</h2>
      <p>You can keep going, but this clear won't earn any stars.</p>
      <div class="actions">
        <button class="btn" data-action="continue">Keep going</button>
@@ -314,7 +314,7 @@ function showOutOfDrops() {
      </div>`,
     (action) => {
       if (action === 'continue') {
-        s.continueWithoutDrops();
+        s.continueWithoutHearts();
         closeModal();
         updateHud();
       } else restartLevel();
@@ -346,7 +346,7 @@ function showWin() {
        <div class="result-line">Time ${fmt(s.elapsedMs)} ${
          newBest ? '<span class="best">· New best!</span>' : `· Best ${fmt(prev.bestMs)}`
        }</div>
-       ${s.continued ? '<p>Finished after running out of water: no stars this time.</p>' : ''}
+       ${s.continued ? '<p>Finished after running out of hearts: no stars this time.</p>' : ''}
        <div class="actions">
          <button class="btn" data-action="next">Next level</button>
          <div class="row">

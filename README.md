@@ -6,9 +6,9 @@ following its own path. Clear every arrow to finish the level.
 
 ## Rules
 
-- **Blocked taps** bounce the arrow back and cost one of three water drops.
-- **Out of water:** keep going for no stars, or restart.
-- **Stars** equal the drops left when the board is cleared.
+- **Blocked taps** bounce the arrow back and cost one of three hearts.
+- **Out of hearts:** keep going for no stars, or restart.
+- **Stars** equal the hearts left when the board is cleared.
 - **Auto-finish:** once every remaining arrow is free, the rest leave on their own.
 - **Hints:** 3 per level. Each one highlights an arrow that can leave now (preferring
   one that unblocks others).

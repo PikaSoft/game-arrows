@@ -17,14 +17,14 @@ const level: Level = {
 };
 
 describe('session', () => {
-  test('blocked taps cost drops, then require a choice, then cost nothing', () => {
+  test('blocked taps cost hearts, then require a choice, then cost nothing', () => {
     const s = new Session(level);
-    for (let i = 0; i < 2; i++) expect(s.tap(0)).toMatchObject({ kind: 'blocked', lostDrop: true, outOfDrops: false });
-    expect(s.tap(0)).toMatchObject({ kind: 'blocked', lostDrop: true, outOfDrops: true });
+    for (let i = 0; i < 2; i++) expect(s.tap(0)).toMatchObject({ kind: 'blocked', lostHeart: true, outOfHearts: false });
+    expect(s.tap(0)).toMatchObject({ kind: 'blocked', lostHeart: true, outOfHearts: true });
     expect(s.awaitingContinue).toBe(true);
     expect(s.tap(2).kind).toBe('none'); // locked until the player decides
-    s.continueWithoutDrops();
-    expect(s.tap(0)).toMatchObject({ kind: 'blocked', lostDrop: false });
+    s.continueWithoutHearts();
+    expect(s.tap(0)).toMatchObject({ kind: 'blocked', lostHeart: false });
     expect(s.stars()).toBe(0);
   });
 

@@ -47,7 +47,7 @@ const HANDMADE: Omit<Level, 'number' | 'difficulty'>[] = [
 
 /** Tutorial levels 4 and 5 are small packed boards from fixed seeds. */
 const SEEDED_TUTORIALS: { seed: number; w: number; h: number; tip: string }[] = [
-  { seed: 4004, w: 5, h: 7, tip: 'Tapping a blocked arrow costs a water drop. Keep all three for 3 stars.' },
+  { seed: 4004, w: 5, h: 7, tip: 'Tapping a blocked arrow costs a heart. Keep all three for 3 stars.' },
   { seed: 5005, w: 6, h: 9, tip: 'Free shows how many arrows can leave right now. Stuck? Tap the bulb for a hint.' },
 ];
 
