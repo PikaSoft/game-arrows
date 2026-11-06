@@ -1,4 +1,4 @@
-import { Bottle } from './types';
+import { Bottle, isLiquid } from './types';
 
 export const top = (b: Bottle): number => (b.length ? b[b.length - 1] : -1);
 
@@ -14,13 +14,33 @@ export function topRun(b: Bottle): number {
 export const isUniform = (b: Bottle): boolean => b.length > 0 && topRun(b) === b.length;
 export const isComplete = (b: Bottle, cap: number): boolean => b.length === cap && isUniform(b);
 
-/** Sand can land in an empty bottle or on the same colour, if there is room. */
+/** Layers of sand in a bottle. Sand always sits below any liquid. */
+export function sandCount(b: Bottle): number {
+  let n = 0;
+  while (n < b.length && !isLiquid(b[n])) n++;
+  return n;
+}
+
+/**
+ * Where a pour of colour c would settle in bottle b: liquid floats on top, sand sinks
+ * through any liquid and comes to rest on the sand.
+ */
+export const landingIndex = (b: Bottle, c: number): number => (isLiquid(c) ? b.length : sandCount(b));
+
+/**
+ * The top colour pours. It must come to rest on the same colour or on the bottom of
+ * the bottle, and there must be room. So sand can sink through liquid onto matching
+ * sand (or to the bottom of a bottle holding only liquid), while liquid needs the same
+ * liquid or an empty bottle.
+ */
 export function canPour(bottles: Bottle[], cap: number, from: number, to: number): boolean {
   if (from === to) return false;
   const a = bottles[from];
   const b = bottles[to];
   if (!a.length || b.length >= cap) return false;
-  return !b.length || top(b) === top(a);
+  const c = top(a);
+  const at = landingIndex(b, c);
+  return at === 0 || b[at - 1] === c;
 }
 
 /** How many layers a pour would move: the whole top run, as much as fits. */
@@ -33,10 +53,9 @@ export function pourAmount(bottles: Bottle[], cap: number, from: number, to: num
 export function pour(bottles: Bottle[], cap: number, from: number, to: number): number {
   const n = pourAmount(bottles, cap, from, to);
   const c = top(bottles[from]);
-  for (let i = 0; i < n; i++) {
-    bottles[from].pop();
-    bottles[to].push(c);
-  }
+  const at = landingIndex(bottles[to], c);
+  for (let i = 0; i < n; i++) bottles[from].pop();
+  bottles[to].splice(at, 0, ...new Array<number>(n).fill(c));
   return n;
 }
 

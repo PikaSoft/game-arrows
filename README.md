@@ -84,6 +84,12 @@ Bottles hold stacked layers of coloured sand. Tap a bottle, then tap another to 
   A layer shows its colour once the sand above it has been poured off (along with any
   matching sand right under it), and stays shown after an undo. Par allows a little
   extra for finding out what is underneath.
+- **Liquids:** from level 35, about one level in three (never one with covered sand)
+  makes some colours liquid. Liquid is lighter than sand, so in every bottle the sand
+  sits below the liquid, and a pour of sand sinks through any liquid to land on the
+  sand beneath. Only the top colour pours, sand or liquid. Sand must land on the same
+  colour or on the bottom of a bottle (one holding only liquid counts); liquid must
+  land on the same liquid or in an empty bottle.
 
 ### Levels
 
