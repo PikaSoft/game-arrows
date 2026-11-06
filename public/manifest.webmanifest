@@ -1,0 +1,9 @@
+{
+  "name": "Arrow Escape",
+  "short_name": "Arrows",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5ecdc",
+  "theme_color": "#f5ecdc",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

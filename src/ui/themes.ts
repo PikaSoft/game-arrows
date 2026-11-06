@@ -1,0 +1,100 @@
+export interface Theme {
+  id: string;
+  name: string;
+  bg: string;
+  surface: string;
+  line: string;
+  accent: string;
+  danger: string;
+  text: string;
+  muted: string;
+  drop: string;
+  confetti: string[];
+}
+
+export const THEMES: Theme[] = [
+  {
+    id: 'paper',
+    name: 'Paper',
+    bg: '#f5ecdc',
+    surface: '#fbf5ea',
+    line: '#6a4a2c',
+    accent: '#e3a23b',
+    danger: '#c9473d',
+    text: '#5b3c22',
+    muted: '#a58a6d',
+    drop: '#4fa3e6',
+    confetti: ['#e3a23b', '#c9473d', '#4fa3e6', '#6a9a4c', '#6a4a2c'],
+  },
+  {
+    id: 'night',
+    name: 'Night',
+    bg: '#1c1916',
+    surface: '#26221e',
+    line: '#e7d5b6',
+    accent: '#f2b84f',
+    danger: '#ff6f61',
+    text: '#f0e4d0',
+    muted: '#8f806c',
+    drop: '#5fb3f0',
+    confetti: ['#f2b84f', '#ff6f61', '#5fb3f0', '#8fcf6a', '#e7d5b6'],
+  },
+  {
+    id: 'sage',
+    name: 'Sage',
+    bg: '#e6ece0',
+    surface: '#f1f5ec',
+    line: '#3d5839',
+    accent: '#d8873b',
+    danger: '#b9443a',
+    text: '#33492f',
+    muted: '#86977f',
+    drop: '#4c9bd6',
+    confetti: ['#d8873b', '#b9443a', '#4c9bd6', '#3d5839', '#e0c04a'],
+  },
+  {
+    id: 'harbour',
+    name: 'Harbour',
+    bg: '#e9eef4',
+    surface: '#f4f7fa',
+    line: '#253a55',
+    accent: '#e8a637',
+    danger: '#c84a4a',
+    text: '#22344c',
+    muted: '#8090a5',
+    drop: '#3f95dc',
+    confetti: ['#e8a637', '#c84a4a', '#3f95dc', '#253a55', '#5fb08a'],
+  },
+];
+
+export const THEME_ORDER = ['auto', ...THEMES.map((t) => t.id)];
+
+export function prefersDark(): boolean {
+  try {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  } catch {
+    return false;
+  }
+}
+
+export function resolveTheme(id: string): Theme {
+  if (id === 'auto') return prefersDark() ? THEMES[1] : THEMES[0];
+  return THEMES.find((t) => t.id === id) ?? THEMES[0];
+}
+
+export function themeLabel(id: string): string {
+  return id === 'auto' ? 'Auto (light/dark)' : resolveTheme(id).name;
+}
+
+export function applyTheme(t: Theme): void {
+  const r = document.documentElement.style;
+  r.setProperty('--bg', t.bg);
+  r.setProperty('--surface', t.surface);
+  r.setProperty('--line', t.line);
+  r.setProperty('--accent', t.accent);
+  r.setProperty('--danger', t.danger);
+  r.setProperty('--text', t.text);
+  r.setProperty('--muted', t.muted);
+  r.setProperty('--drop', t.drop);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', t.bg);
+}
