@@ -37,3 +37,6 @@ export const extraIcons = {
   undo: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>`,
   addBottle: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h6M9 3v4L7 10v9a2 2 0 0 0 2 2h4"/><path d="M13 3v4l2 3v2"/><path d="M18 15v6M15 18h6"/></svg>`,
 };
+
+/** Squeeze logo: a framed board with a gap and an L block sliding out of it. */
+export const squeezeLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M34 8H8v48h48V8h-8" stroke="var(--line)" stroke-width="4.5"/><rect x="14" y="36" width="14" height="14" rx="3" fill="#4f9ed8"/><path d="M36 2h8v14h8v8H36z" fill="#d9584a"/><rect x="32" y="36" width="18" height="7" rx="3" fill="#e8b93a"/></svg>`;
