@@ -98,12 +98,12 @@ export class Renderer {
     if (!this.raf) this.raf = requestAnimationFrame(this.frame);
   }
 
-  addExit(arrow: Arrow, distToEdge: number, delayMs = 0): void {
+  addExit(arrow: Arrow, distToEdge: number, delayMs = 0, maxDurationMs = 900): void {
     const n = arrow.cells.length;
     const travel = distToEdge + n + 1;
     const route = buildRoute(arrow, travel + 2);
     // Speed up for long trips so big boards stay snappy.
-    const duration = Math.min(900, 260 + travel * 22);
+    const duration = Math.min(maxDurationMs, 260 + travel * 22);
     this.bumps.delete(arrow.id);
     this.exits.push({
       kind: 'exit',

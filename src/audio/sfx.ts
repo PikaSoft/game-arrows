@@ -27,7 +27,7 @@ export class Sfx {
     return this.ctx;
   }
 
-  whoosh(): void {
+  whoosh(volume = 0.22): void {
     const ctx = this.ready();
     if (!ctx || !this.noise) return;
     const t = ctx.currentTime;
@@ -41,7 +41,7 @@ export class Sfx {
     bp.frequency.exponentialRampToValueAtTime(f0 * 0.3, t + 0.28);
     const g = ctx.createGain();
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.22, t + 0.03);
+    g.gain.exponentialRampToValueAtTime(volume, t + 0.03);
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
     src.connect(bp).connect(g).connect(ctx.destination);
     src.start(t);

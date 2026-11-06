@@ -296,9 +296,14 @@ function autoFinish() {
   const s = session!;
   const list = s.startAutoFinish();
   renderer.hintId = null;
-  const gap = Math.min(70, 1400 / Math.max(1, list.length));
-  list.forEach(({ arrow, distToEdge }, i) => renderer.addExit(arrow, distToEdge, i * gap));
-  for (let i = 0; i < Math.min(list.length, 6); i++) setTimeout(() => sfx.whoosh(), i * Math.max(gap, 90));
+  // Fire the arrows off one at a time in quick succession. The gap is long enough
+  // that each launch reads as its own beat, and shrinks on big boards so the
+  // whole sequence stays under about two and a half seconds.
+  const gap = Math.max(45, Math.min(120, 2500 / Math.max(1, list.length)));
+  list.forEach(({ arrow, distToEdge }, i) => {
+    renderer.addExit(arrow, distToEdge, i * gap, 450);
+    setTimeout(() => sfx.whoosh(0.12), i * gap);
+  });
   if (list.length) toast('All clear! Finishing up…');
 }
 
