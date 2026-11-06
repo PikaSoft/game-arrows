@@ -209,6 +209,8 @@ export class Renderer {
     ctx.setLineDash([]);
     ctx.globalAlpha = 1;
 
+    this.drawGrid(b);
+
     // Resting arrows.
     for (const a of b.arrows.values()) {
       const bump = this.bumps.get(a.id);
@@ -246,6 +248,32 @@ export class Renderer {
     ctx.restore();
 
     this.drawParticles();
+  }
+
+  /** Faint dot at every cell centre (the nodes arrows travel through). */
+  private drawGrid(b: Board): void {
+    const { ctx, camera: cam } = this;
+    // Too dense to read when zoomed far out; skip rather than draw noise.
+    if (cam.scale < 6) return;
+    const r = Math.min(1.6, Math.max(0.8, cam.scale * 0.04)) / cam.scale;
+    // Only the nodes currently on screen.
+    const tl = cam.toWorld(0, 0);
+    const br = cam.toWorld(this.cssW, this.cssH);
+    const x0 = Math.max(0, Math.floor(tl.x));
+    const y0 = Math.max(0, Math.floor(tl.y));
+    const x1 = Math.min(b.w - 1, Math.ceil(br.x));
+    const y1 = Math.min(b.h - 1, Math.ceil(br.y));
+    ctx.fillStyle = this.theme.muted;
+    ctx.globalAlpha = Math.min(0.4, 0.15 + (cam.scale - 6) * 0.01);
+    ctx.beginPath();
+    for (let y = y0; y <= y1; y++) {
+      for (let x = x0; x <= x1; x++) {
+        ctx.moveTo(x + 0.5 + r, y + 0.5);
+        ctx.arc(x + 0.5, y + 0.5, r, 0, Math.PI * 2);
+      }
+    }
+    ctx.fill();
+    ctx.globalAlpha = 1;
   }
 
   private drawArrow(route: Route, offset: number, color: string, alpha: number): void {
