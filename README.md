@@ -9,6 +9,8 @@ stars and settings.
 | --- | --- |
 | Arrow Escape | Tap bent arrows to slide them off a packed board. |
 | Sandglass | Pour sand between bottles until each one holds a single colour. |
+| Snake | Classic endless snake: eat apples, grow, beat your best. |
+| Snake Trails | Snake with walls: eat enough apples to clear each numbered level. |
 
 ## Arrow Escape
 
@@ -122,6 +124,39 @@ The numbers sit close to 1 because with a spare bottle or two most pours are
 recoverable; the hard levels are the ones where a wrong pour really does lock the
 board. Hover the label in game to see the number.
 
+## Snake and Snake Trails
+
+Two games that share one engine (`src/games/snake/`). Swipe anywhere on the board to
+steer (one drag can make several turns), or use the arrow keys or WASD. Space or P
+pauses; the game also pauses when a card opens or the tab is hidden.
+
+### Rules
+
+- **Moving:** the snake moves one cell per step. Turning straight back is ignored, and
+  up to two quick turns are remembered, so a fast U-turn works.
+- **Eating:** each apple adds one cell. Apples appear on a random empty cell.
+- **Crashing:** the edge of the board, walls and your own body end the run. Moving into
+  the cell your tail is leaving is fine, unless you are growing on that step.
+
+### Snake
+
+Endless. Pick Slow, Normal or Fast on the home screen; the speed creeps up every 5
+apples. The best score is kept per speed, along with your longest snake.
+
+### Snake Trails
+
+Each level sets a number of apples to eat. Finish within par for three stars, within
+1.5 times par for two, otherwise one. A crash means trying the level again.
+
+Levels 1 to 3 are tutorials. After that, level N is generated from N as the seed, so
+everyone gets the same walls and the same apples. Boards grow from 12 to 20 cells wide,
+with more apples, more wall pieces and a faster snake over the first 30 levels, then
+vary. Wall pieces (bars, L shapes, pillars and blocks) are placed with mirror or
+rotational symmetry, and a layout is kept only if every open cell can be reached and
+the snake starts with at least 5 clear cells ahead. Par allows about half the board's
+width plus height in steps per apple. The difficulty label blends speed, apple count
+and how much of the board is wall.
+
 ## Development
 
 ```bash
@@ -133,15 +168,16 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
 ```
-src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass), settings
+src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails), settings
 src/shared/            sound, themes, icons, update check, seeded RNG, worker level loader
 src/games/arrows/      Arrow Escape: core rules, generator and solver, rendering, input, UI
 src/games/sandglass/   Sandglass: the same split
+src/games/snake/       Snake and Snake Trails: rules, level builder, renderer, swipe input, UI
 ```
 
 Each game exports a `GameModule` (`src/games/types.ts`): it builds its own screens and
