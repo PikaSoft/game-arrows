@@ -1,6 +1,6 @@
 import { Rng } from './rng';
 import { solve } from './solver';
-import { Arrow, Cell, DELTA, DIRS, Dir, OPPOSITE } from './types';
+import { Arrow, Cell, DELTA, DIRS, Dir, OPPOSITE, dirBetween } from './types';
 
 export interface GenParams {
   w: number;
@@ -9,8 +9,14 @@ export interface GenParams {
   maxLen: number;
   /** Chance that a body segment keeps going straight instead of turning (0..1). */
   straightness: number;
-  /** Boards generated per level; the one with the deepest dependency chain wins. */
+  /** Boards generated per level; the one with the fewest free moves during play wins. */
   candidates: number;
+  /**
+   * Flip attempts per arrow when tightening the board (0 or missing: none). Each
+   * attempt turns one arrow around and keeps the change if the board stays solvable
+   * and fewer arrows are free on average during play.
+   */
+  tighten?: number;
 }
 
 export interface Generated {
@@ -19,6 +25,7 @@ export interface Generated {
   arrows: Arrow[];
   depth: number;
   initialFree: number;
+  freeShare: number;
 }
 
 /**
@@ -39,13 +46,22 @@ export function generate(seed: number, p: GenParams): Generated {
   let attempt = 0;
   let made = 0;
   while (made < p.candidates && attempt < p.candidates * 20) {
-    const arrows = tryBuild(new Rng(seed * 7919 + attempt), p);
+    const rng = new Rng(seed * 7919 + attempt);
+    const built = tryBuild(rng, p);
     attempt++;
-    if (!arrows) continue;
+    if (!built) continue;
+    const arrows = p.tighten ? tighten(rng, p, built) : built;
     const res = solve({ w: p.w, h: p.h, arrows });
     if (!res.solvable) continue; // should never happen; guard anyway
     made++;
-    const g: Generated = { w: p.w, h: p.h, arrows, depth: res.depth, initialFree: res.initialFree };
+    const g: Generated = {
+      w: p.w,
+      h: p.h,
+      arrows,
+      depth: res.depth,
+      initialFree: res.initialFree,
+      freeShare: res.freeShare,
+    };
     if (!best || score(g) > score(best)) best = g;
   }
   if (!best) throw new Error(`Generator failed for seed ${seed}`);
@@ -53,8 +69,59 @@ export function generate(seed: number, p: GenParams): Generated {
 }
 
 function score(g: Generated): number {
-  // Deep dependency chains and few starting moves make for harder boards.
-  return g.depth * 10 - g.initialFree / Math.max(1, g.arrows.length) * 50;
+  // Few free arrows at each step means the player has to work out what unlocks what,
+  // instead of tapping whatever points at the edge. Depth breaks near ties.
+  return -g.freeShare * 100 + g.depth * 0.5 - (g.initialFree / Math.max(1, g.arrows.length)) * 20;
+}
+
+/**
+ * Hill climb towards boards with fewer free moves. Each step turns one arrow around
+ * (or re-aims a one-cell arrow) and keeps the change if the board is still solvable
+ * and fewer arrows are free on average during play. Arrows that are free right now
+ * are tried more often, since they are the obvious moves a player would spot first.
+ */
+function tighten(rng: Rng, p: GenParams, input: Arrow[]): Arrow[] {
+  const { w, h } = p;
+  const arrows = input.slice();
+  const lvl = { w, h, arrows };
+  let best = cost(solve(lvl), arrows.length);
+  const steps = Math.round(arrows.length * (p.tighten ?? 0));
+  for (let s = 0; s < steps; s++) {
+    let xi: number;
+    if (rng.next() < 0.6) {
+      const free = arrows.map((a, i) => (startsFree(a, w, h) ? i : -1)).filter((i) => i >= 0);
+      xi = free.length ? rng.pick(free) : rng.int(0, arrows.length - 1);
+    } else {
+      xi = rng.int(0, arrows.length - 1);
+    }
+    const X = arrows[xi];
+    let opt: Arrow;
+    if (X.cells.length > 1) {
+      const cells = X.cells.slice().reverse();
+      opt = { ...X, cells, dir: dirBetween(cells[cells.length - 2], cells[cells.length - 1])! };
+    } else {
+      opt = { ...X, dir: rng.pick(DIRS.filter((d) => d !== X.dir)) };
+    }
+    if (blocksItself(opt, w, h)) continue;
+    arrows[xi] = opt;
+    const r = solve(lvl);
+    const c = r.solvable ? cost(r, arrows.length) : Infinity;
+    if (c <= best) best = c;
+    else arrows[xi] = X;
+  }
+  return arrows;
+}
+
+function cost(r: { freeShare: number; initialFree: number }, n: number): number {
+  return r.freeShare + (r.initialFree / Math.max(1, n)) * 0.2;
+}
+
+function startsFree(a: Arrow, w: number, h: number): boolean {
+  const hd = a.cells[a.cells.length - 1];
+  const d = DELTA[a.dir];
+  const nx = hd.x + d.x;
+  const ny = hd.y + d.y;
+  return nx < 0 || ny < 0 || nx >= w || ny >= h;
 }
 
 function tryBuild(rng: Rng, p: GenParams): Arrow[] | null {

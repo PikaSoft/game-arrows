@@ -27,7 +27,10 @@ The generator (`src/core/generator.ts`) builds boards backwards. It places arrow
 at a time, each with a clear exit line when placed, so the reverse order is always a
 solution. It also keeps every empty cell exposed to an edge, so the grid fills
 completely. Neighbouring arrows are then joined into longer snakes where that keeps the
-board solvable. `src/core/solver.ts` checks solvability exactly. Removing an arrow can
+board solvable. Finally a tightening pass turns arrows around one at a time and keeps
+each change that leaves the board solvable with fewer arrows free during play, so you
+have to work out which arrows unlock others instead of tapping whatever points at the
+edge. Each level keeps the best of several candidate boards by that same measure. `src/core/solver.ts` checks solvability exactly. Removing an arrow can
 never block another one, so greedy removal is enough.
 
 ## Development
