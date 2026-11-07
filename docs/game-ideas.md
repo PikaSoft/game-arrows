@@ -24,7 +24,7 @@ and art for each one and don't copy a specific existing game.
 | 10 | ~~[Brick Breaker](#10-brick-breaker)~~ | Arcade | Arcade | Medium | **Built** (`src/games/bricks/`) |
 | 11 | ~~[Stack Tower](#11-stack-tower)~~ | Arcade | Arcade | Small | **Built** (`src/games/stack/`) |
 | 12 | ~~[Lane Dodger](#12-lane-dodger)~~ | Arcade | Arcade | Small to medium | **Built** (`src/games/lanes/`) |
-| 13 | [Merge Tiles](#13-merge-tiles) | Endless | Number | Small | Idea |
+| 13 | ~~[Merge Tiles](#13-merge-tiles)~~ | Endless | Number | Small | **Built** (`src/games/merge/`) |
 | 14 | [Word Grid](#14-word-grid) | Word | Word | Medium to large | Idea |
 
 Effort is a rough guide next to Squeeze: small is under half of its code, large is
@@ -618,6 +618,14 @@ short grace window (about 80 ms) for lane changes.
 ---
 
 ## 13. Merge Tiles
+
+> **Built.** Merge Tiles is in the collection (`src/games/merge/`, route `#/merge`). See
+> the Merge Tiles section of the README for how it ended up working. Both twists from
+> the plan below are the core rules rather than options, so it isn't a copy of any one
+> existing game: three equal tiles merge (into three times the value), pairs never do,
+> and stones turn up, block sliding and crumble after a few moves. The board is 5x5,
+> since triple merges need more room. A game in progress is saved, so it can be
+> continued. The daily board is not built.
 
 **Idea.** A 4x4 grid of numbered tiles. Swipe to slide every tile; two equal tiles that
 meet merge into their sum. A new tile appears after each move. Keep going as long as you
