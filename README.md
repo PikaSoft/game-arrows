@@ -13,6 +13,7 @@ stars and settings.
 | Snake Trails | Snake with walls: eat enough apples to clear each numbered level. |
 | Squeeze | Slide blocks of different shapes out through gaps in the frame. |
 | Pipe Link | Turn pipe tiles until water from the tap reaches every pipe. |
+| Colour Lines | Join each pair of dots with a line; together the lines fill the board. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -269,6 +270,60 @@ each tile's options one step ahead counts as a wave. For each wave it takes
 
 Hover the label in game to see the number.
 
+## Colour Lines
+
+The board holds pairs of coloured dots. Drag from a dot to draw a line to its twin.
+Lines can't cross or branch, and the level is done when every pair is joined and the
+lines cover every square.
+
+### Rules
+
+- **Drawing:** a line follows your finger one square at a time (a quick drag is walked
+  step by step, so it never jumps over anything). Going back over a line shortens it.
+  Pressing a dot starts that colour's line afresh; pressing a line's loose end carries
+  it on.
+- **Crossing:** drawing over another colour's line cuts it back to just before the
+  crossing. If you back off again before letting go, the cut line comes back. Lines
+  can't enter another colour's dot.
+- **Stars:** three for a clear without hints, one fewer for each hint used, never below
+  one. Your best time is saved. Nothing can fail.
+- **Hints:** 3 per level. Each one draws a line that isn't right yet (the shortest
+  first) exactly as it is in the solution, cutting anything in its way.
+- **Undo:** unlimited and free.
+
+### Levels
+
+Levels 1 to 3 are tutorials. After that, level N is generated from N as the seed, so
+everyone gets the same board. Boards grow from about 5x5 to as big as 9x11 over the first
+35 levels, then vary, with about one colour per 6 squares on small boards and one per 8
+on big ones (up to 18 colours).
+
+The generator (`src/games/lines/core/paths.ts`) starts with every square on its own and
+keeps joining the end of one path to the end of a neighbouring one, at random, as long
+as the joined path never runs alongside itself (a path that touches itself leaves room
+for a shortcut). Of the boards whose paths are all at least 3 squares long, it keeps only
+those with exactly one solution, and of those the one closest to the level's difficulty
+target. The solver (`src/games/lines/core/solver.ts`) grows every colour from both dots
+at once and backtracks, always trying the line end with the fewest options first. It
+prunes a position when an empty square has fewer than two ways in, when a colour's two
+ends no longer share an empty area, or when an empty area has no colour that could fill
+it. The work is capped by search nodes, not time, so every device builds the same board.
+
+The difficulty label is measured like Arrow Escape's. The solver plays the solution
+through and, at each step, looks at every unfinished line end. An end is forced when
+only one of its moves keeps the board finishable. A step costs
+(line ends + 1) / (forced ends + 1), or (line ends + 1) when nothing is forced and you
+have to look further ahead. The label comes from the average:
+
+| Label | Line ends checked per forced move |
+| --- | --- |
+| Easy | under 1.15 |
+| Medium | 1.15 to 1.37 |
+| Hard | 1.37 to 1.65 |
+| Super Hard | 1.65 or more |
+
+Hover the label in game to see the number.
+
 ## Development
 
 ```bash
@@ -280,18 +335,19 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
 ```
-src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes), settings
+src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines), settings
 src/shared/            sound, themes, icons, update check, seeded RNG, worker level loader
 src/games/arrows/      Arrow Escape: core rules, generator and solver, rendering, input, UI
 src/games/sandglass/   Sandglass: the same split
 src/games/snake/       Snake and Snake Trails: rules, level builder, renderer, swipe input, UI
 src/games/squeeze/     Squeeze: the same split as Sandglass
 src/games/pipes/       Pipe Link: the same split, plus core/tree.ts for the pipe networks
+src/games/lines/       Colour Lines: the same split, plus core/paths.ts for growing the lines
 ```
 
 Each game exports a `GameModule` (`src/games/types.ts`): it builds its own screens and
