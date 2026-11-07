@@ -60,6 +60,8 @@ export function buildPipeLevel(n: number): PipeLevel {
   let tiles = scramble(c.solution, rng);
   // Never hand out a board that is already solved (only possible on tiny ones).
   if (tiles.every((m, i) => m === c.solution[i])) tiles = tiles.map((m) => rotateBy(m, 1));
+  // The label comes from the score as stored, so the two always agree.
+  const score = Math.round(c.score * 100) / 100;
   return {
     number: n,
     w: spec.w,
@@ -68,8 +70,8 @@ export function buildPipeLevel(n: number): PipeLevel {
     source: c.source,
     solution: c.solution,
     par: parFor(tiles, c.solution),
-    difficulty: n <= TUTORIAL_COUNT ? 'Tutorial' : ratePipes(c.score),
-    score: Math.round(c.score * 100) / 100,
+    difficulty: n <= TUTORIAL_COUNT ? 'Tutorial' : ratePipes(score),
+    score,
     tip: spec.tip,
   };
 }

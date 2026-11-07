@@ -51,3 +51,6 @@ export const squeezeLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="no
 
 /** Pipe Link logo: a tap feeding a bent pipe that ends in a full basin. */
 export const pipeLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke-linecap="butt" stroke-linejoin="round"><path d="M18 14v22h28v16" stroke="var(--line)" stroke-width="13"/><path d="M18 14v22h28v16" stroke="#3f95dc" stroke-width="6"/><circle cx="18" cy="14" r="9" fill="var(--accent)" stroke="var(--line)" stroke-width="3.5"/><circle cx="18" cy="14" r="3.5" fill="#3f95dc"/><circle cx="46" cy="52" r="8" fill="#3f95dc" stroke="var(--line)" stroke-width="3.5"/></svg>`;
+
+/** Colour Lines logo: two pairs of dots joined by lines that wrap round each other. */
+export const linesLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="52" height="52" rx="9" stroke="var(--line)" stroke-width="4"/><path d="M18 18v28h28" stroke="#e5413b" stroke-width="6"/><path d="M30 18h16v16" stroke="#2f6fe0" stroke-width="6"/><circle cx="18" cy="18" r="5.5" fill="#e5413b"/><circle cx="46" cy="46" r="5.5" fill="#e5413b"/><circle cx="30" cy="18" r="5.5" fill="#2f6fe0"/><circle cx="46" cy="34" r="5.5" fill="#2f6fe0"/></svg>`;

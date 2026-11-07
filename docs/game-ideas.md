@@ -13,7 +13,7 @@ and art for each one and don't copy a specific existing game.
 | # | Game | Kind | Fit | Effort | Status |
 | --- | --- | --- | --- | --- | --- |
 | 1 | ~~[Pipe Link](#1-pipe-link)~~ | Rotate tiles | Closest | Small | **Built** (`src/games/pipes/`) |
-| 2 | [Colour Lines](#2-colour-lines) | Join dots | Closest | Medium | Idea |
+| 2 | ~~[Colour Lines](#2-colour-lines)~~ | Join dots | Closest | Medium | **Built** (`src/games/lines/`) |
 | 3 | [Crate Push](#3-crate-push) | Push puzzle | Closest | Medium to large | Idea |
 | 4 | [Light Switch](#4-light-switch) | Toggle grid | Closest | Small | Idea |
 | 5 | [Ice Slide](#5-ice-slide) | Slide to exit | Closest | Small | Idea |
@@ -154,6 +154,14 @@ have four; count turns to the nearest correct one when working out par.
 ---
 
 ## 2. Colour Lines
+
+> **Built.** Colour Lines is in the collection (`src/games/lines/`, route `#/lines`). See
+> the Colour Lines section of the README for how it ended up working. The main
+> differences from the plan below: cutting one long random path into pieces almost never
+> gave a board with one solution, so the generator instead grows paths by joining
+> neighbouring ones and never lets a path run alongside itself. Nearly every board made
+> that way has exactly one solution. The label measures how many line ends you check for
+> each one with only one way to go, like Arrow Escape's, rather than counting guesses.
 
 **Idea.** Pairs of coloured dots on a grid. Draw a path between each pair. Paths can't
 cross, and the finished board must cover every cell.
