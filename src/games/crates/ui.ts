@@ -35,6 +35,7 @@ export function createCrates(shell: Shell): GameModule {
     <p>Push every crate onto a target. Crates can only be pushed, never pulled.</p>
     <button class="btn" id="cp-play"></button>
     <button class="btn secondary" id="cp-open-levels">Levels</button>
+    <button class="btn secondary" data-help>How to play</button>
     <button class="btn secondary" id="cp-settings-home">Settings</button>
     <button class="btn secondary" id="cp-hub">All puzzles</button>
     <div class="total" id="cp-total"></div>
@@ -54,6 +55,7 @@ export function createCrates(shell: Shell): GameModule {
       <div class="title"><b id="cp-title"></b><span id="cp-diff"></span></div>
       <button class="icon-btn" id="cp-restart" aria-label="Restart level">${icons.restart}</button>
       <button class="icon-btn" id="cp-theme" aria-label="Change colours">${icons.palette}</button>
+      <button class="icon-btn" data-help aria-label="How to play">${icons.help}</button>
       <button class="icon-btn" id="cp-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">

@@ -35,6 +35,7 @@ export function createSqueeze(shell: Shell): GameModule {
     <p>Slide the blocks out through the gaps in the frame. Each one needs a gap it fits.</p>
     <button class="btn" id="sq-play"></button>
     <button class="btn secondary" id="sq-open-levels">Levels</button>
+    <button class="btn secondary" data-help>How to play</button>
     <button class="btn secondary" id="sq-settings-home">Settings</button>
     <button class="btn secondary" id="sq-hub">All puzzles</button>
     <div class="total" id="sq-total"></div>
@@ -54,6 +55,7 @@ export function createSqueeze(shell: Shell): GameModule {
       <div class="title"><b id="sq-title"></b><span id="sq-diff"></span></div>
       <button class="icon-btn" id="sq-restart" aria-label="Restart level">${icons.restart}</button>
       <button class="icon-btn" id="sq-theme" aria-label="Change colours">${icons.palette}</button>
+      <button class="icon-btn" data-help aria-label="How to play">${icons.help}</button>
       <button class="icon-btn" id="sq-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">

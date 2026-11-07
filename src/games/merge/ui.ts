@@ -26,6 +26,7 @@ export function createMerge(shell: Shell): GameModule {
     <p>Swipe to slide every tile. Two equal tiles that meet merge into one worth both. Stones get in the way, then crumble.</p>
     <button class="btn" id="mt-continue" hidden>Continue</button>
     <button class="btn" id="mt-new">New game</button>
+    <button class="btn secondary" data-help>How to play</button>
     <button class="btn secondary" id="mt-settings-home">Settings</button>
     <button class="btn secondary" id="mt-hub">All puzzles</button>
     <div class="total" id="mt-total"></div>
@@ -37,6 +38,7 @@ export function createMerge(shell: Shell): GameModule {
       <div class="title"><b>Merge Tiles</b><span id="mt-sub"></span></div>
       <button class="icon-btn" id="mt-restart" aria-label="New game">${icons.restart}</button>
       <button class="icon-btn" id="mt-theme" aria-label="Change colours">${icons.palette}</button>
+      <button class="icon-btn" data-help aria-label="How to play">${icons.help}</button>
       <button class="icon-btn" id="mt-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">

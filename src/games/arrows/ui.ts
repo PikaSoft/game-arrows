@@ -30,6 +30,7 @@ root.innerHTML = `
     <p>Tap an arrow to send it off the board. It can only go if nothing is in its way.</p>
     <button class="btn" id="play"></button>
     <button class="btn secondary" id="open-levels">Levels</button>
+    <button class="btn secondary" data-help>How to play</button>
     <button class="btn secondary" id="open-settings-home">Settings</button>
     <button class="btn secondary" id="arrows-hub">All puzzles</button>
     <div class="total" id="total-stars"></div>
@@ -49,6 +50,7 @@ root.innerHTML = `
       <div class="title"><b id="level-title"></b><span id="level-diff"></span></div>
       <button class="icon-btn" id="restart" aria-label="Restart level">${icons.restart}</button>
       <button class="icon-btn" id="theme" aria-label="Change colours">${icons.palette}</button>
+      <button class="icon-btn" data-help aria-label="How to play">${icons.help}</button>
       <button class="icon-btn" id="open-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">

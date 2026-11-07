@@ -34,6 +34,7 @@ export function createIce(shell: Shell): GameModule {
     <p>Swipe to slide the puck across the ice. It only stops at a rock or the edge. Stop it on the flag.</p>
     <button class="btn" id="is-play"></button>
     <button class="btn secondary" id="is-open-levels">Levels</button>
+    <button class="btn secondary" data-help>How to play</button>
     <button class="btn secondary" id="is-settings-home">Settings</button>
     <button class="btn secondary" id="is-hub">All puzzles</button>
     <div class="total" id="is-total"></div>
@@ -53,6 +54,7 @@ export function createIce(shell: Shell): GameModule {
       <div class="title"><b id="is-title"></b><span id="is-diff"></span></div>
       <button class="icon-btn" id="is-restart" aria-label="Restart level">${icons.restart}</button>
       <button class="icon-btn" id="is-theme" aria-label="Change colours">${icons.palette}</button>
+      <button class="icon-btn" data-help aria-label="How to play">${icons.help}</button>
       <button class="icon-btn" id="is-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">
