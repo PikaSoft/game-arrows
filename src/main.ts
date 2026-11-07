@@ -16,6 +16,7 @@ import { createPipes } from './games/pipes/ui';
 import { createSandglass } from './games/sandglass/ui';
 import { createSnakeGame } from './games/snake/ui';
 import { createSqueeze } from './games/squeeze/ui';
+import { createStars } from './games/stars/ui';
 import { createStack } from './games/stack/ui';
 import { GameModule, Shell } from './games/types';
 import { hubLogo, starIcon } from './shared/icons';
@@ -230,6 +231,7 @@ games.push(
   createLanes(shell),
   createMerge(shell),
   createWords(shell),
+  createStars(shell),
 );
 
 document.addEventListener('keydown', (e) => {

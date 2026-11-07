@@ -18,7 +18,12 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); o
 body { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 button { font: inherit; color: inherit; cursor: pointer; }
 #app {
-  height: 100dvh;
+  /* The visible height with every browser toolbar showing, so controls at the bottom (like
+     Picture Grid's Fill / Cross switch) are never hidden behind one. Older browsers fall
+     back to the closest thing they understand. */
+  height: 100vh;
+  height: -webkit-fill-available;
+  height: 100svh;
   max-width: 900px;
   margin: 0 auto;
   display: flex;

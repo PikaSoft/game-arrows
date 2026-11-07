@@ -19,7 +19,7 @@ and art for each one and don't copy a specific existing game.
 | 5 | ~~[Ice Slide](#5-ice-slide)~~ | Slide to exit | Closest | Small | **Built** (`src/games/ice/`) |
 | 6 | ~~[Picture Grid](#6-picture-grid)~~ | Deduction | Logic | Medium | **Built** (`src/games/picture/`) |
 | 7 | ~~[Number Place](#7-number-place)~~ | Deduction | Logic | Medium | **Built** (`src/games/numbers/`) |
-| 8 | [Tents and Trees / Star Battle](#8-tents-and-trees--star-battle) | Deduction | Logic | Medium | **Tents and Trees built** (`src/games/tents/`); Star Battle still an idea |
+| 8 | ~~[Tents and Trees / Star Battle](#8-tents-and-trees--star-battle)~~ | Deduction | Logic | Medium | **Both built** (`src/games/tents/`, `src/games/stars/`) |
 | 9 | ~~[Hidden Mines](#9-hidden-mines)~~ | Deduction | Logic | Medium | **Built** (`src/games/mines/`) |
 | 10 | ~~[Brick Breaker](#10-brick-breaker)~~ | Arcade | Arcade | Medium | **Built** (`src/games/bricks/`) |
 | 11 | ~~[Stack Tower](#11-stack-tower)~~ | Arcade | Arcade | Small | **Built** (`src/games/stack/`) |
@@ -422,8 +422,15 @@ accept the closest match.
 
 ## 8. Tents and Trees / Star Battle
 
-> **Tents and Trees is built** (`src/games/tents/`, route `#/tents`); Star Battle is
-> still an idea. See the Tents and Trees section of the README for how it ended up
+> **Star Battle is built too** (`src/games/stars/`, route `#/stars`). Randomly grown
+> regions almost never give one answer, so the generator repairs them: while a second
+> answer exists, it hands one of that answer's stars to a neighbouring region (the
+> intended stars never move). It uses Picture Grid's controls (a Star / Dot switch,
+> painting and long press), and squares round a star and the rest of a finished row,
+> column or region fill with dots by themselves. One star each on 5x5 to 9x9 grids; two
+> each on 10x10 from level 35.
+>
+> **Tents and Trees is built** (`src/games/tents/`, route `#/tents`). See the Tents and Trees section of the README for how it ended up
 > working. It plays like Picture Grid (a Tent / Grass switch, hearts, finished lines fill
 > themselves). Squares with no tree beside them, and rows or columns with no tents,
 > start as grass. Uniqueness is checked by a backtracking search over the squares beside
