@@ -27,6 +27,7 @@ stars and settings.
 | Lane Dodger | Swipe between three lanes and jump hurdles. Endless. |
 | Merge Tiles | Slide tiles so pairs merge; stones get in the way. Endless. |
 | Word Grid | Trace words through touching letters against the clock. |
+| Star Battle | Place stars so every row, column and region has the same count; stars never touch. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -880,6 +881,57 @@ leaving out a short list of offensive words (52,325 words, about 440 KB, 136 KB
 compressed). Only the level builder loads the list, and it runs in a worker, so the rest
 of the app never downloads it.
 
+## Star Battle
+
+The grid is split into coloured regions. Place stars so that every row, every column and
+every region holds the same number of them (one on most boards, two on the 10x10 ones),
+and no two stars touch, not even at the corners.
+
+### Rules
+
+- **Marking:** tap a square to mark it, as a star or a dot (no star) depending on the
+  Star / Dot switch under the board. Hold a square for a moment to use the other mark.
+  Drag to paint several squares in one stroke, in any direction.
+- **Dots for free:** the squares round a star, and the rest of any row, column or region
+  that has all its stars, fill with dots by themselves.
+- **Hearts:** every mark is checked straight away, as in Picture Grid. A wrong one shows
+  what the square really is (outlined in red), costs one of three hearts and ends the
+  stroke. Out of hearts: keep going for no stars, or restart.
+- **Stars** equal the hearts left when every star is placed.
+- **Hints:** 3 per level, free. Each one reveals a square the rules can work out from the
+  board as it is, preferring a star.
+
+### Levels
+
+Levels 1 to 3 are tutorials (5x5 and 6x6). After that, level N is generated from N as the
+seed, so everyone gets the same board. Grids grow from 6x6 to 9x9 with one star each over
+the first 30 or so levels, then vary. From level 35, about one board in five is 10x10
+with two stars each.
+
+The generator (`src/games/stars/core/layout.ts`) places a valid set of stars, then grows
+a region round each star (or round nearby pairs of stars on two-star boards), the smaller
+regions growing more often so they come out irregular but not too uneven. Random regions
+almost never pin down one answer, so it then repairs them: while a backtracking search
+(`src/games/stars/core/solver.ts`) finds a second answer, one of that answer's stars is
+handed to a neighbouring region, keeping every region in one piece. The intended stars
+never move, so they still fit. Boards are then kept only if a reasoning solver can
+finish them without guessing: in waves, it dots the squares round stars and tries every
+way to place each row's, column's and region's remaining stars; when that stalls, it
+tries each open square both ways and rules out whatever leads to a contradiction.
+
+The difficulty label is measured like Arrow Escape's: for each wave,
+(open squares + 1) / (squares settled that wave + 1), averaged:
+
+| Label | Open squares per square settled |
+| --- | --- |
+| Easy | under 2.4 |
+| Medium | 2.4 to 4 |
+| Hard | 4 to 7 |
+| Super Hard | 7 or more |
+
+Hover the label in game to see the number. Two-star boards take a second or so to build
+(sometimes several), in a worker, while the previous level is being played.
+
 ## Development
 
 ```bash
@@ -891,12 +943,12 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
 ```
-src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture, #/numbers, #/tents, #/mines, #/bricks, #/stack, #/lanes, #/merge, #/words), settings
+src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture, #/numbers, #/tents, #/mines, #/bricks, #/stack, #/lanes, #/merge, #/words, #/stars), settings
 src/shared/            sound, themes, icons, update check, seeded RNG, worker level loader
 src/games/arrows/      Arrow Escape: core rules, generator and solver, rendering, input, UI
 src/games/sandglass/   Sandglass: the same split
@@ -916,6 +968,7 @@ src/games/stack/       Stack Tower: rules in core/sim.ts, no levels
 src/games/lanes/       Lane Dodger: rules in core/sim.ts, the course in core/course.ts
 src/games/merge/       Merge Tiles: sliding in core/rules.ts, a game (spawns, stones) in core/game.ts
 src/games/words/       Word Grid: word search in core/trie.ts, the word list in data/words.txt
+src/games/stars/       Star Battle: stars and regions in core/layout.ts, search and reasoning in core/solver.ts
 tools/build-words.mjs  builds Word Grid's word list from 12dicts
 ```
 
