@@ -112,6 +112,14 @@ export class BricksRenderer {
     ctx.beginPath();
     ctx.roundRect(this.ox, this.oy, FIELD_W * u, FIELD_H * u, u * 0.4);
     ctx.fill();
+    // A faint band below the paddle: the room left for a finger to drag in.
+    const band = PADDLE_Y + PADDLE_H + 1;
+    ctx.fillStyle = this.theme.line;
+    ctx.globalAlpha = 0.05;
+    ctx.beginPath();
+    ctx.roundRect(this.ox, this.oy + band * u, FIELD_W * u, (FIELD_H - band) * u, [0, 0, u * 0.4, u * 0.4]);
+    ctx.fill();
+    ctx.globalAlpha = 1;
     // Bricks.
     s.wall.forEach((row, r) =>
       row.forEach((v, c) => {

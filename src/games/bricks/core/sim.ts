@@ -6,7 +6,12 @@ export const STEP_HZ = 240;
 export const START_LIVES = 3;
 
 export const BALL_R = 0.18;
-export const PADDLE_Y = FIELD_H - 1.5;
+/**
+ * The paddle sits well above the bottom of the field, so a finger dragging below it on a
+ * phone doesn't cover it or the ball coming down.
+ */
+export const PADDLE_GAP = 4;
+export const PADDLE_Y = FIELD_H - PADDLE_GAP;
 export const PADDLE_H = 0.36;
 export const PADDLE_W = 2.4;
 const WIDE_W = 3.6;

@@ -700,7 +700,8 @@ you three balls.
 ### Rules
 
 - **Paddle:** drag anywhere to move it. The paddle follows your finger's movement rather
-  than jumping under it, so your finger never covers it. Arrow keys work too.
+  than jumping under it, and sits well up from the bottom of the field, with a faint band
+  below it to drag in, so your finger never covers it. Arrow keys work too.
 - **Serving:** the ball waits on the paddle; tap (or press Space) to launch it.
 - **Angles:** where the ball lands on the paddle sets where it goes: the middle sends it
   straight up, the edges send it out wide.

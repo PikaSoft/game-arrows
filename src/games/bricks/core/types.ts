@@ -2,7 +2,7 @@ export type Difficulty = 'Tutorial' | 'Easy' | 'Medium' | 'Hard' | 'Super Hard';
 
 /** Width of the play field, in brick widths. Bricks are one unit wide and half a unit tall. */
 export const FIELD_W = 12;
-export const FIELD_H = 18;
+export const FIELD_H = 20;
 export const BRICK_H = 0.5;
 /** Top of the brick wall. */
 export const WALL_TOP = 1.5;
