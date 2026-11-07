@@ -24,6 +24,7 @@ stars and settings.
 | Hidden Mines | Uncover every safe square using the numbers. Never a guess. |
 | Brick Breaker | Paddle, ball and a wall of bricks: break them all, level by level. |
 | Stack Tower | Tap to drop sliding blocks onto a tower; overhangs are cut off. Endless. |
+| Lane Dodger | Swipe between three lanes and jump hurdles. Endless. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -767,6 +768,34 @@ rules (`src/games/stack/core/sim.ts`) have no timing in them: the sliding block'
 position is worked out from how long it has been sliding, so the tests can drop it at
 exact spots.
 
+## Lane Dodger
+
+A runner heads up a three-lane road. Swipe left or right to change lanes and dodge the
+walls, and swipe up to jump the low hurdles. Endless: run as far as you can, picking up
+coins on the way.
+
+### Rules
+
+- **Moving:** swipe anywhere (or use the arrow keys or WASD; Space jumps). Lanes can be
+  changed in the air.
+- **Walls and hurdles:** walls must be dodged; hurdles can be dodged or jumped. A jump
+  lasts just over half a second.
+- **Grace:** touching something only counts once it has lasted 80 ms, so a swipe that
+  arrives just too late still gets you out of trouble.
+- **Speed:** starts at 7 metres a second and rises by 1 for every 100 metres run, up to
+  16. The course gets busier as it goes.
+- **Best:** your best distance, the most coins in one run and coins collected in total
+  are kept. The pause button (or P), opening a card or leaving the tab pauses the run.
+
+The course (`src/games/lanes/core/course.ts`) is built about 40 rows ahead from
+hand-designed obstacle patterns, picked at random and mirrored half the time, with a gap
+before each that shrinks with distance. A pattern is only used if a small search shows
+it can be got through from every lane at the speed the player will be going when they
+reach it, allowing for how quickly a person can swipe again (0.2 s) and how far a jump
+carries. The rules (`src/games/lanes/core/sim.ts`) run in small fixed steps with no
+drawing or timing. The tests include a test player that plans a route each row and runs
+2,000 metres to top speed without crashing.
+
 ## Development
 
 ```bash
@@ -778,12 +807,12 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
 ```
-src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture, #/numbers, #/tents, #/mines, #/bricks, #/stack), settings
+src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture, #/numbers, #/tents, #/mines, #/bricks, #/stack, #/lanes), settings
 src/shared/            sound, themes, icons, update check, seeded RNG, worker level loader
 src/games/arrows/      Arrow Escape: core rules, generator and solver, rendering, input, UI
 src/games/sandglass/   Sandglass: the same split
@@ -800,6 +829,7 @@ src/games/tents/       Tents and Trees: the same split
 src/games/mines/       Hidden Mines: the same split
 src/games/bricks/      Brick Breaker: rules in core/sim.ts (fixed steps), walls in core/levels.ts
 src/games/stack/       Stack Tower: rules in core/sim.ts, no levels
+src/games/lanes/       Lane Dodger: rules in core/sim.ts, the course in core/course.ts
 ```
 
 Each game exports a `GameModule` (`src/games/types.ts`): it builds its own screens and

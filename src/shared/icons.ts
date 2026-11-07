@@ -81,3 +81,6 @@ export const bricksLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="non
 
 /** Stack Tower logo: a stack of shrinking slabs with one sliding in. */
 export const stackLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="none"><rect x="12" y="46" width="40" height="10" rx="2" fill="hsl(200,55%,58%)"/><rect x="15" y="35" width="34" height="10" rx="2" fill="hsl(207,55%,58%)"/><rect x="18" y="24" width="28" height="10" rx="2" fill="hsl(214,55%,58%)"/><rect x="30" y="10" width="28" height="10" rx="2" fill="var(--accent)"/><path d="M8 15h16" stroke="var(--line)" stroke-width="3" stroke-linecap="round" stroke-dasharray="3 4"/></svg>`;
+
+/** Lane Dodger logo: three lanes, a runner, a wall and a hurdle. */
+export const lanesLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke-linecap="round"><path d="M10 6v52M54 6v52" stroke="var(--line)" stroke-width="3.5"/><path d="M24.7 6v52M39.3 6v52" stroke="var(--line)" stroke-width="2" stroke-dasharray="4 5" opacity="0.5"/><rect x="12.5" y="12" width="10" height="9" rx="2" fill="var(--line)"/><rect x="41" y="22" width="11" height="4" rx="1.5" fill="#ee8a3a"/><circle cx="32" cy="46" r="6" fill="#4f9ed8" stroke="var(--line)" stroke-width="2"/></svg>`;

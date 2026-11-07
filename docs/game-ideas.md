@@ -23,7 +23,7 @@ and art for each one and don't copy a specific existing game.
 | 9 | ~~[Hidden Mines](#9-hidden-mines)~~ | Deduction | Logic | Medium | **Built** (`src/games/mines/`) |
 | 10 | ~~[Brick Breaker](#10-brick-breaker)~~ | Arcade | Arcade | Medium | **Built** (`src/games/bricks/`) |
 | 11 | ~~[Stack Tower](#11-stack-tower)~~ | Arcade | Arcade | Small | **Built** (`src/games/stack/`) |
-| 12 | [Lane Dodger](#12-lane-dodger) | Arcade | Arcade | Small to medium | Idea |
+| 12 | ~~[Lane Dodger](#12-lane-dodger)~~ | Arcade | Arcade | Small to medium | **Built** (`src/games/lanes/`) |
 | 13 | [Merge Tiles](#13-merge-tiles) | Endless | Number | Small | Idea |
 | 14 | [Word Grid](#14-word-grid) | Word | Word | Medium to large | Idea |
 
@@ -585,6 +585,14 @@ tap event's timestamp, not when the frame draws.
 ---
 
 ## 12. Lane Dodger
+
+> **Built.** Lane Dodger is in the collection (`src/games/lanes/`, route `#/lanes`). See
+> the Lane Dodger section of the README for how it ended up working. It follows the plan
+> below, including the 80 ms grace window. Three things a planning test player turned
+> up: each pattern has to be checked at the speed the player will be going when they
+> reach it, not the speed when it's laid (it's laid 40 rows ahead, and speed rises); the
+> runner's collision length has to be short enough that the generator's whole-row model
+> holds; and 15 x 0.2 rounding up to 4 in floats.
 
 **Idea.** A runner moves forward in three lanes. Swipe left or right to change lanes and
 dodge obstacles; swipe up to jump low ones.
