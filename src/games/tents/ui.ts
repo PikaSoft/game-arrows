@@ -29,6 +29,7 @@ export function createTents(shell: Shell): GameModule {
     <p>Pitch a tent beside every tree. Tents never touch, and the numbers say how many go in each row and column.</p>
     <button class="btn" id="tt-play"></button>
     <button class="btn secondary" id="tt-open-levels">Levels</button>
+    <button class="btn secondary" data-help>How to play</button>
     <button class="btn secondary" id="tt-settings-home">Settings</button>
     <button class="btn secondary" id="tt-hub">All puzzles</button>
     <div class="total" id="tt-total"></div>
@@ -48,6 +49,7 @@ export function createTents(shell: Shell): GameModule {
       <div class="title"><b id="tt-title"></b><span id="tt-diff"></span></div>
       <button class="icon-btn" id="tt-restart" aria-label="Restart level">${icons.restart}</button>
       <button class="icon-btn" id="tt-theme" aria-label="Change colours">${icons.palette}</button>
+      <button class="icon-btn" data-help aria-label="How to play">${icons.help}</button>
       <button class="icon-btn" id="tt-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">

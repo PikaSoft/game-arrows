@@ -29,6 +29,7 @@ export function createWords(shell: Shell): GameModule {
     <p>Trace words through touching letters before time runs out. Find enough of them for stars.</p>
     <button class="btn" id="wd-play"></button>
     <button class="btn secondary" id="wd-open-levels">Levels</button>
+    <button class="btn secondary" data-help>How to play</button>
     <button class="btn secondary" id="wd-settings-home">Settings</button>
     <button class="btn secondary" id="wd-hub">All puzzles</button>
     <div class="total" id="wd-total"></div>
@@ -48,6 +49,7 @@ export function createWords(shell: Shell): GameModule {
       <div class="title"><b id="wd-title"></b><span id="wd-diff"></span></div>
       <button class="icon-btn" id="wd-restart" aria-label="Restart level">${icons.restart}</button>
       <button class="icon-btn" id="wd-theme" aria-label="Change colours">${icons.palette}</button>
+      <button class="icon-btn" data-help aria-label="How to play">${icons.help}</button>
       <button class="icon-btn" id="wd-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">

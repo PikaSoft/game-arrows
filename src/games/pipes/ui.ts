@@ -32,6 +32,7 @@ export function createPipes(shell: Shell): GameModule {
     <p>Turn the tiles until water flows from the tap to every pipe, with no loose ends.</p>
     <button class="btn" id="pl-play"></button>
     <button class="btn secondary" id="pl-open-levels">Levels</button>
+    <button class="btn secondary" data-help>How to play</button>
     <button class="btn secondary" id="pl-settings-home">Settings</button>
     <button class="btn secondary" id="pl-hub">All puzzles</button>
     <div class="total" id="pl-total"></div>
@@ -51,6 +52,7 @@ export function createPipes(shell: Shell): GameModule {
       <div class="title"><b id="pl-title"></b><span id="pl-diff"></span></div>
       <button class="icon-btn" id="pl-restart" aria-label="Restart level">${icons.restart}</button>
       <button class="icon-btn" id="pl-theme" aria-label="Change colours">${icons.palette}</button>
+      <button class="icon-btn" data-help aria-label="How to play">${icons.help}</button>
       <button class="icon-btn" id="pl-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">

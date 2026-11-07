@@ -29,6 +29,7 @@ export function createPicture(shell: Shell): GameModule {
     <p>The numbers tell you the runs of filled squares in each row and column. Work them out to reveal a picture.</p>
     <button class="btn" id="pg-play"></button>
     <button class="btn secondary" id="pg-open-levels">Levels</button>
+    <button class="btn secondary" data-help>How to play</button>
     <button class="btn secondary" id="pg-settings-home">Settings</button>
     <button class="btn secondary" id="pg-hub">All puzzles</button>
     <div class="total" id="pg-total"></div>
@@ -48,6 +49,7 @@ export function createPicture(shell: Shell): GameModule {
       <div class="title"><b id="pg-title"></b><span id="pg-diff"></span></div>
       <button class="icon-btn" id="pg-restart" aria-label="Restart level">${icons.restart}</button>
       <button class="icon-btn" id="pg-theme" aria-label="Change colours">${icons.palette}</button>
+      <button class="icon-btn" data-help aria-label="How to play">${icons.help}</button>
       <button class="icon-btn" id="pg-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">

@@ -6,6 +6,11 @@ game; progress is kept per game. A game's progress can be reset from the setting
 inside that game (the home screen's settings card has no reset buttons). Players who had Arrow Escape before keep their levels,
 stars and settings.
 
+Every game has a How to play card, opened from the ? button in its top bar or the How to
+play button on its home screen. It sums up the goal and repeats every tip the tutorial
+levels show (`src/games/help.ts`; a test checks that no level tip is missing from it).
+Real-time games pause while it is open.
+
 | Game | Idea |
 | --- | --- |
 | Arrow Escape | Tap bent arrows to slide them off a packed board. |

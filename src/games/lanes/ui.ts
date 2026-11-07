@@ -23,6 +23,7 @@ export function createLanes(shell: Shell): GameModule {
     <h1>Lane Dodger</h1>
     <p>Run as far as you can. Swipe left or right to change lanes, and swipe up to jump the low hurdles.</p>
     <button class="btn" id="ld-play">Run</button>
+    <button class="btn secondary" data-help>How to play</button>
     <button class="btn secondary" id="ld-settings-home">Settings</button>
     <button class="btn secondary" id="ld-hub">All puzzles</button>
     <div class="total" id="ld-total"></div>
@@ -34,6 +35,7 @@ export function createLanes(shell: Shell): GameModule {
       <div class="title"><b>Lane Dodger</b><span id="ld-sub"></span></div>
       <button class="icon-btn" id="ld-restart" aria-label="Start again">${icons.restart}</button>
       <button class="icon-btn" id="ld-theme" aria-label="Change colours">${icons.palette}</button>
+      <button class="icon-btn" data-help aria-label="How to play">${icons.help}</button>
       <button class="icon-btn" id="ld-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">

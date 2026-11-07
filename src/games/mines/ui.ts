@@ -31,6 +31,7 @@ export function createMines(shell: Shell): GameModule {
     <p>Uncover every safe square. Each number says how many mines touch it. Every board can be solved without guessing.</p>
     <button class="btn" id="hm-play"></button>
     <button class="btn secondary" id="hm-open-levels">Levels</button>
+    <button class="btn secondary" data-help>How to play</button>
     <button class="btn secondary" id="hm-settings-home">Settings</button>
     <button class="btn secondary" id="hm-hub">All puzzles</button>
     <div class="total" id="hm-total"></div>
@@ -50,6 +51,7 @@ export function createMines(shell: Shell): GameModule {
       <div class="title"><b id="hm-title"></b><span id="hm-diff"></span></div>
       <button class="icon-btn" id="hm-restart" aria-label="Restart level">${icons.restart}</button>
       <button class="icon-btn" id="hm-theme" aria-label="Change colours">${icons.palette}</button>
+      <button class="icon-btn" data-help aria-label="How to play">${icons.help}</button>
       <button class="icon-btn" id="hm-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">

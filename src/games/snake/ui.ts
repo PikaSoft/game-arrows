@@ -68,6 +68,7 @@ export function createSnakeGame(shell: Shell, mode: SnakeMode): GameModule {
     ${homeExtra}
     <button class="btn" id="${P}-play"></button>
     ${classic ? '' : `<button class="btn secondary" id="${P}-open-levels">Levels</button>`}
+    <button class="btn secondary" data-help>How to play</button>
     <button class="btn secondary" id="${P}-settings-home">Settings</button>
     <button class="btn secondary" id="${P}-hub">All puzzles</button>
     <div class="total" id="${P}-total"></div>
@@ -91,6 +92,7 @@ export function createSnakeGame(shell: Shell, mode: SnakeMode): GameModule {
       <div class="title"><b id="${P}-title"></b><span id="${P}-diff"></span></div>
       <button class="icon-btn" id="${P}-restart" aria-label="Restart">${icons.restart}</button>
       <button class="icon-btn" id="${P}-theme" aria-label="Change colours">${icons.palette}</button>
+      <button class="icon-btn" data-help aria-label="How to play">${icons.help}</button>
       <button class="icon-btn" id="${P}-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">

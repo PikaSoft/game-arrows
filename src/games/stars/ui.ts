@@ -29,6 +29,7 @@ export function createStars(shell: Shell): GameModule {
     <p>Place stars so every row, column and coloured region has the same number, and no two stars touch.</p>
     <button class="btn" id="sb-play"></button>
     <button class="btn secondary" id="sb-open-levels">Levels</button>
+    <button class="btn secondary" data-help>How to play</button>
     <button class="btn secondary" id="sb-settings-home">Settings</button>
     <button class="btn secondary" id="sb-hub">All puzzles</button>
     <div class="total" id="sb-total"></div>
@@ -48,6 +49,7 @@ export function createStars(shell: Shell): GameModule {
       <div class="title"><b id="sb-title"></b><span id="sb-diff"></span></div>
       <button class="icon-btn" id="sb-restart" aria-label="Restart level">${icons.restart}</button>
       <button class="icon-btn" id="sb-theme" aria-label="Change colours">${icons.palette}</button>
+      <button class="icon-btn" data-help aria-label="How to play">${icons.help}</button>
       <button class="icon-btn" id="sb-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">

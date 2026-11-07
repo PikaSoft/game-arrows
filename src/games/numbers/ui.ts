@@ -30,6 +30,7 @@ export function createNumbers(shell: Shell): GameModule {
     <p>Fill the grid so every row, column and box holds each digit exactly once.</p>
     <button class="btn" id="np-play"></button>
     <button class="btn secondary" id="np-open-levels">Levels</button>
+    <button class="btn secondary" data-help>How to play</button>
     <button class="btn secondary" id="np-settings-home">Settings</button>
     <button class="btn secondary" id="np-hub">All puzzles</button>
     <div class="total" id="np-total"></div>
@@ -49,6 +50,7 @@ export function createNumbers(shell: Shell): GameModule {
       <div class="title"><b id="np-title"></b><span id="np-diff"></span></div>
       <button class="icon-btn" id="np-restart" aria-label="Restart level">${icons.restart}</button>
       <button class="icon-btn" id="np-theme" aria-label="Change colours">${icons.palette}</button>
+      <button class="icon-btn" data-help aria-label="How to play">${icons.help}</button>
       <button class="icon-btn" id="np-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">

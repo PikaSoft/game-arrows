@@ -29,6 +29,7 @@ export function createLines(shell: Shell): GameModule {
     <p>Join each pair of dots with a line. Lines can't cross, and together they fill the board.</p>
     <button class="btn" id="cl-play"></button>
     <button class="btn secondary" id="cl-open-levels">Levels</button>
+    <button class="btn secondary" data-help>How to play</button>
     <button class="btn secondary" id="cl-settings-home">Settings</button>
     <button class="btn secondary" id="cl-hub">All puzzles</button>
     <div class="total" id="cl-total"></div>
@@ -48,6 +49,7 @@ export function createLines(shell: Shell): GameModule {
       <div class="title"><b id="cl-title"></b><span id="cl-diff"></span></div>
       <button class="icon-btn" id="cl-restart" aria-label="Restart level">${icons.restart}</button>
       <button class="icon-btn" id="cl-theme" aria-label="Change colours">${icons.palette}</button>
+      <button class="icon-btn" data-help aria-label="How to play">${icons.help}</button>
       <button class="icon-btn" id="cl-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">

@@ -29,6 +29,7 @@ export function createSandglass(shell: Shell): GameModule {
     <p>Pour sand from bottle to bottle until each one holds a single colour.</p>
     <button class="btn" id="sg-play"></button>
     <button class="btn secondary" id="sg-open-levels">Levels</button>
+    <button class="btn secondary" data-help>How to play</button>
     <button class="btn secondary" id="sg-settings-home">Settings</button>
     <button class="btn secondary" id="sg-hub">All puzzles</button>
     <div class="total" id="sg-total"></div>
@@ -48,6 +49,7 @@ export function createSandglass(shell: Shell): GameModule {
       <div class="title"><b id="sg-title"></b><span id="sg-diff"></span></div>
       <button class="icon-btn" id="sg-restart" aria-label="Restart level">${icons.restart}</button>
       <button class="icon-btn" id="sg-theme" aria-label="Change colours">${icons.palette}</button>
+      <button class="icon-btn" data-help aria-label="How to play">${icons.help}</button>
       <button class="icon-btn" id="sg-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">

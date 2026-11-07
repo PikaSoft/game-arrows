@@ -18,6 +18,7 @@ import { createSnakeGame } from './games/snake/ui';
 import { createSqueeze } from './games/squeeze/ui';
 import { createStars } from './games/stars/ui';
 import { createStack } from './games/stack/ui';
+import { HELP } from './games/help';
 import { GameModule, Shell } from './games/types';
 import { hubLogo, starIcon } from './shared/icons';
 import { loadSettings, saveSettings } from './shared/settings';
@@ -80,6 +81,8 @@ function openModal(html: string, onClick: (action: string, el: HTMLElement) => v
   const card = $('#card');
   card.innerHTML = html;
   modal.hidden = false;
+  // A card that scrolled last time it was open would otherwise reopen part way down.
+  card.scrollTop = 0;
   modal.onclick = (e) => {
     if (e.target === modal && dismissable) closeModal();
   };
@@ -185,6 +188,29 @@ function openSettings() {
   $<HTMLSelectElement>('#theme-select').addEventListener('change', (e) => setTheme((e.target as HTMLSelectElement).value));
 }
 $('#hub-settings').addEventListener('click', openSettings);
+
+// ---------- How to play ----------
+const escapeHtml = (t: string) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+
+/** The open game's rules and tutorial tips. Real-time games pause while a card is open. */
+function openHelp() {
+  if (!activeGame) return;
+  const h = HELP[activeGame.id];
+  if (!h) return;
+  openModal(
+    `<h2>How to play</h2>
+     <p class="help-goal">${escapeHtml(h.goal)}</p>
+     <ul class="help-tips">${h.tips.map((t) => `<li>${escapeHtml(t)}</li>`).join('')}</ul>
+     <div class="actions"><button class="btn small" data-action="close">Got it</button></div>`,
+    (action) => {
+      if (action === 'close') closeModal();
+    },
+  );
+}
+// Every game has a ? button in its top bar and a How to play button on its home screen.
+app.addEventListener('click', (e) => {
+  if ((e.target as HTMLElement).closest('[data-help]')) openHelp();
+});
 
 // ---------- Games ----------
 const shell: Shell = {

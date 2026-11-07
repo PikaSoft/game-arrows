@@ -20,6 +20,7 @@ export function createStack(shell: Shell): GameModule {
     <h1>Stack Tower</h1>
     <p>Tap to drop each sliding block onto the tower. Whatever hangs over the edge is cut off. How high can you go?</p>
     <button class="btn" id="tw-play">Play</button>
+    <button class="btn secondary" data-help>How to play</button>
     <button class="btn secondary" id="tw-settings-home">Settings</button>
     <button class="btn secondary" id="tw-hub">All puzzles</button>
     <div class="total" id="tw-total"></div>
@@ -31,6 +32,7 @@ export function createStack(shell: Shell): GameModule {
       <div class="title"><b>Stack Tower</b><span id="tw-sub"></span></div>
       <button class="icon-btn" id="tw-restart" aria-label="Start again">${icons.restart}</button>
       <button class="icon-btn" id="tw-theme" aria-label="Change colours">${icons.palette}</button>
+      <button class="icon-btn" data-help aria-label="How to play">${icons.help}</button>
       <button class="icon-btn" id="tw-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">

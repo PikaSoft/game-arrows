@@ -37,6 +37,7 @@ export function createBricks(shell: Shell): GameModule {
     <p>Keep the ball in play with the paddle and break every brick. Three balls per level.</p>
     <button class="btn" id="bb-play"></button>
     <button class="btn secondary" id="bb-open-levels">Levels</button>
+    <button class="btn secondary" data-help>How to play</button>
     <button class="btn secondary" id="bb-settings-home">Settings</button>
     <button class="btn secondary" id="bb-hub">All puzzles</button>
     <div class="total" id="bb-total"></div>
@@ -56,6 +57,7 @@ export function createBricks(shell: Shell): GameModule {
       <div class="title"><b id="bb-title"></b><span id="bb-diff"></span></div>
       <button class="icon-btn" id="bb-restart" aria-label="Restart level">${icons.restart}</button>
       <button class="icon-btn" id="bb-theme" aria-label="Change colours">${icons.palette}</button>
+      <button class="icon-btn" data-help aria-label="How to play">${icons.help}</button>
       <button class="icon-btn" id="bb-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">

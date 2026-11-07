@@ -29,6 +29,7 @@ export function createLights(shell: Shell): GameModule {
     <p>Each tap switches a light and the lights beside it. Turn every light off.</p>
     <button class="btn" id="ls-play"></button>
     <button class="btn secondary" id="ls-open-levels">Levels</button>
+    <button class="btn secondary" data-help>How to play</button>
     <button class="btn secondary" id="ls-settings-home">Settings</button>
     <button class="btn secondary" id="ls-hub">All puzzles</button>
     <div class="total" id="ls-total"></div>
@@ -48,6 +49,7 @@ export function createLights(shell: Shell): GameModule {
       <div class="title"><b id="ls-title"></b><span id="ls-diff"></span></div>
       <button class="icon-btn" id="ls-restart" aria-label="Restart level">${icons.restart}</button>
       <button class="icon-btn" id="ls-theme" aria-label="Change colours">${icons.palette}</button>
+      <button class="icon-btn" data-help aria-label="How to play">${icons.help}</button>
       <button class="icon-btn" id="ls-settings" aria-label="Settings">${icons.gear}</button>
     </header>
     <div class="hud">
