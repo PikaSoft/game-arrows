@@ -620,12 +620,10 @@ short grace window (about 80 ms) for lane changes.
 ## 13. Merge Tiles
 
 > **Built.** Merge Tiles is in the collection (`src/games/merge/`, route `#/merge`). See
-> the Merge Tiles section of the README for how it ended up working. Both twists from
-> the plan below are the core rules rather than options, so it isn't a copy of any one
-> existing game: three equal tiles merge (into three times the value), pairs never do,
-> and stones turn up, block sliding and crumble after a few moves. The board is 5x5,
-> since triple merges need more room. A game in progress is saved, so it can be
-> continued. The daily board is not built.
+> the Merge Tiles section of the README for how it ended up working. It first shipped with
+> both twists below as the core rules (three-tile merges and stones); it now merges pairs
+> (1, 2, 4, 8…) and keeps the stones, the 5x5 board and its own look. A game in progress
+> is saved, so it can be continued. The daily board is not built.
 
 **Idea.** A 4x4 grid of numbered tiles. Swipe to slide every tile; two equal tiles that
 meet merge into their sum. A new tile appears after each move. Keep going as long as you

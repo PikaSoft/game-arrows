@@ -23,7 +23,7 @@ export function createMerge(shell: Shell): GameModule {
   <section class="screen home" id="mt-home">
     <div class="logo">${mergeLogo}</div>
     <h1>Merge Tiles</h1>
-    <p>Swipe to slide every tile. Three equal tiles in a row merge into one worth three times as much. Pairs never merge, and stones get in the way.</p>
+    <p>Swipe to slide every tile. Two equal tiles that meet merge into one worth both. Stones get in the way, then crumble.</p>
     <button class="btn" id="mt-continue" hidden>Continue</button>
     <button class="btn" id="mt-new">New game</button>
     <button class="btn secondary" id="mt-settings-home">Settings</button>
@@ -109,7 +109,7 @@ export function createMerge(shell: Shell): GameModule {
     undoTo = null;
     undoLeft = 1;
     bestAtStart = progress.bestScore;
-    $('#mt-tip').textContent = progress.games === 0 && !saved ? 'Line up three of the same number to merge them. Plan ahead: pairs just sit there.' : '';
+    $('#mt-tip').textContent = progress.games === 0 && !saved ? 'Slide two equal tiles together to merge them. Keep space free: a full board with no pairs ends the game.' : '';
     renderer.setBoard(game.board);
     renderer.resize();
     persist();
@@ -243,7 +243,7 @@ export function createMerge(shell: Shell): GameModule {
   return {
     id: 'merge',
     name: 'Merge Tiles',
-    tagline: 'Slide tiles so three of a kind merge. Stones get in the way.',
+    tagline: 'Slide tiles so pairs merge. Stones get in the way.',
     icon: mergeLogo,
     summary: () => ({
       status: progress.saved ? `Game in progress · ${progress.saved.score}` : progress.games ? `Best ${progress.bestScore}` : 'Start playing',
