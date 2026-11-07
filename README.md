@@ -12,6 +12,7 @@ stars and settings.
 | Snake | Classic endless snake: eat apples, grow, beat your best. |
 | Snake Trails | Snake with walls: eat enough apples to clear each numbered level. |
 | Squeeze | Slide blocks of different shapes out through gaps in the frame. |
+| Pipe Link | Turn pipe tiles until water from the tap reaches every pipe. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -219,6 +220,55 @@ levels and then varies, with the odd easier breather:
 
 Hover the label in game to see the number.
 
+## Pipe Link
+
+The board is a grid of pipe tiles: straights, corners, T junctions, crosses and end caps
+(outlets). One tile holds the tap. Tap a tile to turn it a quarter turn clockwise. Water
+flows from the tap through every pipe that meets its neighbour, and the level is done
+when it reaches every tile with no pipe end left open.
+
+### Rules
+
+- **Taps and stars:** each level has a par from the solver: the fewest quarter turns
+  that solve it. Finish within par for three stars, within par + 25% for two, otherwise
+  one. Nothing can fail.
+- **Locking:** long-press a tile (or right-click it) to lock it once you are sure. A
+  locked tile does not turn until you unlock it the same way. Locking is not a move.
+- **Undo:** unlimited and free, but an undone tap still counts.
+- **Hints:** 3 per level. Each one turns a wrong tile into place and locks it,
+  preferring one next to the water. Its turns count as taps, so par is still possible.
+
+### Levels
+
+Levels 1 to 4 are tutorials. After that, level N is generated from N as the seed, so
+everyone gets the same board. Boards grow from about 5x5 to as big as 8x10 over the first 35
+levels, then vary, and the networks get bushier (more junctions and dead ends).
+
+The generator (`src/games/pipes/core/levels.ts`) grows a random spanning tree from the
+tap, so every tile is joined and there are no loops, then turns each tile at random. It
+keeps only boards with exactly one solution that can be reasoned out without guessing,
+and of up to 120 candidates keeps the one closest to the level's difficulty target. The
+solver (`src/games/pipes/core/solver.ts`) keeps, for each tile, the turns it could still
+have. Two rules narrow them: neighbours must agree on the edge between them (an edge
+tile can never point off the board), and fixed pipes must not seal off a group of their
+own. A backtracking search with the same rules checks there is only one solution. The
+work is capped by search nodes, not time, so every device builds the same board.
+
+The difficulty label is measured like Arrow Escape's. The solver reasons in waves, each
+using only what was known at the start of it, the way a player looks at the board,
+settles what they can, then looks again. When the edge rule stalls, one sweep of trying
+each tile's options one step ahead counts as a wave. For each wave it takes
+(open tiles + 1) / (tiles fixed this wave + 1) and the label comes from the average:
+
+| Label | Open tiles per tile settled |
+| --- | --- |
+| Easy | under 1.6 |
+| Medium | 1.6 to 2.1 |
+| Hard | 2.1 to 2.7 |
+| Super Hard | 2.7 or more |
+
+Hover the label in game to see the number.
+
 ## Development
 
 ```bash
@@ -230,17 +280,18 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
 ```
-src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze), settings
+src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes), settings
 src/shared/            sound, themes, icons, update check, seeded RNG, worker level loader
 src/games/arrows/      Arrow Escape: core rules, generator and solver, rendering, input, UI
 src/games/sandglass/   Sandglass: the same split
 src/games/snake/       Snake and Snake Trails: rules, level builder, renderer, swipe input, UI
 src/games/squeeze/     Squeeze: the same split as Sandglass
+src/games/pipes/       Pipe Link: the same split, plus core/tree.ts for the pipe networks
 ```
 
 Each game exports a `GameModule` (`src/games/types.ts`): it builds its own screens and
