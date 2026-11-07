@@ -13,6 +13,9 @@ stars and settings.
 | Snake Trails | Snake with walls: eat enough apples to clear each numbered level. |
 | Squeeze | Slide blocks of different shapes out through gaps in the frame. |
 
+Ideas for more games, with notes on building each one, are in
+[docs/game-ideas.md](docs/game-ideas.md).
+
 ## Arrow Escape
 
 The board is packed with bent arrows. Tap an arrow and, if
