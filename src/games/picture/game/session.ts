@@ -90,7 +90,9 @@ export class Session {
       this.mistakes.add(i);
       if (!this.continued && this.hearts > 0) {
         this.hearts--;
-        if (this.hearts === 0) {
+        // Out of hearts, unless that mark just finished the board: then it simply ends
+        // with no stars, rather than asking whether to carry on.
+        if (this.hearts === 0 && !this.won) {
           this.awaitingContinue = true;
           outOfHearts = true;
         }

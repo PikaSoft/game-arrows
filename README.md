@@ -19,6 +19,7 @@ stars and settings.
 | Ice Slide | Slide a puck across the ice and stop it exactly on the flag. |
 | Picture Grid | Use the number clues to fill the grid and reveal a picture. |
 | Number Place | Fill the grid so every row, column and box holds each digit once. |
+| Tents and Trees | Pitch a tent beside every tree; tents never touch. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -493,7 +494,8 @@ filled to reveal a picture.
 - **Hearts:** every mark is checked straight away. A wrong one shows what the square
   really is (in red) and costs one of three hearts, and stops a drag. So everything on
   the board is always true, and a marked square can't be changed.
-- **Out of hearts:** keep going for no stars, or restart.
+- **Out of hearts:** keep going for no stars, or restart. If the mark that used the last
+  heart also finishes the picture, the level just ends with no stars.
 - **Stars** equal the hearts left when the picture is done.
 - **Finished lines:** once every filled square in a row or column is found, the rest of
   it is crossed off and its numbers fade.
@@ -579,6 +581,57 @@ The difficulty label is the hardest technique that solver needs
 
 Hover the label in game to see the technique.
 
+## Tents and Trees
+
+A campsite full of trees. Pitch one tent beside each tree (above, below, left or right
+of it, not diagonally), so that every tent belongs to its own tree. Tents never touch
+each other, not even at the corners. The numbers say how many tents go in each row and
+column.
+
+### Rules
+
+- **Marking:** tap a square to mark it, as a tent or as grass (empty) depending on the
+  Tent / Grass switch under the board. Drag along a row or column to mark several at
+  once.
+- **Hearts:** every mark is checked straight away, as in Picture Grid. A wrong one shows
+  what the square really is (outlined in red) and costs one of three hearts.
+- **Out of hearts:** keep going for no stars, or restart. If the mark that used the last
+  heart also finishes the board, the level just ends with no stars.
+- **Stars** equal the hearts left when every tent is pitched.
+- **Grass for free:** squares with no tree beside them start as grass, and so do rows
+  and columns that hold no tents. Once a row or column has all its tents, the rest of it
+  turns to grass and its number fades.
+- **Hints:** 3 per level, free. Each one reveals a square the rules can work out from
+  the board as it is, preferring a tent.
+
+### Levels
+
+Levels 1 to 3 are tutorials. After that, level N is generated from N as the seed, so
+everyone gets the same campsite. Boards grow from 6x6 to about 10x11 over the first 35
+levels, then vary, with tents on about 16% to 20% of the squares.
+
+The generator (`src/games/tents/core/levels.ts`) places tents at random so none touch,
+gives each a tree on a free square beside it, and counts the tents per row and column.
+A backtracking search (`src/games/tents/core/solver.ts`) over the squares beside trees
+counts the answers, checking at the end that every tent can be paired with its own tree;
+a board is kept only if it has exactly one. It must also be finishable by reasoning: in
+waves, each row and column tries every way to place its remaining tents, squares round a
+tent become grass, and a tree with one open square beside it gets its tent there. When
+those stall, each open square is tried as a tent and as grass, and whatever leads to a
+contradiction is ruled out.
+
+The difficulty label is measured like Arrow Escape's: for each wave,
+(open squares + 1) / (squares settled that wave + 1), averaged:
+
+| Label | Open squares per square settled |
+| --- | --- |
+| Easy | under 1.7 |
+| Medium | 1.7 to 2.2 |
+| Hard | 2.2 to 2.7 |
+| Super Hard | 2.7 or more |
+
+Hover the label in game to see the number.
+
 ## Development
 
 ```bash
@@ -590,12 +643,12 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
 ```
-src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture, #/numbers), settings
+src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture, #/numbers, #/tents), settings
 src/shared/            sound, themes, icons, update check, seeded RNG, worker level loader
 src/games/arrows/      Arrow Escape: core rules, generator and solver, rendering, input, UI
 src/games/sandglass/   Sandglass: the same split
@@ -608,6 +661,7 @@ src/games/lights/      Light Switch: the same split
 src/games/ice/         Ice Slide: the same split
 src/games/picture/     Picture Grid: the same split, plus core/line.ts (line solver) and core/pictures.ts (drawings)
 src/games/numbers/     Number Place: the same split, plus core/grid.ts (counting answers) and core/techniques.ts
+src/games/tents/       Tents and Trees: the same split
 ```
 
 Each game exports a `GameModule` (`src/games/types.ts`): it builds its own screens and
