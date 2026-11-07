@@ -20,8 +20,8 @@ export interface PictureSpec {
 
 const TIPS = [
   'Each number is a run of filled squares in that row or column, in order, with gaps between. Tap to fill.',
-  'Switch to Cross to mark squares you know are empty. A wrong guess costs a heart.',
-  'Drag along a row or column to fill several squares at once. Finished lines fade their numbers.',
+  'Hold a square for a moment to cross it out as empty (or switch to Cross). A wrong guess costs a heart.',
+  'Drag to paint several squares in one stroke; hold first to paint crosses. Finished lines fade their numbers.',
 ];
 
 /** What level n should look like. Same n, same spec, on every device. */

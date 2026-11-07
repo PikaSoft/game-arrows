@@ -134,6 +134,7 @@ export function createPicture(shell: Shell): GameModule {
     show('game');
     const token = ++loadToken;
     session = null;
+    if (drag) clearTimeout(drag.timer);
     drag = null;
     renderer.setView(null);
     $('#pg-title').textContent = `Level ${n}`;
@@ -150,6 +151,7 @@ export function createPicture(shell: Shell): GameModule {
 
   function beginSession(level: PictureLevel) {
     session = new Session(level);
+    if (drag) clearTimeout(drag.timer);
     drag = null;
     setMode('fill');
     const diffEl = $('#pg-diff');
@@ -194,26 +196,36 @@ export function createPicture(shell: Shell): GameModule {
   });
 
   // ---------- Marking ----------
-  // Press a square to mark it (fill or cross, by the mode). Drag along its row or column
-  // to mark more in one go; the drag stops at the first mistake.
-  interface Drag {
+  // Tap a square to mark it with the switch's mark (fill or cross). Hold it for a moment
+  // to use the other mark instead (so in Fill mode, a long press crosses). Drag to paint:
+  // every square the finger passes over gets the stroke's mark. A stroke stops at the
+  // first mistake, so one bad stroke costs at most one heart.
+  const LONG_PRESS_MS = 400;
+  interface Stroke {
     pointer: number;
     start: number;
-    /** 'x' along the row, 'y' down the column, or null until the finger leaves the square. */
-    axis: 'x' | 'y' | null;
+    /** The mark this stroke paints. Settled by a long press, or by moving off the start. */
+    mark: Mode;
+    /** True once the start square has been marked (the stroke is under way). */
+    started: boolean;
     stopped: boolean;
+    /** Last finger position, in canvas pixels, to fill in squares a fast drag skips. */
+    lastX: number;
+    lastY: number;
+    timer: number;
   }
-  let drag: Drag | null = null;
+  let drag: Stroke | null = null;
 
-  const cellUnder = (e: PointerEvent) => {
+  const local = (e: PointerEvent) => {
     const r = canvas.getBoundingClientRect();
-    return renderer.cellAt(e.clientX - r.left, e.clientY - r.top);
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
   };
+  const other = (m: Mode): Mode => (m === 'fill' ? 'cross' : 'fill');
 
-  /** Mark one cell. False if the drag should stop (a mistake). */
-  function markCell(i: number): boolean {
+  /** Mark one cell. False if the stroke should stop (a mistake). */
+  function markCell(i: number, m: Mode): boolean {
     const s = session!;
-    const r = s.mark(i, mode);
+    const r = s.mark(i, m);
     if (!r) return true;
     renderer.pop([i, ...r.crossed]);
     if (r.ok) {
@@ -227,6 +239,7 @@ export function createPicture(shell: Shell): GameModule {
     renderer.invalidate();
     if (r.outOfHearts) setTimeout(showOutOfHearts, 450);
     if (s.won) {
+      if (drag) clearTimeout(drag.timer);
       drag = null;
       renderer.focus = null;
       setTimeout(showWin, 250);
@@ -234,57 +247,76 @@ export function createPicture(shell: Shell): GameModule {
     return r.ok;
   }
 
+  /** Begin painting: mark the start square with the stroke's mark. */
+  function startStroke(d: Stroke) {
+    if (d.started) return;
+    d.started = true;
+    clearTimeout(d.timer);
+    if (!markCell(d.start, d.mark)) d.stopped = true;
+  }
+
   canvas.addEventListener('pointerdown', (e) => {
     const s = session;
     if (!s || s.won || s.awaitingContinue || modalOpen() || drag) return;
     sfx.unlock();
-    const i = cellUnder(e);
+    const p = local(e);
+    const i = renderer.cellAt(p.x, p.y);
     if (i === null) return;
     canvas.setPointerCapture(e.pointerId);
-    drag = { pointer: e.pointerId, start: i, axis: null, stopped: false };
+    const d: Stroke = { pointer: e.pointerId, start: i, mark: mode, started: false, stopped: false, lastX: p.x, lastY: p.y, timer: 0 };
+    // Held still long enough: the other mark.
+    d.timer = window.setTimeout(() => {
+      if (drag !== d || d.started) return;
+      d.mark = other(mode);
+      shell.vibrate(25);
+      startStroke(d);
+    }, LONG_PRESS_MS);
+    drag = d;
     renderer.focus = i;
-    if (!markCell(i)) drag.stopped = true;
     renderer.invalidate();
   });
 
   canvas.addEventListener('pointermove', (e) => {
     const d = drag;
-    const s = session;
-    if (!d || d.pointer !== e.pointerId || !s) return;
-    const i = cellUnder(e);
-    if (i === null) return;
-    const w = s.w;
-    const sx = d.start % w;
-    const sy = (d.start / w) | 0;
-    let x = i % w;
-    let y = (i / w) | 0;
-    if (!d.axis && i !== d.start) d.axis = Math.abs(x - sx) >= Math.abs(y - sy) ? 'x' : 'y';
-    // Keep to the line the drag started along.
-    if (d.axis === 'x') y = sy;
-    if (d.axis === 'y') x = sx;
-    renderer.focus = y * w + x;
+    if (!d || d.pointer !== e.pointerId || !session) return;
+    const p = local(e);
+    const here = renderer.cellAt(p.x, p.y);
+    if (here !== null) renderer.focus = here;
     renderer.invalidate();
-    if (d.stopped || !d.axis) return;
-    const len = d.axis === 'x' ? x - sx : y - sy;
-    const step = Math.sign(len);
-    for (let k = 1; k <= Math.abs(len); k++) {
-      const c = d.axis === 'x' ? sy * w + sx + k * step : (sy + k * step) * w + sx;
-      if (!markCell(c)) {
+    // Leaving the start square before the long press starts a stroke with the switch's mark.
+    if (!d.started) {
+      if (here === d.start) return;
+      startStroke(d);
+    }
+    if (d.stopped) return;
+    // Walk the finger's path in small steps so a quick drag doesn't skip squares.
+    const dist = Math.hypot(p.x - d.lastX, p.y - d.lastY);
+    const steps = Math.max(1, Math.ceil(dist / (renderer.cell / 4)));
+    for (let k = 1; k <= steps; k++) {
+      const c = renderer.cellAt(d.lastX + ((p.x - d.lastX) * k) / steps, d.lastY + ((p.y - d.lastY) * k) / steps);
+      if (c === null) continue;
+      if (!markCell(c, d.mark)) {
         d.stopped = true;
         break;
       }
       if (!drag) return;
     }
+    d.lastX = p.x;
+    d.lastY = p.y;
   });
 
-  const endDrag = (e: PointerEvent) => {
-    if (!drag || drag.pointer !== e.pointerId) return;
+  const endDrag = (e: PointerEvent, cancelled: boolean) => {
+    const d = drag;
+    if (!d || d.pointer !== e.pointerId) return;
+    clearTimeout(d.timer);
     drag = null;
+    // A quick tap that never moved: mark it with the switch's mark.
+    if (!d.started && !cancelled) startStroke(d);
     renderer.focus = null;
     renderer.invalidate();
   };
-  canvas.addEventListener('pointerup', endDrag);
-  canvas.addEventListener('pointercancel', endDrag);
+  canvas.addEventListener('pointerup', (e) => endDrag(e, false));
+  canvas.addEventListener('pointercancel', (e) => endDrag(e, true));
 
   $('#pg-hint').addEventListener('click', () => {
     const s = session;
@@ -411,6 +443,7 @@ export function createPicture(shell: Shell): GameModule {
     leave: () => {
       loadToken++;
       session = null;
+      if (drag) clearTimeout(drag.timer);
       drag = null;
       renderer.setView(null);
     },

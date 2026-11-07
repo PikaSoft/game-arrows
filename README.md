@@ -489,11 +489,15 @@ filled to reveal a picture.
 ### Rules
 
 - **Marking:** tap a square to mark it, as filled or crossed (empty) depending on the
-  Fill / Cross switch under the board. Drag along a row or column to mark several at
-  once.
+  Fill / Cross switch under the board. Hold a square for a moment to use the other mark
+  instead, so in Fill mode a long press crosses a square out.
+- **Painting:** drag to paint. Every square the finger passes over gets the stroke's
+  mark, in any direction. Hold first, then drag, to paint the other mark (crosses, in
+  Fill mode).
 - **Hearts:** every mark is checked straight away. A wrong one shows what the square
-  really is (in red) and costs one of three hearts, and stops a drag. So everything on
-  the board is always true, and a marked square can't be changed.
+  really is (in red) and costs one of three hearts, and ends the stroke, so one bad
+  stroke costs at most one heart. Everything on the board is always true, and a marked
+  square can't be changed.
 - **Out of hearts:** keep going for no stars, or restart. If the mark that used the last
   heart also finishes the picture, the level just ends with no stars.
 - **Stars** equal the hearts left when the picture is done.
