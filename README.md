@@ -25,6 +25,7 @@ stars and settings.
 | Brick Breaker | Paddle, ball and a wall of bricks: break them all, level by level. |
 | Stack Tower | Tap to drop sliding blocks onto a tower; overhangs are cut off. Endless. |
 | Lane Dodger | Swipe between three lanes and jump hurdles. Endless. |
+| Merge Tiles | Slide tiles so three of a kind merge; stones get in the way. Endless. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -796,6 +797,31 @@ carries. The rules (`src/games/lanes/core/sim.ts`) run in small fixed steps with
 drawing or timing. The tests include a test player that plans a route each row and runs
 2,000 metres to top speed without crashing.
 
+## Merge Tiles
+
+A 5x5 board of numbered tiles. Swipe to slide every tile as far as it goes in that
+direction. Three equal tiles in a row merge into one worth three times as much (1, 3,
+9, 27, 81…). Pairs never merge, so you have to line up threes. A new tile (usually a 1,
+sometimes a 3) appears after every move. The game ends when no swipe changes anything.
+
+### Rules
+
+- **Merging:** merges start from the side the tiles move toward, and each tile merges at
+  most once per swipe (so five 9s make 27, 9, 9). The score goes up by each merged
+  tile's new value.
+- **Stones:** from move 30, a stone turns up every 25 moves. Stones don't slide, block
+  tiles and split a row or column in two. Each crumbles after 8 moves (the number on it
+  counts down).
+- **Undo:** once per game (Z on a keyboard).
+- **Saving:** a game in progress is kept, so you can leave and Continue later. Best score,
+  best tile and games played are kept too.
+- Swipe anywhere, one move per swipe, or use the arrow keys or WASD.
+
+The rules (`src/games/merge/core/rules.ts` and `core/game.ts`) have no drawing or timing
+in them. While designing them, a bot that looks two moves ahead lasted about three times
+as long as one moving at random (a median of about 310 moves against 90), so planning
+pays off.
+
 ## Development
 
 ```bash
@@ -807,12 +833,12 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
 ```
-src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture, #/numbers, #/tents, #/mines, #/bricks, #/stack, #/lanes), settings
+src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture, #/numbers, #/tents, #/mines, #/bricks, #/stack, #/lanes, #/merge), settings
 src/shared/            sound, themes, icons, update check, seeded RNG, worker level loader
 src/games/arrows/      Arrow Escape: core rules, generator and solver, rendering, input, UI
 src/games/sandglass/   Sandglass: the same split
@@ -830,6 +856,7 @@ src/games/mines/       Hidden Mines: the same split
 src/games/bricks/      Brick Breaker: rules in core/sim.ts (fixed steps), walls in core/levels.ts
 src/games/stack/       Stack Tower: rules in core/sim.ts, no levels
 src/games/lanes/       Lane Dodger: rules in core/sim.ts, the course in core/course.ts
+src/games/merge/       Merge Tiles: sliding in core/rules.ts, a game (spawns, stones) in core/game.ts
 ```
 
 Each game exports a `GameModule` (`src/games/types.ts`): it builds its own screens and

@@ -6,6 +6,7 @@ import { createIce } from './games/ice/ui';
 import { createLanes } from './games/lanes/ui';
 import { createLights } from './games/lights/ui';
 import { createLines } from './games/lines/ui';
+import { createMerge } from './games/merge/ui';
 import { createMines } from './games/mines/ui';
 import { createNumbers } from './games/numbers/ui';
 import { createPicture } from './games/picture/ui';
@@ -226,6 +227,7 @@ games.push(
   createBricks(shell),
   createStack(shell),
   createLanes(shell),
+  createMerge(shell),
 );
 
 document.addEventListener('keydown', (e) => {
