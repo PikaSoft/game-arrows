@@ -15,6 +15,7 @@ stars and settings.
 | Pipe Link | Turn pipe tiles until water from the tap reaches every pipe. |
 | Colour Lines | Join each pair of dots with a line; together the lines fill the board. |
 | Crate Push | Push every crate onto a target in a small warehouse. No pulling. |
+| Light Switch | Each tap flips a light and its neighbours. Turn every light off. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -378,6 +379,55 @@ since a crate that goes out of its way has to come back:
 
 Hover the label in game to see the number.
 
+## Light Switch
+
+A grid of lights. Tapping a light switches it and the lights beside it. Turn every
+light off.
+
+### Rules
+
+- **Tapping:** press a tile to see which lights it reaches (they're outlined), and let
+  go on it to tap. Sliding off before letting go cancels. Tapping the same tile twice
+  puts everything back, and the order of taps never matters.
+- **Corner taps:** from level 15, about one board in three has taps that reach the four
+  diagonal neighbours instead of the four side ones.
+- **Three-step lights:** from level 30, about one board in three has lights that go
+  bright, dim, off, then bright again, one step per tap. Pips on each light show how
+  many taps it needs to go off.
+- **Taps and stars:** each level has a par from the solver: the fewest taps that turn
+  every light off. Finish within par for three stars, within par + 25% for two,
+  otherwise one. Nothing can fail.
+- **Undo:** unlimited and free, but an undone tap still counts.
+- **Hints:** 3 per level. Each one outlines a tile that a shortest solution from where
+  you are taps. It costs a star (never below one).
+
+### Levels
+
+Levels 1 to 3 are tutorials. After that, level N is generated from N as the seed, so
+everyone gets the same board. Boards grow from 4x4 to about 7x8 over the first 35 levels,
+then vary.
+
+The generator (`src/games/lights/core/levels.ts`) starts with every light off and taps
+tiles at random, so the board that comes out can always be solved. The solver
+(`src/games/lights/core/solver.ts`) treats the board as linear equations: each tap adds
+1 (mod 2, or mod 3 for three-step lights) to the tiles it reaches, so Gaussian
+elimination gives an answer plus a few free choices, and trying every free choice finds
+the one with the fewest taps. That can be fewer than the taps that made the board. Of
+up to 30 boards, the one whose par is closest to the level's target is kept.
+
+Clearing the board row by row always works, so the label measures how long a board is
+more than how clever. It comes from par, weighted for how hard the board is to read:
+x1.25 for corner taps and x1.4 for three-step lights:
+
+| Label | Weighted par |
+| --- | --- |
+| Easy | under 6 |
+| Medium | 6 to 11 |
+| Hard | 12 to 19 |
+| Super Hard | 20 or more |
+
+Hover the label in game to see the numbers.
+
 ## Development
 
 ```bash
@@ -389,12 +439,12 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
 ```
-src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates), settings
+src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights), settings
 src/shared/            sound, themes, icons, update check, seeded RNG, worker level loader
 src/games/arrows/      Arrow Escape: core rules, generator and solver, rendering, input, UI
 src/games/sandglass/   Sandglass: the same split
@@ -403,6 +453,7 @@ src/games/squeeze/     Squeeze: the same split as Sandglass
 src/games/pipes/       Pipe Link: the same split, plus core/tree.ts for the pipe networks
 src/games/lines/       Colour Lines: the same split, plus core/paths.ts for growing the lines
 src/games/crates/      Crate Push: the same split, plus core/room.ts for carving rooms
+src/games/lights/      Light Switch: the same split
 ```
 
 Each game exports a `GameModule` (`src/games/types.ts`): it builds its own screens and

@@ -15,7 +15,7 @@ and art for each one and don't copy a specific existing game.
 | 1 | ~~[Pipe Link](#1-pipe-link)~~ | Rotate tiles | Closest | Small | **Built** (`src/games/pipes/`) |
 | 2 | ~~[Colour Lines](#2-colour-lines)~~ | Join dots | Closest | Medium | **Built** (`src/games/lines/`) |
 | 3 | ~~[Crate Push](#3-crate-push)~~ | Push puzzle | Closest | Medium to large | **Built** (`src/games/crates/`) |
-| 4 | [Light Switch](#4-light-switch) | Toggle grid | Closest | Small | Idea |
+| 4 | ~~[Light Switch](#4-light-switch)~~ | Toggle grid | Closest | Small | **Built** (`src/games/lights/`) |
 | 5 | [Ice Slide](#5-ice-slide) | Slide to exit | Closest | Small | Idea |
 | 6 | [Picture Grid](#6-picture-grid) | Deduction | Logic | Medium | Idea |
 | 7 | [Number Place](#7-number-place) | Deduction | Logic | Medium | Idea |
@@ -250,6 +250,13 @@ of about 8x8; cap by states.
 ---
 
 ## 4. Light Switch
+
+> **Built.** Light Switch is in the collection (`src/games/lights/`, route `#/lights`).
+> See the Light Switch section of the README for how it ended up working. It follows the
+> plan below, with two of the twists in: corner taps (from level 15) and three-step
+> lights (from level 30). Whole-row taps are not built. Every board shape tried has at
+> most 8 free choices, so the solver always finds the true fewest taps. Hints point at a
+> tile rather than tapping it, and cost a star.
 
 **Idea.** A grid of lights. Tapping one toggles it and its four neighbours. Turn every
 light off.
