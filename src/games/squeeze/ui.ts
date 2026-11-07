@@ -3,8 +3,10 @@ import { extraIcons, icons, squeezeLogo, starIcon } from '../../shared/icons';
 import { LevelSource } from '../../shared/levelSource';
 import { GameModule, Shell } from '../types';
 import { buildSqueezeLevel } from './core/levels';
+import { exitSide, occupancy } from './core/rules';
 import { SHAPES } from './core/shapes';
-import { OUTWARD, Side, SqueezeLevel } from './core/types';
+import { Axis, SlideRange, slideRange } from './core/slide';
+import { Side, SqueezeLevel } from './core/types';
 import { Session } from './game/session';
 import { loadSqueeze, recordSqueezeClear, resetSqueeze, SqueezeProgress } from './game/storage';
 import { SqueezeRenderer } from './render/renderer';
@@ -196,22 +198,27 @@ export function createSqueeze(shell: Shell): GameModule {
   }
 
   // ---------- Dragging ----------
-  // A drag moves the block one cell at a time toward the finger, along the clear cells it
-  // can reach. Pulled through a gap it fits, it leaves when let go.
+  // The block slides along one axis at a time, exactly under the finger, and stops flush
+  // against whatever is in the way. It turns onto the other axis when the finger clearly
+  // heads that way and the block is lined up with a cell that is free in that direction.
+  // Let go and it settles into the nearest cell; pulled far enough through a gap it fits,
+  // it leaves.
   interface Drag {
     pointer: number;
     block: number;
     /** Where on the block the finger took hold, in cells from its top-left. */
     gx: number;
     gy: number;
-    x: number;
-    y: number;
     startX: number;
     startY: number;
-    reach: Set<number>;
-    exits: Map<number, Side>;
-    leaving: Side | null;
-    pull: number;
+    /** The cell the block is lined up on, the axis it slides along, and how far along. */
+    baseX: number;
+    baseY: number;
+    axis: Axis;
+    t: number;
+    range: SlideRange;
+    /** Every other block's cells. */
+    occ: Int16Array;
     moved: boolean;
     bumped: boolean;
     downAt: number;
@@ -224,6 +231,22 @@ export function createSqueeze(shell: Shell): GameModule {
     return renderer.toCell(e.clientX - r.left, e.clientY - r.top);
   };
 
+  const rangeFor = (d: Drag, x: number, y: number, axis: Axis) => slideRange(session!.board, session!.blocks, d.occ, d.block, x, y, axis);
+  const dragPos = (d: Drag) => ({ x: d.baseX + (d.axis === 'x' ? d.t : 0), y: d.baseY + (d.axis === 'y' ? d.t : 0) });
+  /** The cell the block settles into if let go now. */
+  const settleCell = (d: Drag) => {
+    const k = Math.round(Math.max(d.range.lo, Math.min(d.range.hi, d.t)));
+    return { x: d.baseX + (d.axis === 'x' ? k : 0), y: d.baseY + (d.axis === 'y' ? k : 0) };
+  };
+  /** How far the block has been pulled out past an open end, and through which side. */
+  const pulledOut = (d: Drag): { side: Side; by: number; at: { x: number; y: number } } | null => {
+    const r = d.range;
+    const end = (k: number) => ({ x: d.baseX + (d.axis === 'x' ? k : 0), y: d.baseY + (d.axis === 'y' ? k : 0) });
+    if (r.exitLo && d.t < r.lo) return { side: r.exitLo, by: r.lo - d.t, at: end(r.lo) };
+    if (r.exitHi && d.t > r.hi) return { side: r.exitHi, by: d.t - r.hi, at: end(r.hi) };
+    return null;
+  };
+
   canvas.addEventListener('pointerdown', (e) => {
     const s = session;
     if (!s || s.won || modalOpen() || drag) return;
@@ -232,26 +255,26 @@ export function createSqueeze(shell: Shell): GameModule {
     const i = s.blockAt(Math.floor(f.x), Math.floor(f.y));
     if (i === null) return;
     const p = s.pos[i]!;
-    const { reach, exits } = s.options(i);
+    const occ = occupancy(s.board, s.blocks, s.pos, i);
     drag = {
       pointer: e.pointerId,
       block: i,
       gx: f.x - p.x,
       gy: f.y - p.y,
-      x: p.x,
-      y: p.y,
       startX: p.x,
       startY: p.y,
-      reach,
-      exits,
-      leaving: null,
-      pull: 0,
+      baseX: p.x,
+      baseY: p.y,
+      axis: 'x',
+      t: 0,
+      range: slideRange(s.board, s.blocks, occ, i, p.x, p.y, 'x'),
+      occ,
       moved: false,
       bumped: false,
       downAt: performance.now(),
     };
     canvas.setPointerCapture(e.pointerId);
-    renderer.drag = { block: i, dx: 0, dy: 0 };
+    renderer.drag = { block: i, x: p.x, y: p.y };
     // Light up the gaps this block fits through.
     renderer.glow.clear();
     s.board.gaps.forEach((g, gi) => {
@@ -266,77 +289,52 @@ export function createSqueeze(shell: Shell): GameModule {
   canvas.addEventListener('pointermove', (e) => {
     const d = drag;
     if (!d || d.pointer !== e.pointerId || !session) return;
-    const w = session.board.w;
     const f = fingerCell(e);
     const tx = f.x - d.gx;
     const ty = f.y - d.gy;
     if (Math.hypot(tx - d.startX, ty - d.startY) > 0.2) d.moved = true;
 
-    if (d.leaving) {
-      const [o1, o2] = OUTWARD[d.leaving];
-      d.pull = (tx - d.x) * o1 + (ty - d.y) * o2;
-      if (d.pull < 0.25) d.leaving = null;
-      else {
-        renderer.drag = { block: d.block, dx: o1 * d.pull, dy: o2 * d.pull };
-        renderer.invalidate();
-        return;
-      }
-    }
-
-    // Step toward the finger, larger distance first, while the next cell is clear.
-    for (let guard = 0; guard < 32; guard++) {
-      const ddx = tx - d.x;
-      const ddy = ty - d.y;
-      const steps: [number, number][] = [];
-      if (Math.abs(ddx) >= 0.5) steps.push([Math.sign(ddx), 0]);
-      if (Math.abs(ddy) >= 0.5) steps.push([0, Math.sign(ddy)]);
-      if (Math.abs(ddy) > Math.abs(ddx)) steps.reverse();
-      let stepped = false;
-      for (const [sx, sy] of steps) {
-        const nx = d.x + sx;
-        const ny = d.y + sy;
-        if (d.reach.has(ny * w + nx)) {
-          d.x = nx;
-          d.y = ny;
-          stepped = true;
-          break;
-        }
-        const side = d.exits.get(d.y * w + d.x);
-        if (side && OUTWARD[side][0] === sx && OUTWARD[side][1] === sy) {
-          d.leaving = side;
-          break;
+    // Turn onto the other axis? Only from a whole cell inside the range, toward free space.
+    const k = Math.round(d.t);
+    if (k >= d.range.lo && k <= d.range.hi) {
+      const cx = d.baseX + (d.axis === 'x' ? k : 0);
+      const cy = d.baseY + (d.axis === 'y' ? k : 0);
+      const along = d.axis === 'x' ? tx - cx : ty - cy;
+      const cross = d.axis === 'x' ? ty - cy : tx - cx;
+      const lined = Math.abs(d.t - k) < 0.35 || Math.abs(cross) > 0.75;
+      if (Math.abs(cross) > Math.abs(along) + 0.25 && lined) {
+        const other: Axis = d.axis === 'x' ? 'y' : 'x';
+        const r = rangeFor(d, cx, cy, other);
+        const free = cross < 0 ? r.lo < 0 || !!r.exitLo : r.hi > 0 || !!r.exitHi;
+        if (free) {
+          d.baseX = cx;
+          d.baseY = cy;
+          d.axis = other;
+          d.t = 0;
+          d.range = r;
         }
       }
-      if (!stepped || d.leaving) break;
     }
 
-    if (d.leaving) {
-      const [o1, o2] = OUTWARD[d.leaving];
-      d.pull = Math.max(0, (tx - d.x) * o1 + (ty - d.y) * o2);
-      renderer.drag = { block: d.block, dx: o1 * d.pull, dy: o2 * d.pull };
-      if (!d.bumped) sfx.blip();
-      d.bumped = true;
-      renderer.invalidate();
-      return;
-    }
+    // Follow the finger along the axis, flush against whatever is in the way. Past an
+    // open end the block keeps going, out through the gap.
+    const want = d.axis === 'x' ? tx - d.baseX : ty - d.baseY;
+    const r = d.range;
+    const maxOut = d.axis === 'x' ? SHAPES[session.blocks[d.block].shape].w + 1 : SHAPES[session.blocks[d.block].shape].h + 1;
+    let t = want;
+    if (t < r.lo) t = r.exitLo ? Math.max(t, r.lo - maxOut) : r.lo;
+    if (t > r.hi) t = r.exitHi ? Math.min(t, r.hi + maxOut) : r.hi;
+    d.t = t;
 
-    // Let the block lean toward the finger: half a cell where it could go, a nudge where it can't.
-    const lean = (delta: number, ok: boolean) => Math.max(ok ? -0.5 : -0.08, Math.min(ok ? 0.5 : 0.08, delta));
-    const ddx = tx - d.x;
-    const ddy = ty - d.y;
-    const sx = Math.sign(ddx);
-    const sy = Math.sign(ddy);
-    const exitHere = d.exits.get(d.y * w + d.x);
-    const okX = d.reach.has(d.y * w + d.x + sx) && d.x + sx >= 0 && d.x + sx < w || (!!exitHere && OUTWARD[exitHere][0] === sx && sx !== 0);
-    const okY = d.reach.has((d.y + sy) * w + d.x) || (!!exitHere && OUTWARD[exitHere][1] === sy && sy !== 0);
-    renderer.drag = { block: d.block, dx: lean(ddx, okX), dy: lean(ddy, okY) };
     // A firm push against something solid gets a bump, once per push.
-    const hard = (Math.abs(ddx) > 0.7 && !okX) || (Math.abs(ddy) > 0.7 && !okY);
+    const hard = (want < r.lo - 0.3 && !r.exitLo) || (want > r.hi + 0.3 && !r.exitHi);
     if (hard && !d.bumped) {
       d.bumped = true;
       sfx.thud();
       shell.vibrate(12);
-    } else if (!hard && Math.abs(ddx) < 0.3 && Math.abs(ddy) < 0.3) d.bumped = false;
+    } else if (!hard) d.bumped = false;
+
+    renderer.drag = { block: d.block, ...dragPos(d) };
     renderer.invalidate();
   });
 
@@ -344,27 +342,29 @@ export function createSqueeze(shell: Shell): GameModule {
     const d = drag;
     if (!d || d.pointer !== e.pointerId) return;
     drag = null;
-    renderer.drag = null;
     renderer.glow.clear();
     const s = session;
     if (!s || cancelled) {
+      renderer.drag = null;
       renderer.invalidate();
       return;
     }
-    if (d.leaving && d.pull >= LEAVE_AT) {
-      // The block carries on out from where the finger left it.
-      renderer.drag = { block: d.block, dx: 0, dy: 0 };
-      sendOut(d.block, { x: d.x, y: d.y });
+    const out = pulledOut(d);
+    if (out && out.by >= LEAVE_AT) {
+      // The leave animation carries on from where the finger let go.
+      sendOut(d.block, out.at);
       renderer.drag = null;
       return;
     }
-    if (d.x !== d.startX || d.y !== d.startY) {
-      s.commit(d.block, { x: d.x, y: d.y });
+    renderer.drag = null;
+    const cell = settleCell(d);
+    if (cell.x !== d.startX || cell.y !== d.startY) {
+      s.commit(d.block, cell);
       sfx.blip();
       afterMove();
     } else if (!d.moved && performance.now() - d.downAt < 400) {
       // A tap on a block that can leave from right where it is sends it out.
-      if (!d.exits.has(d.y * s.board.w + d.x) || !sendOut(d.block)) renderer.shake(d.block);
+      if (!exitSide(s.board, s.blocks, d.occ, d.block, d.startX, d.startY) || !sendOut(d.block)) renderer.shake(d.block);
     }
     renderer.invalidate();
   };

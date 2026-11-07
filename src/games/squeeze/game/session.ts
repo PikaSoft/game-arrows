@@ -56,7 +56,7 @@ export class Session {
   /** Slide block i to `to`. One move, however far it went. */
   commit(i: number, to: { x: number; y: number }): boolean {
     const cur = this.pos[i];
-    if (!cur || (to.x === cur.x && to.y === cur.y)) return false;
+    if (!cur || (to.x === cur.x && to.y === cur.y) || !this.onBoard(to)) return false;
     if (!this.options(i).reach.has(to.y * this.board.w + to.x)) return false;
     this.record(i, { ...to });
     return true;
@@ -68,13 +68,18 @@ export class Session {
    */
   leave(i: number, at?: { x: number; y: number }): Side | null {
     const cur = this.pos[i];
-    if (!cur) return null;
+    if (!cur || (at && !this.onBoard(at))) return null;
     const { exits } = this.options(i);
     const from = at ?? cur;
     const side = exits.get(from.y * this.board.w + from.x) ?? (at ? null : [...exits.values()][0]);
     if (!side) return null;
     this.record(i, null);
     return side;
+  }
+
+  /** Cells are keyed y * w + x, so anything off the board must be turned away first. */
+  private onBoard(p: { x: number; y: number }): boolean {
+    return Number.isInteger(p.x) && Number.isInteger(p.y) && p.x >= 0 && p.y >= 0 && p.x < this.board.w && p.y < this.board.h;
   }
 
   private record(i: number, p: Pos): void {

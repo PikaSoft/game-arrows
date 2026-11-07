@@ -3,6 +3,7 @@ import { GATE_INTRO, rateSqueeze, squeezeSpecFor, TUTORIAL_COUNT } from '../src/
 import { buildSqueezeLevel } from '../src/games/squeeze/core/levels';
 import { Board, canExit, findExit, occupancy, reachable } from '../src/games/squeeze/core/rules';
 import { shapeIndex } from '../src/games/squeeze/core/shapes';
+import { slideRange } from '../src/games/squeeze/core/slide';
 import { solve, startPos } from '../src/games/squeeze/core/solver';
 import { Block, Gap, SqueezeLevel } from '../src/games/squeeze/core/types';
 import { Session } from '../src/games/squeeze/game/session';
@@ -139,4 +140,36 @@ describe('levels', () => {
       expect(s.won).toBe(true);
     }
   }, 60000);
+});
+
+describe('sliding', () => {
+  test('a block slides until it meets a block or the frame', () => {
+    const board: Board = { w: 5, h: 3, gaps: [] };
+    const blocks = [block('bar2h', 2, 1), block('dot', 0, 1)];
+    const occ = occupancy(board, blocks, startPos(blocks), 0);
+    expect(slideRange(board, blocks, occ, 0, 2, 1, 'x')).toEqual({ lo: -1, hi: 1, exitLo: null, exitHi: null });
+    expect(slideRange(board, blocks, occ, 0, 2, 1, 'y')).toEqual({ lo: -1, hi: 1, exitLo: null, exitHi: null });
+  });
+
+  test('an end is open only at a gap the block fits, with a clear way out', () => {
+    const board: Board = { w: 4, h: 3, gaps: [gap('right', 1, 1), gap('top', 0, 1)] };
+    const blocks = [block('bar2h', 0, 1), block('dot', 3, 0)];
+    const occ = occupancy(board, blocks, startPos(blocks), 0);
+    const r = slideRange(board, blocks, occ, 0, 0, 1, 'x');
+    expect(r).toEqual({ lo: 0, hi: 2, exitLo: null, exitHi: 'right' });
+    // Two wide never fits the one wide gap on top.
+    expect(slideRange(board, blocks, occ, 0, 0, 1, 'y').exitLo).toBeNull();
+    // The dot can go out of the top only from column 0, so not from where it is.
+    const occ1 = occupancy(board, blocks, startPos(blocks), 1);
+    expect(slideRange(board, blocks, occ1, 1, 3, 0, 'y').exitLo).toBeNull();
+  });
+
+  test('positions off the board are refused, even ones whose cell key wraps to another row', () => {
+    const s = new Session(lvl(3, 3, [], [block('dot', 2, 0)]));
+    expect(s.commit(0, { x: 3, y: 0 })).toBe(false); // key 3 is cell 0, 1
+    expect(s.commit(0, { x: -1, y: 1 })).toBe(false); // key 2 is cell 2, 0
+    expect(s.leave(0, { x: 3, y: 0 })).toBeNull();
+    expect(s.commit(0, { x: 0, y: 1 })).toBe(true);
+    expect(s.pos[0]).toEqual({ x: 0, y: 1 });
+  });
 });

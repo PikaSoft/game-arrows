@@ -51,8 +51,8 @@ const MARGIN = 0.9;
 
 export class SqueezeRenderer {
   view: SqueezeView | null = null;
-  /** Block being dragged, with its offset from its cell in cells. */
-  drag: { block: number; dx: number; dy: number } | null = null;
+  /** Block being dragged and where it is drawn (top-left, in cells): right under the finger. */
+  drag: { block: number; x: number; y: number } | null = null;
   /** Gaps the dragged block could leave through: drawn glowing. */
   glow = new Set<number>();
 
@@ -310,14 +310,18 @@ export class SqueezeRenderer {
   private drawBlockAt(v: SqueezeView, i: number, now: number, dt: number): boolean {
     const p = v.pos[i]!;
     const d = this.drag && this.drag.block === i ? this.drag : null;
-    const tx = p.x + (d ? d.dx : 0);
-    const ty = p.y + (d ? d.dy : 0);
+    const tx = d ? d.x : p.x;
+    const ty = d ? d.y : p.y;
     let s = this.shown.get(i);
-    if (!s) {
+    // While dragged the block sits exactly under the finger. The only exception is a
+    // catch-up of more than half a cell (the finger ran ahead while the block was stuck,
+    // then the way opened): that glides over a few frames instead of teleporting. Easing
+    // is also used to settle into a cell on release, and after undo or restart.
+    if (!s || (d && Math.hypot(tx - s.x, ty - s.y) < 0.6)) {
       s = { x: tx, y: ty };
       this.shown.set(i, s);
     }
-    const k = 1 - Math.exp(-dt / (d ? 22 : 45));
+    const k = 1 - Math.exp(-dt / (d ? 28 : 45));
     s.x += (tx - s.x) * k;
     s.y += (ty - s.y) * k;
     let moving = false;
