@@ -25,7 +25,7 @@ stars and settings.
 | Brick Breaker | Paddle, ball and a wall of bricks: break them all, level by level. |
 | Stack Tower | Tap to drop sliding blocks onto a tower; overhangs are cut off. Endless. |
 | Lane Dodger | Swipe between three lanes and jump hurdles. Endless. |
-| Merge Tiles | Slide tiles so three of a kind merge; stones get in the way. Endless. |
+| Merge Tiles | Slide tiles so pairs merge; stones get in the way. Endless. |
 | Word Grid | Trace words through touching letters against the clock. |
 
 Ideas for more games, with notes on building each one, are in
@@ -801,15 +801,15 @@ drawing or timing. The tests include a test player that plans a route each row a
 ## Merge Tiles
 
 A 5x5 board of numbered tiles. Swipe to slide every tile as far as it goes in that
-direction. Three equal tiles in a row merge into one worth three times as much (1, 3,
-9, 27, 81…). Pairs never merge, so you have to line up threes. A new tile (usually a 1,
-sometimes a 3) appears after every move. The game ends when no swipe changes anything.
+direction. Two equal tiles that meet merge into one worth both (1 and 1 make 2, 2 and 2
+make 4, and so on). A new tile (usually a 1, sometimes a 2) appears after every move. The
+game ends when no swipe changes anything.
 
 ### Rules
 
 - **Merging:** merges start from the side the tiles move toward, and each tile merges at
-  most once per swipe (so five 9s make 27, 9, 9). The score goes up by each merged
-  tile's new value.
+  most once per swipe (so four 2s make two 4s, not an 8). The score goes up by each
+  merged tile's new value.
 - **Stones:** from move 30, a stone turns up every 25 moves. Stones don't slide, block
   tiles and split a row or column in two. Each crumbles after 8 moves (the number on it
   counts down).
@@ -819,9 +819,12 @@ sometimes a 3) appears after every move. The game ends when no swipe changes any
 - Swipe anywhere, one move per swipe, or use the arrow keys or WASD.
 
 The rules (`src/games/merge/core/rules.ts` and `core/game.ts`) have no drawing or timing
-in them. While designing them, a bot that looks two moves ahead lasted about three times
-as long as one moving at random (a median of about 310 moves against 90), so planning
-pays off.
+in them. Games are long: a player moving at random lasts about 440 moves, and one that
+always keeps the most space free about 1,050.
+
+Merge Tiles first shipped with three-tile merges (tiles 1, 3, 9, 27…). Progress made
+under those rules (bests and any saved game) is cleared the first time the game loads
+under the new ones; the count of games played is kept.
 
 ## Word Grid
 

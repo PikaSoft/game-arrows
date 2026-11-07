@@ -4,7 +4,7 @@ export const SIZE = 5;
 export const STONE = -1;
 
 /**
- * A square: 0 empty, a positive tile value (1, 3, 9, 27…), or STONE. Stones carry how many
+ * A square: 0 empty, a positive tile value (1, 2, 4, 8…), or STONE. Stones carry how many
  * more moves they last in a parallel `life` array.
  */
 export interface Board {
@@ -60,9 +60,9 @@ export function lines(d: number): number[][] {
 
 /**
  * Swipe toward side d. In each line, tiles slide toward that side until they hit the
- * edge, a stone or another tile. Then, from the leading edge, any three equal tiles in a
- * row merge into one worth three times as much (each tile merges at most once per swipe).
- * Pairs never merge. Stones stay put and split a line into separate stretches.
+ * edge, a stone or another tile. Then, from the leading edge, two equal tiles side by
+ * side merge into one worth both (each tile merges at most once per swipe). Stones stay
+ * put and split a line into separate stretches.
  */
 export function slide(b: Board, d: number): SlideResult {
   const cells = b.cells.slice();
@@ -83,12 +83,12 @@ export function slide(b: Board, d: number): SlideResult {
       for (let t = 0; t < tiles.length; ) {
         const v = b.cells[tiles[t]];
         const to = stretch[out++];
-        if (t + 2 < tiles.length && b.cells[tiles[t + 1]] === v && b.cells[tiles[t + 2]] === v) {
-          cells[to] = v * 3;
-          merges.push({ at: to, value: v * 3 });
-          gained += v * 3;
-          for (let m = 0; m < 3; m++) moves.push({ from: tiles[t + m], to });
-          t += 3;
+        if (t + 1 < tiles.length && b.cells[tiles[t + 1]] === v) {
+          cells[to] = v * 2;
+          merges.push({ at: to, value: v * 2 });
+          gained += v * 2;
+          for (let m = 0; m < 2; m++) moves.push({ from: tiles[t + m], to });
+          t += 2;
         } else {
           cells[to] = v;
           moves.push({ from: tiles[t], to });

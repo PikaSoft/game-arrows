@@ -1,8 +1,8 @@
 import { Rng } from '../../../shared/rng';
 import { Board, emptyBoard, slide, SlideResult, STONE, stuck } from './rules';
 
-/** Chance a new tile is a 3 rather than a 1. */
-export const THREE_CHANCE = 0.15;
+/** Chance a new tile is a 2 rather than a 1. */
+export const TWO_CHANCE = 0.1;
 /** Stones start turning up after this many moves, then every STONE_EVERY moves. */
 export const STONE_FROM = 30;
 export const STONE_EVERY = 25;
@@ -70,7 +70,7 @@ export class MergeGame {
     const e = this.empties();
     if (!e.length) return null;
     const at = this.rng.pick(e);
-    const value = this.rng.next() < THREE_CHANCE ? 3 : 1;
+    const value = this.rng.next() < TWO_CHANCE ? 2 : 1;
     this.board.cells[at] = value;
     return { at, value };
   }

@@ -1,14 +1,17 @@
 import { Theme } from '../../../shared/themes';
 import { Board, SIZE, STONE } from '../core/rules';
 
-/** Tile colours by value: 1, 3, 9, 27, 81, 243, 729, 2187, then the last again. */
-const TILE_COLORS = ['#f3e2c4', '#f2c77a', '#ee9d4a', '#e5683f', '#d24a5c', '#a84a9e', '#5c5fc4', '#2f8fb8', '#2e9e7c'];
+/** Tile colours by value: 1, 2, 4, 8, … 4096, then the last again. */
+const TILE_COLORS = [
+  '#f3e2c4', '#f2d49a', '#f2c77a', '#efae5e', '#ee9d4a', '#e9823f', '#e5683f', '#dc5450',
+  '#d24a5c', '#bc4a80', '#a84a9e', '#7f55b4', '#5c5fc4',
+];
 const STONE_COLOR = '#8b9097';
 
 const SLIDE_MS = 110;
 const POP_MS = 160;
 
-const colourOf = (v: number) => TILE_COLORS[Math.min(TILE_COLORS.length - 1, Math.round(Math.log(v) / Math.log(3)))];
+const colourOf = (v: number) => TILE_COLORS[Math.min(TILE_COLORS.length - 1, Math.round(Math.log2(v)))];
 
 interface Anim {
   t0: number;
@@ -152,7 +155,7 @@ export class MergeRenderer {
     ctx.fillStyle = 'rgba(255,255,255,0.25)';
     ctx.fillRect(px + s * 0.1, py + s * 0.08, s * 0.8, s * 0.1);
     const text = String(v);
-    ctx.fillStyle = v <= 3 ? '#5b3c22' : '#ffffff';
+    ctx.fillStyle = v <= 4 ? '#5b3c22' : '#ffffff';
     ctx.font = `800 ${Math.round(c * (text.length <= 2 ? 0.44 : text.length === 3 ? 0.36 : 0.28) * scale)}px system-ui, -apple-system, Segoe UI, Roboto, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

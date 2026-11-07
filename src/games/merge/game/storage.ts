@@ -1,7 +1,14 @@
 import { SavedGame } from '../core/game';
 
+/**
+ * Which rules the progress was made under. 1 was three-tile merges (tiles 1, 3, 9, 27…);
+ * 2 is pairs (1, 2, 4, 8…). Bests and saved games from other rules don't carry over.
+ */
+export const RULES = 2;
+
 /** Merge Tiles progress: bests, games played, and the game in progress (if any). */
 export interface MergeProgress {
+  rules: number;
   bestScore: number;
   bestTile: number;
   games: number;
@@ -10,13 +17,17 @@ export interface MergeProgress {
 
 export const MERGE_KEY = 'merge.v1';
 
-const defaults = (): MergeProgress => ({ bestScore: 0, bestTile: 0, games: 0, saved: null });
+const defaults = (): MergeProgress => ({ rules: RULES, bestScore: 0, bestTile: 0, games: 0, saved: null });
 
 export function loadMerge(): MergeProgress {
   try {
     const raw = localStorage.getItem(MERGE_KEY);
     if (!raw) return defaults();
-    return { ...defaults(), ...(JSON.parse(raw) as Partial<MergeProgress>) };
+    const stored = JSON.parse(raw) as Partial<MergeProgress>;
+    const p = { ...defaults(), ...stored, rules: stored.rules ?? 1 };
+    // Made under the old three-tile rules: keep the count of games, start the rest afresh.
+    if (p.rules !== RULES) return { ...defaults(), games: p.games };
+    return p;
   } catch {
     return defaults();
   }
