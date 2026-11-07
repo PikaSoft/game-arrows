@@ -14,6 +14,7 @@ stars and settings.
 | Squeeze | Slide blocks of different shapes out through gaps in the frame. |
 | Pipe Link | Turn pipe tiles until water from the tap reaches every pipe. |
 | Colour Lines | Join each pair of dots with a line; together the lines fill the board. |
+| Crate Push | Push every crate onto a target in a small warehouse. No pulling. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -324,6 +325,59 @@ have to look further ahead. The label comes from the average:
 
 Hover the label in game to see the number.
 
+## Crate Push
+
+A small warehouse holds crates and the same number of targets. Walk the worker around
+and push every crate onto a target. Crates can only be pushed, one at a time, never
+pulled.
+
+### Rules
+
+- **Moving:** swipe anywhere to step (one drag can make several steps), or use the arrow
+  keys or WASD. Walking into a crate pushes it if the square beyond is free.
+- **Tap to walk:** tap any floor square to walk there by the shortest way round; tap a
+  crate right next to the worker to push it. Walking is free: only pushes count.
+- **Pushes and stars:** each level has a par from the solver: the fewest pushes that
+  solve it. Finish within par for three stars, within par + 25% for two, otherwise one.
+- **Stuck crates:** a crate pushed where it can never reach a target (into a corner, or
+  against a wall with no target along it) gets a red edge and a note to undo.
+- **Undo:** unlimited and free (Z or Backspace on a keyboard). It takes back the last
+  push and puts the worker back where they pushed from. Undone pushes still count.
+- **Hints:** 3 per level. Each one walks to and plays the next push of a shortest
+  solution from where you are, and costs a star (never below one).
+
+### Levels
+
+Levels 1 to 4 are tutorials. After that, level N is generated from N as the seed, so
+everyone gets the same room. Rooms grow to about 9x9 (walls included) and from 2 to 5
+crates over the first 35 levels, then vary.
+
+The generator (`src/games/crates/core/levels.ts`) carves a room from a few overlapping
+rectangles plus some pillars (`room.ts`), crops it to the floor and places targets.
+Then it works backward from solved: crates on their targets, the worker in any area,
+pulling crates around (`pullAll` in `solver.ts`). A pull is a push played in reverse,
+so the number of pulls to reach a position is exactly the fewest pushes that solve it,
+and every position found can be solved. The position whose difficulty is closest to
+the level's target becomes the start. Positions are named by the crates plus which area
+the worker is in, not their exact square, which keeps the search small. The forward
+solver (a breadth-first search over pushes that skips crates pushed onto dead squares)
+powers hints and checks par in the tests. The work is capped by positions explored,
+not time, so every device builds the same room.
+
+The difficulty label counts extra pushes: pushes in the shortest solution beyond what
+the crates would need if each could slide to its own target alone. Those are the
+crates moved out of the way, or round the long way, first. The count is always even,
+since a crate that goes out of its way has to come back:
+
+| Label | Extra pushes |
+| --- | --- |
+| Easy | 0 to 2 |
+| Medium | 4 to 6 |
+| Hard | 8 to 10 |
+| Super Hard | 12 or more |
+
+Hover the label in game to see the number.
+
 ## Development
 
 ```bash
@@ -335,12 +389,12 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
 ```
-src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines), settings
+src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates), settings
 src/shared/            sound, themes, icons, update check, seeded RNG, worker level loader
 src/games/arrows/      Arrow Escape: core rules, generator and solver, rendering, input, UI
 src/games/sandglass/   Sandglass: the same split
@@ -348,6 +402,7 @@ src/games/snake/       Snake and Snake Trails: rules, level builder, renderer, s
 src/games/squeeze/     Squeeze: the same split as Sandglass
 src/games/pipes/       Pipe Link: the same split, plus core/tree.ts for the pipe networks
 src/games/lines/       Colour Lines: the same split, plus core/paths.ts for growing the lines
+src/games/crates/      Crate Push: the same split, plus core/room.ts for carving rooms
 ```
 
 Each game exports a `GameModule` (`src/games/types.ts`): it builds its own screens and

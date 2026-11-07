@@ -14,7 +14,7 @@ and art for each one and don't copy a specific existing game.
 | --- | --- | --- | --- | --- | --- |
 | 1 | ~~[Pipe Link](#1-pipe-link)~~ | Rotate tiles | Closest | Small | **Built** (`src/games/pipes/`) |
 | 2 | ~~[Colour Lines](#2-colour-lines)~~ | Join dots | Closest | Medium | **Built** (`src/games/lines/`) |
-| 3 | [Crate Push](#3-crate-push) | Push puzzle | Closest | Medium to large | Idea |
+| 3 | ~~[Crate Push](#3-crate-push)~~ | Push puzzle | Closest | Medium to large | **Built** (`src/games/crates/`) |
 | 4 | [Light Switch](#4-light-switch) | Toggle grid | Closest | Small | Idea |
 | 5 | [Ice Slide](#5-ice-slide) | Slide to exit | Closest | Small | Idea |
 | 6 | [Picture Grid](#6-picture-grid) | Deduction | Logic | Medium | Idea |
@@ -200,6 +200,14 @@ by solver states and fall back to a smaller board if needed, as Squeeze does.
 ---
 
 ## 3. Crate Push
+
+> **Built.** Crate Push is in the collection (`src/games/crates/`, route `#/crates`). See
+> the Crate Push section of the README for how it ended up working. It follows the plan
+> below closely. The main difference: rather than pulling crates at random and solving
+> forward, the generator pulls backward from solved to every reachable position at
+> once, which gives each position's exact par with no forward search. Rooms are cropped
+> to their floor, and the label's extra-push count is always even (a crate that goes out
+> of its way has to come back), so the bands are 0 to 2, 4 to 6, 8 to 10 and 12 or more.
 
 **Idea.** A worker in a small warehouse pushes crates onto marked spots. Crates can only
 be pushed, never pulled, one at a time.
