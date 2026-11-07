@@ -69,3 +69,6 @@ export const pictureLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="no
 
 /** Number Place logo: a 3x3 box of digits. */
 export const numbersLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="var(--line)" stroke-width="3.5" stroke-linejoin="round"><rect x="8" y="8" width="48" height="48" rx="6"/><path d="M24 8v48M40 8v48M8 24h48M8 40h48" stroke-width="1.6" opacity="0.6"/><rect x="24" y="24" width="16" height="16" fill="var(--accent)" stroke="none" opacity="0.8"/><g fill="var(--line)" stroke="none" font-family="sans-serif" font-weight="700" font-size="12" text-anchor="middle"><text x="16" y="20.5">5</text><text x="48" y="20.5">3</text><text x="32" y="36.5">9</text><text x="16" y="52.5">1</text><text x="48" y="52.5">7</text></g></svg>`;
+
+/** Tents and Trees logo: a tent beside a tree, with a row count. */
+export const tentsLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke-linejoin="round"><rect x="6" y="10" width="52" height="44" rx="8" fill="#9fcf7c" fill-opacity="0.45" stroke="var(--line)" stroke-width="4"/><rect x="18.5" y="34" width="5" height="12" fill="#7a5232"/><circle cx="21" cy="27" r="9" fill="#3f8f4a"/><circle cx="15" cy="33" r="6" fill="#3f8f4a"/><circle cx="27" cy="33" r="6" fill="#3f8f4a"/><path d="M44 22l11 24H33z" fill="#e8893a"/><path d="M44 36l4 10h-8z" fill="rgba(0,0,0,0.3)"/></svg>`;

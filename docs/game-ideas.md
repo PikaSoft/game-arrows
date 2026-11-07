@@ -19,7 +19,7 @@ and art for each one and don't copy a specific existing game.
 | 5 | ~~[Ice Slide](#5-ice-slide)~~ | Slide to exit | Closest | Small | **Built** (`src/games/ice/`) |
 | 6 | ~~[Picture Grid](#6-picture-grid)~~ | Deduction | Logic | Medium | **Built** (`src/games/picture/`) |
 | 7 | ~~[Number Place](#7-number-place)~~ | Deduction | Logic | Medium | **Built** (`src/games/numbers/`) |
-| 8 | [Tents and Trees / Star Battle](#8-tents-and-trees--star-battle) | Deduction | Logic | Medium | Idea |
+| 8 | [Tents and Trees / Star Battle](#8-tents-and-trees--star-battle) | Deduction | Logic | Medium | **Tents and Trees built** (`src/games/tents/`); Star Battle still an idea |
 | 9 | [Hidden Mines](#9-hidden-mines) | Deduction | Logic | Medium | Idea |
 | 10 | [Brick Breaker](#10-brick-breaker) | Arcade | Arcade | Medium | Idea |
 | 11 | [Stack Tower](#11-stack-tower) | Arcade | Arcade | Small | Idea |
@@ -421,6 +421,15 @@ accept the closest match.
 ---
 
 ## 8. Tents and Trees / Star Battle
+
+> **Tents and Trees is built** (`src/games/tents/`, route `#/tents`); Star Battle is
+> still an idea. See the Tents and Trees section of the README for how it ended up
+> working. It plays like Picture Grid (a Tent / Grass switch, hearts, finished lines fill
+> themselves). Squares with no tree beside them, and rows or columns with no tents,
+> start as grass. Uniqueness is checked by a backtracking search over the squares beside
+> trees (with a tent-to-tree pairing check at the end), and boards are kept only if a
+> reasoning solver can finish them without guessing. Star Battle could reuse the same
+> UI and the wave-based rating.
 
 Two small-grid logic games that play well in short sessions. Build one first; they can
 share most of the code.
