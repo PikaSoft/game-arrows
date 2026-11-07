@@ -17,7 +17,7 @@ and art for each one and don't copy a specific existing game.
 | 3 | ~~[Crate Push](#3-crate-push)~~ | Push puzzle | Closest | Medium to large | **Built** (`src/games/crates/`) |
 | 4 | ~~[Light Switch](#4-light-switch)~~ | Toggle grid | Closest | Small | **Built** (`src/games/lights/`) |
 | 5 | ~~[Ice Slide](#5-ice-slide)~~ | Slide to exit | Closest | Small | **Built** (`src/games/ice/`) |
-| 6 | [Picture Grid](#6-picture-grid) | Deduction | Logic | Medium | Idea |
+| 6 | ~~[Picture Grid](#6-picture-grid)~~ | Deduction | Logic | Medium | **Built** (`src/games/picture/`) |
 | 7 | [Number Place](#7-number-place) | Deduction | Logic | Medium | Idea |
 | 8 | [Tents and Trees / Star Battle](#8-tents-and-trees--star-battle) | Deduction | Logic | Medium | Idea |
 | 9 | [Hidden Mines](#9-hidden-mines) | Deduction | Logic | Medium | Idea |
@@ -331,6 +331,14 @@ Animate the slide with a short ease-out.
 ---
 
 ## 6. Picture Grid
+
+> **Built.** Picture Grid is in the collection (`src/games/picture/`, route `#/picture`).
+> See the Picture Grid section of the README for how it ended up working. It follows the
+> plan below, with hearts and a Fill / Cross switch instead of tapping to cycle, since
+> every mark is checked at once and can't be changed. Boards stop at 12x13, which fits a
+> phone without zooming, so the zoom camera wasn't needed. There are 13 hand-drawn
+> pictures (3 tutorials and 10 for every tenth level); two of the first drafts (a rocket
+> and a key) turned out to have more than one answer and were redrawn or replaced.
 
 **Idea.** A grid with number clues on each row and column giving the runs of filled
 cells in order. Fill cells to reveal a picture.
