@@ -16,7 +16,7 @@ and art for each one and don't copy a specific existing game.
 | 2 | ~~[Colour Lines](#2-colour-lines)~~ | Join dots | Closest | Medium | **Built** (`src/games/lines/`) |
 | 3 | ~~[Crate Push](#3-crate-push)~~ | Push puzzle | Closest | Medium to large | **Built** (`src/games/crates/`) |
 | 4 | ~~[Light Switch](#4-light-switch)~~ | Toggle grid | Closest | Small | **Built** (`src/games/lights/`) |
-| 5 | [Ice Slide](#5-ice-slide) | Slide to exit | Closest | Small | Idea |
+| 5 | ~~[Ice Slide](#5-ice-slide)~~ | Slide to exit | Closest | Small | **Built** (`src/games/ice/`) |
 | 6 | [Picture Grid](#6-picture-grid) | Deduction | Logic | Medium | Idea |
 | 7 | [Number Place](#7-number-place) | Deduction | Logic | Medium | Idea |
 | 8 | [Tents and Trees / Star Battle](#8-tents-and-trees--star-battle) | Deduction | Logic | Medium | Idea |
@@ -292,6 +292,13 @@ can't happen here because boards are built by tapping, but keep the generator th
 ---
 
 ## 5. Ice Slide
+
+> **Built.** Ice Slide is in the collection (`src/games/ice/`, route `#/ice`). See the
+> Ice Slide section of the README for how it ended up working. It follows the plan
+> below, with holes (from level 12) and two pucks that slide together (from level 25).
+> One-way arrows and keys and doors are not built. A puck that slides over a hole wastes
+> the swipe rather than ending the level, so nothing can fail. Each puck has its own
+> flag and must stop exactly on it.
 
 **Idea.** A token on an icy grid slides in the swiped direction until it hits a wall or
 a rock. Reach the exit.

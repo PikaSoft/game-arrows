@@ -16,6 +16,7 @@ stars and settings.
 | Colour Lines | Join each pair of dots with a line; together the lines fill the board. |
 | Crate Push | Push every crate onto a target in a small warehouse. No pulling. |
 | Light Switch | Each tap flips a light and its neighbours. Turn every light off. |
+| Ice Slide | Slide a puck across the ice and stop it exactly on the flag. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -428,6 +429,54 @@ x1.25 for corner taps and x1.4 for three-step lights:
 
 Hover the label in game to see the numbers.
 
+## Ice Slide
+
+A puck sits on a sheet of ice dotted with rocks. Swipe to send it sliding: it only stops
+when the next square is the edge or a rock. Stop it exactly on the flag; sliding past
+isn't enough.
+
+### Rules
+
+- **Swiping:** one swipe anywhere is one slide. Arrow keys and WASD work too. A swipe
+  that moves nothing doesn't count.
+- **Holes:** from level 12, about half the boards have holes. A puck that slides over
+  one falls in: the swipe counts, but nothing moves.
+- **Two pucks:** from level 25, about one board in three has two pucks that slide
+  together on every swipe, each with its own flag. They stop against each other, and a
+  puck that stops on its flag is home and leaves the ice.
+- **Swipes and stars:** each level has a par from the solver: the fewest swipes. Finish
+  within par for three stars, within par + 25% for two, otherwise one.
+- **Dead ends:** if no swipes can get home from where you are, a note says so.
+- **Undo:** unlimited and free (Z or Backspace on a keyboard), but an undone swipe still
+  counts.
+- **Hints:** 3 per level. Each one shows arrows for the first swipe of a shortest way
+  home from where you are, and costs a star (never below one).
+
+### Levels
+
+Levels 1 to 3 are tutorials. After that, level N is generated from N as the seed, so
+everyone gets the same board. Boards grow from 6x7 to about 9x11 over the first 35
+levels, then vary, with 12% to 20% of squares rock.
+
+The generator (`src/games/ice/core/levels.ts`) scatters rocks and holes, places the
+pucks, and picks flags among the squares each puck can stop at on its own, leaning
+toward far ones. A breadth-first search over swipes (`src/games/ice/core/solver.ts`)
+then gives par and counts dead ends: positions you can slide into but never get home
+from. Of the boards tried, the one whose score is closest to the level's target is
+kept. The work is capped by attempts and positions searched, not time.
+
+The difficulty label comes from par, weighted by dead ends: par x (1 + dead ends /
+positions reachable). A board full of traps punishes the obvious first swipe:
+
+| Label | Weighted par |
+| --- | --- |
+| Easy | under 7 |
+| Medium | 7 to 10 |
+| Hard | 11 to 14 |
+| Super Hard | 15 or more |
+
+Hover the label in game to see the numbers.
+
 ## Development
 
 ```bash
@@ -439,12 +488,12 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
 ```
-src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights), settings
+src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice), settings
 src/shared/            sound, themes, icons, update check, seeded RNG, worker level loader
 src/games/arrows/      Arrow Escape: core rules, generator and solver, rendering, input, UI
 src/games/sandglass/   Sandglass: the same split
@@ -454,6 +503,7 @@ src/games/pipes/       Pipe Link: the same split, plus core/tree.ts for the pipe
 src/games/lines/       Colour Lines: the same split, plus core/paths.ts for growing the lines
 src/games/crates/      Crate Push: the same split, plus core/room.ts for carving rooms
 src/games/lights/      Light Switch: the same split
+src/games/ice/         Ice Slide: the same split
 ```
 
 Each game exports a `GameModule` (`src/games/types.ts`): it builds its own screens and
