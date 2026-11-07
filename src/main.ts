@@ -1,5 +1,6 @@
 import './styles.css';
 import { createArrows } from './games/arrows/ui';
+import { createCrates } from './games/crates/ui';
 import { createLines } from './games/lines/ui';
 import { createPipes } from './games/pipes/ui';
 import { createSandglass } from './games/sandglass/ui';
@@ -204,6 +205,7 @@ games.push(
   createSqueeze(shell),
   createPipes(shell),
   createLines(shell),
+  createCrates(shell),
 );
 
 document.addEventListener('keydown', (e) => {
