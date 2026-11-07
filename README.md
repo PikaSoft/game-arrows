@@ -18,6 +18,7 @@ stars and settings.
 | Light Switch | Each tap flips a light and its neighbours. Turn every light off. |
 | Ice Slide | Slide a puck across the ice and stop it exactly on the flag. |
 | Picture Grid | Use the number clues to fill the grid and reveal a picture. |
+| Number Place | Fill the grid so every row, column and box holds each digit once. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -529,6 +530,55 @@ average:
 
 Hover the label in game to see the number.
 
+## Number Place
+
+Fill the grid so that every row, every column and every box holds each digit exactly
+once. Boards are either 6x6 (digits 1 to 6, boxes 3 wide and 2 high) or the classic 9x9
+(digits 1 to 9, 3x3 boxes).
+
+### Rules
+
+- **Entering digits:** tap a square, then a digit on the pad. Each pad button shows how
+  many of that digit are still to place, and greys out when they're all in. Keyboard:
+  digits, arrow keys to move, N for notes, Backspace to clear notes.
+- **Notes:** switch to Notes to pencil in the digits a square could be. Placing a digit
+  clears it from the notes of every square in the same row, column and box.
+- **Hearts:** every digit is checked straight away. A wrong one isn't placed, flashes
+  red and costs one of three hearts.
+- **Out of hearts:** keep going for no stars, or restart.
+- **Stars** equal the hearts left when the grid is full.
+- **Hints:** 3 per level, free. Each one fills the next square a player could work out
+  from the board as it is, using the easiest technique that does it.
+- **Highlights:** the selected square's row, column and box are shaded, and so is every
+  square with the same digit.
+
+### Levels
+
+Levels 1 to 3 are tutorials (two 6x6, one 9x9). After that, level N is generated from N
+as the seed, so everyone gets the same puzzle. 6x6 boards are about half the levels at
+first and turn up now and then later as a breather. 9x9 boards take over as the
+techniques needed ramp up over the first 35 levels.
+
+The generator (`src/games/numbers/core/levels.ts`) fills a random complete grid, then
+takes clues away: in mirrored pairs at first (for the usual symmetric look), one at a
+time on later tries. A removal stays only if the puzzle still has exactly one answer
+(a backtracking solver in `grid.ts` counts them) and a solver that works like a person
+can still finish it without anything harder than the level calls for. Harder levels get
+more tries, and of those, one that really needs the level's hardest technique, with the
+fewest clues, is kept.
+
+The difficulty label is the hardest technique that solver needs
+(`src/games/numbers/core/techniques.ts`), always trying the easiest first:
+
+| Label | Hardest technique needed |
+| --- | --- |
+| Easy | Hidden single in a box: the only square in a box where a digit fits |
+| Medium | Naked single (one digit left in a square) or hidden single in a row or column |
+| Hard | Pointing or claiming: a digit's spots in a box all in one line, or the reverse |
+| Super Hard | Naked or hidden pairs, triples, or an X-wing |
+
+Hover the label in game to see the technique.
+
 ## Development
 
 ```bash
@@ -540,12 +590,12 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
 ```
-src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture), settings
+src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture, #/numbers), settings
 src/shared/            sound, themes, icons, update check, seeded RNG, worker level loader
 src/games/arrows/      Arrow Escape: core rules, generator and solver, rendering, input, UI
 src/games/sandglass/   Sandglass: the same split
@@ -557,6 +607,7 @@ src/games/crates/      Crate Push: the same split, plus core/room.ts for carving
 src/games/lights/      Light Switch: the same split
 src/games/ice/         Ice Slide: the same split
 src/games/picture/     Picture Grid: the same split, plus core/line.ts (line solver) and core/pictures.ts (drawings)
+src/games/numbers/     Number Place: the same split, plus core/grid.ts (counting answers) and core/techniques.ts
 ```
 
 Each game exports a `GameModule` (`src/games/types.ts`): it builds its own screens and
