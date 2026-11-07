@@ -23,6 +23,7 @@ stars and settings.
 | Tents and Trees | Pitch a tent beside every tree; tents never touch. |
 | Hidden Mines | Uncover every safe square using the numbers. Never a guess. |
 | Brick Breaker | Paddle, ball and a wall of bricks: break them all, level by level. |
+| Stack Tower | Tap to drop sliding blocks onto a tower; overhangs are cut off. Endless. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -742,6 +743,29 @@ of steel: (speed - 11) x 1.2 + hits / 20 + steel share x 25:
 
 Hover the label in game to see the ball speed and score.
 
+## Stack Tower
+
+A block slides back and forth above the tower. Tap anywhere (or press Space) to drop it.
+Whatever hangs over the edge of the block below is cut off and falls away, so the tower
+gets narrower every time you miss. Miss the tower completely and it's over. Endless:
+build as high as you can.
+
+### Rules
+
+- **Perfect drops:** a drop within a hair (0.12 of a block unit) of dead on snaps into
+  place with nothing cut off. After three perfect drops in a row, every further one grows
+  the block back a little (a quarter unit), up to its starting width.
+- **Speed:** the block slides faster as the tower grows, up to a limit.
+- **Timing:** the drop uses the moment your finger touched the screen (the touch's own
+  timestamp), not the next frame drawn, so a tap lands where you saw the block.
+- **Best:** your best height, most perfect drops in one tower and towers built are kept.
+  Opening a card or leaving the tab holds the block still.
+
+Each tower gets its own colours and its own order of sides the blocks come in from. The
+rules (`src/games/stack/core/sim.ts`) have no timing in them: the sliding block's
+position is worked out from how long it has been sliding, so the tests can drop it at
+exact spots.
+
 ## Development
 
 ```bash
@@ -753,12 +777,12 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
 ```
-src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture, #/numbers, #/tents, #/mines, #/bricks), settings
+src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture, #/numbers, #/tents, #/mines, #/bricks, #/stack), settings
 src/shared/            sound, themes, icons, update check, seeded RNG, worker level loader
 src/games/arrows/      Arrow Escape: core rules, generator and solver, rendering, input, UI
 src/games/sandglass/   Sandglass: the same split
@@ -774,10 +798,13 @@ src/games/numbers/     Number Place: the same split, plus core/grid.ts (counting
 src/games/tents/       Tents and Trees: the same split
 src/games/mines/       Hidden Mines: the same split
 src/games/bricks/      Brick Breaker: rules in core/sim.ts (fixed steps), walls in core/levels.ts
+src/games/stack/       Stack Tower: rules in core/sim.ts, no levels
 ```
 
 Each game exports a `GameModule` (`src/games/types.ts`): it builds its own screens and
-gets shared services (modal, toast, theme, sound) from the shell. Adding a game means
+gets shared services (modal, toast, theme, sound) from the shell. Every game's element
+ids start with its own two-letter prefix (Snake uses `sn-` and Snake Trails `st-`, so
+Stack Tower uses `tw-`); two games sharing a prefix would show each other's screens. Adding a game means
 adding a folder and one line in `src/main.ts`.
 
 ## Deploying

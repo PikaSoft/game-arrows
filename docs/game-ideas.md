@@ -22,7 +22,7 @@ and art for each one and don't copy a specific existing game.
 | 8 | [Tents and Trees / Star Battle](#8-tents-and-trees--star-battle) | Deduction | Logic | Medium | **Tents and Trees built** (`src/games/tents/`); Star Battle still an idea |
 | 9 | ~~[Hidden Mines](#9-hidden-mines)~~ | Deduction | Logic | Medium | **Built** (`src/games/mines/`) |
 | 10 | ~~[Brick Breaker](#10-brick-breaker)~~ | Arcade | Arcade | Medium | **Built** (`src/games/bricks/`) |
-| 11 | [Stack Tower](#11-stack-tower) | Arcade | Arcade | Small | Idea |
+| 11 | ~~[Stack Tower](#11-stack-tower)~~ | Arcade | Arcade | Small | **Built** (`src/games/stack/`) |
 | 12 | [Lane Dodger](#12-lane-dodger) | Arcade | Arcade | Small to medium | Idea |
 | 13 | [Merge Tiles](#13-merge-tiles) | Endless | Number | Small | Idea |
 | 14 | [Word Grid](#14-word-grid) | Word | Word | Medium to large | Idea |
@@ -553,6 +553,12 @@ the paddle.
 ---
 
 ## 11. Stack Tower
+
+> **Built.** Stack Tower is in the collection (`src/games/stack/`, route `#/stack`). See
+> the Stack Tower section of the README for how it ended up working. It follows the plan
+> below, including reading the block's position at the tap's own timestamp. The block's
+> position is a function of time since it appeared, so the rules stay pure and the tests
+> can drop it at exact spots. It uses a flat side view.
 
 **Idea.** A block slides back and forth above the tower. Tap to drop it. Any part hanging
 over the block below is cut off and falls. The tower gets narrower as you miss.
