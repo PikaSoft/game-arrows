@@ -191,3 +191,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
   background: var(--line); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-weight: 700; font-size: 15px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.2); text-align: center;
 }
+
+/* Picture Grid: the Fill / Cross switch under the board. */
+.mode-bar { display: flex; justify-content: center; padding: 6px 0 calc(10px + env(safe-area-inset-bottom)); }

@@ -17,6 +17,7 @@ stars and settings.
 | Crate Push | Push every crate onto a target in a small warehouse. No pulling. |
 | Light Switch | Each tap flips a light and its neighbours. Turn every light off. |
 | Ice Slide | Slide a puck across the ice and stop it exactly on the flag. |
+| Picture Grid | Use the number clues to fill the grid and reveal a picture. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -477,6 +478,57 @@ positions reachable). A board full of traps punishes the obvious first swipe:
 
 Hover the label in game to see the numbers.
 
+## Picture Grid
+
+Numbers beside each row and above each column give the runs of filled squares in that
+line, in order, with at least one empty square between runs. Work out which squares are
+filled to reveal a picture.
+
+### Rules
+
+- **Marking:** tap a square to mark it, as filled or crossed (empty) depending on the
+  Fill / Cross switch under the board. Drag along a row or column to mark several at
+  once.
+- **Hearts:** every mark is checked straight away. A wrong one shows what the square
+  really is (in red) and costs one of three hearts, and stops a drag. So everything on
+  the board is always true, and a marked square can't be changed.
+- **Out of hearts:** keep going for no stars, or restart.
+- **Stars** equal the hearts left when the picture is done.
+- **Finished lines:** once every filled square in a row or column is found, the rest of
+  it is crossed off and its numbers fade.
+- **Hints:** 3 per level, free. Each one reveals a square that line logic can work out
+  from what's on the board, preferring a filled one.
+
+### Levels
+
+Levels 1 to 3 are hand-drawn tutorials (a heart, a house, a mug), and every tenth level
+after that is one of 10 hand-drawn pictures, in turn. The rest are generated from the
+level number as the seed. Boards grow from 6x6 to about 12x12 over the first 35 levels,
+then vary.
+
+Generated pictures (`src/games/picture/core/levels.ts`) start as random values, smoothed
+by averaging each square with its neighbours so they form shapes rather than static,
+then the top half or so is filled. A board is kept only if line logic alone can finish
+it, which also means it has exactly one answer. The line solver
+(`src/games/picture/core/line.ts`) works out, for one row or column, what every
+placement of its runs that fits the known squares agrees on, without listing the
+placements one by one. Every hand-drawn picture is checked the same way in the tests.
+
+The difficulty label is measured like Arrow Escape's. The solver works in waves: every
+row and column is solved using only what was known when the wave began, the way a
+player scans the board and then looks again. For each wave it takes
+(open squares + 1) / (squares settled that wave + 1), and the label comes from the
+average:
+
+| Label | Open squares per square settled |
+| --- | --- |
+| Easy | under 1.5 |
+| Medium | 1.5 to 1.9 |
+| Hard | 1.9 to 2.5 |
+| Super Hard | 2.5 or more |
+
+Hover the label in game to see the number.
+
 ## Development
 
 ```bash
@@ -488,12 +540,12 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
 ```
-src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice), settings
+src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture), settings
 src/shared/            sound, themes, icons, update check, seeded RNG, worker level loader
 src/games/arrows/      Arrow Escape: core rules, generator and solver, rendering, input, UI
 src/games/sandglass/   Sandglass: the same split
@@ -504,6 +556,7 @@ src/games/lines/       Colour Lines: the same split, plus core/paths.ts for grow
 src/games/crates/      Crate Push: the same split, plus core/room.ts for carving rooms
 src/games/lights/      Light Switch: the same split
 src/games/ice/         Ice Slide: the same split
+src/games/picture/     Picture Grid: the same split, plus core/line.ts (line solver) and core/pictures.ts (drawings)
 ```
 
 Each game exports a `GameModule` (`src/games/types.ts`): it builds its own screens and
