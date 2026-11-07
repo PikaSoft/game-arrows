@@ -18,7 +18,7 @@ and art for each one and don't copy a specific existing game.
 | 4 | ~~[Light Switch](#4-light-switch)~~ | Toggle grid | Closest | Small | **Built** (`src/games/lights/`) |
 | 5 | ~~[Ice Slide](#5-ice-slide)~~ | Slide to exit | Closest | Small | **Built** (`src/games/ice/`) |
 | 6 | ~~[Picture Grid](#6-picture-grid)~~ | Deduction | Logic | Medium | **Built** (`src/games/picture/`) |
-| 7 | [Number Place](#7-number-place) | Deduction | Logic | Medium | Idea |
+| 7 | ~~[Number Place](#7-number-place)~~ | Deduction | Logic | Medium | **Built** (`src/games/numbers/`) |
 | 8 | [Tents and Trees / Star Battle](#8-tents-and-trees--star-battle) | Deduction | Logic | Medium | Idea |
 | 9 | [Hidden Mines](#9-hidden-mines) | Deduction | Logic | Medium | Idea |
 | 10 | [Brick Breaker](#10-brick-breaker) | Arcade | Arcade | Medium | Idea |
@@ -379,6 +379,13 @@ standard left-most and right-most placement trick or a small dynamic programme.
 ---
 
 ## 7. Number Place
+
+> **Built.** Number Place is in the collection (`src/games/numbers/`, route `#/numbers`).
+> See the Number Place section of the README for how it ended up working. It follows the
+> plan below, with 6x6 boards as the quick variant (extra regions are not built). Puzzles
+> that need triples or X-wings turned out too rare to find by random removal, so the top
+> tier starts at naked and hidden pairs. Clues come out in mirrored pairs at first, then
+> one at a time on later tries, which leaves more room for hard puzzles.
 
 **Idea.** A 9x9 grid split into nine 3x3 boxes. Fill digits 1 to 9 so each row, column
 and box holds each digit once.
