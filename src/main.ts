@@ -141,9 +141,11 @@ $('#game-cards').addEventListener('click', (e) => {
 function openSettings() {
   const sw = (id: string, on: boolean) => `<button class="switch" role="switch" data-action="${id}" aria-checked="${on}"></button>`;
   const opts = THEME_ORDER.map((id) => `<option value="${id}" ${id === settings.theme ? 'selected' : ''}>${themeLabel(id)}</option>`).join('');
-  const resets = games
-    .map((g) => `<button class="btn small secondary" data-action="reset" data-game="${g.id}">Reset ${g.name}</button>`)
-    .join('');
+  // Only the game being played can be reset from here. On the home screen there's no game
+  // open, so say where to find the reset instead of listing every game.
+  const resets = activeGame
+    ? `<button class="btn small secondary" data-action="reset" data-game="${activeGame.id}">Reset ${activeGame.name}</button>`
+    : '<p class="setting-note">To reset a game\'s progress, open its settings from inside the game.</p>';
   openModal(
     `<h2>Settings</h2>
      <div class="setting"><span>Sound</span>${sw('sound', settings.sound)}</div>

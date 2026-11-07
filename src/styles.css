@@ -203,3 +203,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .digit-pad button:disabled { opacity: 0.3; }
 .digit-pad button:active { background: color-mix(in srgb, var(--accent) 30%, var(--surface)); }
 .mode-bar .btn.small { margin-left: 10px; }
+
+/* Settings: the note shown on the home screen instead of reset buttons. */
+.setting-note { margin: 4px 0 0; font-size: 13px; color: var(--muted); text-align: center; }
