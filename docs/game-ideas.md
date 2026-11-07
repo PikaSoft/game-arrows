@@ -20,7 +20,7 @@ and art for each one and don't copy a specific existing game.
 | 6 | ~~[Picture Grid](#6-picture-grid)~~ | Deduction | Logic | Medium | **Built** (`src/games/picture/`) |
 | 7 | ~~[Number Place](#7-number-place)~~ | Deduction | Logic | Medium | **Built** (`src/games/numbers/`) |
 | 8 | [Tents and Trees / Star Battle](#8-tents-and-trees--star-battle) | Deduction | Logic | Medium | **Tents and Trees built** (`src/games/tents/`); Star Battle still an idea |
-| 9 | [Hidden Mines](#9-hidden-mines) | Deduction | Logic | Medium | Idea |
+| 9 | ~~[Hidden Mines](#9-hidden-mines)~~ | Deduction | Logic | Medium | **Built** (`src/games/mines/`) |
 | 10 | [Brick Breaker](#10-brick-breaker) | Arcade | Arcade | Medium | Idea |
 | 11 | [Stack Tower](#11-stack-tower) | Arcade | Arcade | Small | Idea |
 | 12 | [Lane Dodger](#12-lane-dodger) | Arcade | Arcade | Small to medium | Idea |
@@ -465,6 +465,14 @@ region has exactly one (or two, on bigger boards), and no two stars touch.
 ---
 
 ## 9. Hidden Mines
+
+> **Built.** Hidden Mines is in the collection (`src/games/mines/`, route `#/mines`). See
+> the Hidden Mines section of the README for how it ended up working. Instead of a
+> pulsing start square, the start area opens by itself, so there is no first tap to get
+> wrong. Long press flags (the same gesture as Picture Grid's cross), with a Reveal /
+> Flag switch for those who prefer taps, and tapping a number whose mines are flagged
+> opens the rest around it. Boards that would need a guess are simply rejected, which
+> was fast enough that moving mines wasn't needed.
 
 **Idea.** A grid hides mines. Revealing a cell shows how many of its eight neighbours
 are mines. Reveal every safe cell. The selling point: every board can be finished
