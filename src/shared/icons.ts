@@ -78,3 +78,6 @@ export const minesLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="none
 
 /** Brick Breaker logo: a wall of bricks, a ball and a paddle. */
 export const bricksLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke-linejoin="round"><rect x="6" y="8" width="16" height="8" rx="2" fill="#d9584a"/><rect x="24" y="8" width="16" height="8" rx="2" fill="#d9584a"/><rect x="42" y="8" width="16" height="8" rx="2" fill="#d9584a"/><rect x="6" y="18" width="16" height="8" rx="2" fill="#e8b93a"/><rect x="42" y="18" width="16" height="8" rx="2" fill="#e8b93a"/><circle cx="34" cy="38" r="4" fill="var(--line)"/><rect x="18" y="50" width="28" height="6" rx="3" fill="var(--accent)" stroke="var(--line)" stroke-width="2"/></svg>`;
+
+/** Stack Tower logo: a stack of shrinking slabs with one sliding in. */
+export const stackLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="none"><rect x="12" y="46" width="40" height="10" rx="2" fill="hsl(200,55%,58%)"/><rect x="15" y="35" width="34" height="10" rx="2" fill="hsl(207,55%,58%)"/><rect x="18" y="24" width="28" height="10" rx="2" fill="hsl(214,55%,58%)"/><rect x="30" y="10" width="28" height="10" rx="2" fill="var(--accent)"/><path d="M8 15h16" stroke="var(--line)" stroke-width="3" stroke-linecap="round" stroke-dasharray="3 4"/></svg>`;
