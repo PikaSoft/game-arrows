@@ -10,22 +10,22 @@ and art for each one and don't copy a specific existing game.
 
 ## Contents
 
-| # | Game | Kind | Fit | Effort |
-| --- | --- | --- | --- | --- |
-| 1 | [Pipe Link](#1-pipe-link) | Rotate tiles | Closest | Small |
-| 2 | [Colour Lines](#2-colour-lines) | Join dots | Closest | Medium |
-| 3 | [Crate Push](#3-crate-push) | Push puzzle | Closest | Medium to large |
-| 4 | [Light Switch](#4-light-switch) | Toggle grid | Closest | Small |
-| 5 | [Ice Slide](#5-ice-slide) | Slide to exit | Closest | Small |
-| 6 | [Picture Grid](#6-picture-grid) | Deduction | Logic | Medium |
-| 7 | [Number Place](#7-number-place) | Deduction | Logic | Medium |
-| 8 | [Tents and Trees / Star Battle](#8-tents-and-trees--star-battle) | Deduction | Logic | Medium |
-| 9 | [Hidden Mines](#9-hidden-mines) | Deduction | Logic | Medium |
-| 10 | [Brick Breaker](#10-brick-breaker) | Arcade | Arcade | Medium |
-| 11 | [Stack Tower](#11-stack-tower) | Arcade | Arcade | Small |
-| 12 | [Lane Dodger](#12-lane-dodger) | Arcade | Arcade | Small to medium |
-| 13 | [Merge Tiles](#13-merge-tiles) | Endless | Number | Small |
-| 14 | [Word Grid](#14-word-grid) | Word | Word | Medium to large |
+| # | Game | Kind | Fit | Effort | Status |
+| --- | --- | --- | --- | --- | --- |
+| 1 | ~~[Pipe Link](#1-pipe-link)~~ | Rotate tiles | Closest | Small | **Built** (`src/games/pipes/`) |
+| 2 | [Colour Lines](#2-colour-lines) | Join dots | Closest | Medium | Idea |
+| 3 | [Crate Push](#3-crate-push) | Push puzzle | Closest | Medium to large | Idea |
+| 4 | [Light Switch](#4-light-switch) | Toggle grid | Closest | Small | Idea |
+| 5 | [Ice Slide](#5-ice-slide) | Slide to exit | Closest | Small | Idea |
+| 6 | [Picture Grid](#6-picture-grid) | Deduction | Logic | Medium | Idea |
+| 7 | [Number Place](#7-number-place) | Deduction | Logic | Medium | Idea |
+| 8 | [Tents and Trees / Star Battle](#8-tents-and-trees--star-battle) | Deduction | Logic | Medium | Idea |
+| 9 | [Hidden Mines](#9-hidden-mines) | Deduction | Logic | Medium | Idea |
+| 10 | [Brick Breaker](#10-brick-breaker) | Arcade | Arcade | Medium | Idea |
+| 11 | [Stack Tower](#11-stack-tower) | Arcade | Arcade | Small | Idea |
+| 12 | [Lane Dodger](#12-lane-dodger) | Arcade | Arcade | Small to medium | Idea |
+| 13 | [Merge Tiles](#13-merge-tiles) | Endless | Number | Small | Idea |
+| 14 | [Word Grid](#14-word-grid) | Word | Word | Medium to large | Idea |
 
 Effort is a rough guide next to Squeeze: small is under half of its code, large is
 more than all of it.
@@ -107,6 +107,13 @@ same on every device.
 ---
 
 ## 1. Pipe Link
+
+> **Built.** Pipe Link is in the collection (`src/games/pipes/`, route `#/pipes`). See the
+> Pipe Link section of the README for how it ended up working. The main differences from
+> the plan below: taps only turn clockwise, a long-press (or right-click) locks a tile,
+> and the difficulty label is measured in waves of deduction like Arrow Escape's, since
+> the edge rule alone solves almost every board and so could not tell them apart.
+> Wrap-around boards are not built yet.
 
 **Idea.** A grid of pipe tiles (straight, corner, T, cross, end caps). Tap a tile to
 turn it 90 degrees. Connect the source to every outlet with no loose ends.

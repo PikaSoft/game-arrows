@@ -1,5 +1,6 @@
 import './styles.css';
 import { createArrows } from './games/arrows/ui';
+import { createPipes } from './games/pipes/ui';
 import { createSandglass } from './games/sandglass/ui';
 import { createSnakeGame } from './games/snake/ui';
 import { createSqueeze } from './games/squeeze/ui';
@@ -200,6 +201,7 @@ games.push(
   createSnakeGame(shell, 'classic'),
   createSnakeGame(shell, 'trails'),
   createSqueeze(shell),
+  createPipes(shell),
 );
 
 document.addEventListener('keydown', (e) => {

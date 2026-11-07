@@ -48,3 +48,6 @@ export const trailsLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="non
 
 /** Squeeze logo: a framed board with a gap and an L block sliding out of it. */
 export const squeezeLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M34 8H8v48h48V8h-8" stroke="var(--line)" stroke-width="4.5"/><rect x="14" y="36" width="14" height="14" rx="3" fill="#4f9ed8"/><path d="M36 2h8v14h8v8H36z" fill="#d9584a"/><rect x="32" y="36" width="18" height="7" rx="3" fill="#e8b93a"/></svg>`;
+
+/** Pipe Link logo: a tap feeding a bent pipe that ends in a full basin. */
+export const pipeLogo = `<svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke-linecap="butt" stroke-linejoin="round"><path d="M18 14v22h28v16" stroke="var(--line)" stroke-width="13"/><path d="M18 14v22h28v16" stroke="#3f95dc" stroke-width="6"/><circle cx="18" cy="14" r="9" fill="var(--accent)" stroke="var(--line)" stroke-width="3.5"/><circle cx="18" cy="14" r="3.5" fill="#3f95dc"/><circle cx="46" cy="52" r="8" fill="#3f95dc" stroke="var(--line)" stroke-width="3.5"/></svg>`;
