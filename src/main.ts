@@ -4,6 +4,7 @@ import { createCrates } from './games/crates/ui';
 import { createIce } from './games/ice/ui';
 import { createLights } from './games/lights/ui';
 import { createLines } from './games/lines/ui';
+import { createMines } from './games/mines/ui';
 import { createNumbers } from './games/numbers/ui';
 import { createPicture } from './games/picture/ui';
 import { createTents } from './games/tents/ui';
@@ -216,6 +217,7 @@ games.push(
   createPicture(shell),
   createNumbers(shell),
   createTents(shell),
+  createMines(shell),
 );
 
 document.addEventListener('keydown', (e) => {

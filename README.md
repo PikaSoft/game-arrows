@@ -20,6 +20,7 @@ stars and settings.
 | Picture Grid | Use the number clues to fill the grid and reveal a picture. |
 | Number Place | Fill the grid so every row, column and box holds each digit once. |
 | Tents and Trees | Pitch a tent beside every tree; tents never touch. |
+| Hidden Mines | Uncover every safe square using the numbers. Never a guess. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -636,6 +637,58 @@ The difficulty label is measured like Arrow Escape's: for each wave,
 
 Hover the label in game to see the number.
 
+## Hidden Mines
+
+The board hides mines. An uncovered square shows how many of the eight squares around it
+are mines. Uncover every safe square. Every board can be finished without guessing.
+
+### Rules
+
+- **Starting:** the start area opens by itself, so there's never a blind first tap.
+- **Uncovering:** tap a covered square to uncover it. A 0 opens everything around it.
+- **Flags:** hold a square for a moment (or right-click) to flag it as a mine, and again
+  to take the flag off. A Reveal / Flag switch swaps what a tap and a long press do.
+  Flags are your own notes and are never checked; they just stop a square being
+  uncovered by mistake. The counter shows mines left minus flags.
+- **Opening around a number:** tap an uncovered number whose mines are all flagged to
+  uncover every other square around it. A wrong flag means a mine goes off.
+- **Hearts:** setting off a mine costs one of three hearts. The mine stays shown and
+  play goes on.
+- **Out of hearts:** keep going for no stars, or restart.
+- **Stars** equal the hearts left when every safe square is uncovered.
+- **Hints:** 3 per level, free. Each one uncovers a square that can be worked out as safe
+  from what's showing (or, if only mines can be worked out, flags one).
+
+### Levels
+
+Levels 1 to 3 are tutorials. After that, level N is generated from N as the seed, so
+everyone gets the same board. Boards grow from 8x9 to about 10x14 over the first 35
+levels, then vary, with mines on 13% to 21% of the squares.
+
+The generator (`src/games/mines/core/levels.ts`) picks a start square near the middle,
+scatters mines anywhere except it and its neighbours, and keeps a board only if a solver
+that never guesses (`src/games/mines/core/solver.ts`) can finish it from there. The
+solver works in waves, each time with the simplest reasoning that gets anywhere:
+
+1. One number at a time: if its mines are all found, the rest around it are safe; if
+   its covered squares are exactly the mines it still needs, they're all mines.
+2. Two numbers that share squares: if the mines one needs can't all fit in the shared
+   squares, the rest must fill its own squares, which can settle the other's.
+3. Trying every arrangement of mines along the edge of the open area, together with the
+   count of mines left, and keeping what's the same in all of them.
+
+The difficulty label scores how much more than rule 1 a board needs: each wave of rule 2
+counts 1 and each wave of rule 3 counts 3:
+
+| Label | Score |
+| --- | --- |
+| Easy | 0 to 2 |
+| Medium | 3 to 5 |
+| Hard | 6 to 8 |
+| Super Hard | 9 or more |
+
+Hover the label in game to see the hardest reasoning needed.
+
 ## Development
 
 ```bash
@@ -647,12 +700,12 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
 ```
-src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture, #/numbers, #/tents), settings
+src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture, #/numbers, #/tents, #/mines), settings
 src/shared/            sound, themes, icons, update check, seeded RNG, worker level loader
 src/games/arrows/      Arrow Escape: core rules, generator and solver, rendering, input, UI
 src/games/sandglass/   Sandglass: the same split
@@ -666,6 +719,7 @@ src/games/ice/         Ice Slide: the same split
 src/games/picture/     Picture Grid: the same split, plus core/line.ts (line solver) and core/pictures.ts (drawings)
 src/games/numbers/     Number Place: the same split, plus core/grid.ts (counting answers) and core/techniques.ts
 src/games/tents/       Tents and Trees: the same split
+src/games/mines/       Hidden Mines: the same split
 ```
 
 Each game exports a `GameModule` (`src/games/types.ts`): it builds its own screens and
