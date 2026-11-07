@@ -21,6 +21,7 @@ stars and settings.
 | Number Place | Fill the grid so every row, column and box holds each digit once. |
 | Tents and Trees | Pitch a tent beside every tree; tents never touch. |
 | Hidden Mines | Uncover every safe square using the numbers. Never a guess. |
+| Brick Breaker | Paddle, ball and a wall of bricks: break them all, level by level. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -689,6 +690,57 @@ counts 1 and each wave of rule 3 counts 3:
 
 Hover the label in game to see the hardest reasoning needed.
 
+## Brick Breaker
+
+Keep the ball in play with the paddle and break every brick in the wall. Each level gives
+you three balls.
+
+### Rules
+
+- **Paddle:** drag anywhere to move it. The paddle follows your finger's movement rather
+  than jumping under it, so your finger never covers it. Arrow keys work too.
+- **Serving:** the ball waits on the paddle; tap (or press Space) to launch it.
+- **Angles:** where the ball lands on the paddle sets where it goes: the middle sends it
+  straight up, the edges send it out wide.
+- **Bricks:** darker bricks take more hits (the dots show how many are left). From level
+  12, about half the walls have grey steel bricks that never break.
+- **Capsules:** a broken brick sometimes drops one. Catch it with the paddle: W widens the
+  paddle for 15 seconds, S slows the ball for 12, and + splits every ball into three.
+- **Balls and stars:** dropping the last ball in play costs one of three hearts. Stars
+  equal the hearts left when the wall is gone. Lose all three and the level starts over.
+- **Pause:** the pause button (or P), opening a card, or leaving the tab pauses the game.
+
+### Levels
+
+Levels 1 to 3 are tutorials. After that, level N is generated from N as the seed, so
+everyone gets the same wall. Walls grow from 3 to 6 rows and the ball speeds up from
+about 12 to 16 units a second over the first 35 levels, then vary, with the odd easier
+level.
+
+Walls (`src/games/bricks/core/levels.ts`) are a pattern for the left half (solid,
+checker, pyramid, diamond, stripes, columns or scattered), mirrored to the right, with
+tougher bricks nearer the top. Steel goes in mirrored pairs, and only where every
+breakable brick can still be reached (from below, or over the top once the ball breaks
+through) and none is boxed in between steel and the side wall.
+
+The rules (`src/games/bricks/core/sim.ts`) have no drawing or timing in them: the game
+runs them at 240 small steps a second, which keeps the ball from skipping through a
+brick, and the ball never leaves the paddle or a wall flatter than 22 degrees, so it
+can't bounce side to side for ever. The tests play levels through with a simple player
+that aims at the lowest bricks, to check they can be cleared.
+
+The difficulty label blends ball speed, the number of hits the wall takes and the share
+of steel: (speed - 11) x 1.2 + hits / 20 + steel share x 25:
+
+| Label | Score |
+| --- | --- |
+| Easy | under 4 |
+| Medium | 4 to 7 |
+| Hard | 7 to 10.5 |
+| Super Hard | 10.5 or more |
+
+Hover the label in game to see the ball speed and score.
+
 ## Development
 
 ```bash
@@ -700,12 +752,12 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
 ```
-src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture, #/numbers, #/tents, #/mines), settings
+src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture, #/numbers, #/tents, #/mines, #/bricks), settings
 src/shared/            sound, themes, icons, update check, seeded RNG, worker level loader
 src/games/arrows/      Arrow Escape: core rules, generator and solver, rendering, input, UI
 src/games/sandglass/   Sandglass: the same split
@@ -720,6 +772,7 @@ src/games/picture/     Picture Grid: the same split, plus core/line.ts (line sol
 src/games/numbers/     Number Place: the same split, plus core/grid.ts (counting answers) and core/techniques.ts
 src/games/tents/       Tents and Trees: the same split
 src/games/mines/       Hidden Mines: the same split
+src/games/bricks/      Brick Breaker: rules in core/sim.ts (fixed steps), walls in core/levels.ts
 ```
 
 Each game exports a `GameModule` (`src/games/types.ts`): it builds its own screens and

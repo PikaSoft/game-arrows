@@ -21,7 +21,7 @@ and art for each one and don't copy a specific existing game.
 | 7 | ~~[Number Place](#7-number-place)~~ | Deduction | Logic | Medium | **Built** (`src/games/numbers/`) |
 | 8 | [Tents and Trees / Star Battle](#8-tents-and-trees--star-battle) | Deduction | Logic | Medium | **Tents and Trees built** (`src/games/tents/`); Star Battle still an idea |
 | 9 | ~~[Hidden Mines](#9-hidden-mines)~~ | Deduction | Logic | Medium | **Built** (`src/games/mines/`) |
-| 10 | [Brick Breaker](#10-brick-breaker) | Arcade | Arcade | Medium | Idea |
+| 10 | ~~[Brick Breaker](#10-brick-breaker)~~ | Arcade | Arcade | Medium | **Built** (`src/games/bricks/`) |
 | 11 | [Stack Tower](#11-stack-tower) | Arcade | Arcade | Small | Idea |
 | 12 | [Lane Dodger](#12-lane-dodger) | Arcade | Arcade | Small to medium | Idea |
 | 13 | [Merge Tiles](#13-merge-tiles) | Endless | Number | Small | Idea |
@@ -510,6 +510,16 @@ so the player doesn't tap elsewhere and lose a heart.
 ---
 
 ## 10. Brick Breaker
+
+> **Built.** Brick Breaker is in the collection (`src/games/bricks/`, route `#/bricks`).
+> See the Brick Breaker section of the README for how it ended up working. It follows the
+> plan below. Two things the plan didn't foresee: at first a level took a simulated
+> player three to six minutes, so walls were capped at six rows and the ball sped up;
+> and a brick boxed in between steel and the side wall could take ages to reach, so
+> steel is never placed where it would do that. The "sealed off" check also had to allow
+> for the wall spanning the full width (the ball only gets in from below, or over the top
+> once it breaks through). Instead of a fixed time step per frame, the sim runs at 240
+> small steps a second, which is enough that the ball can't skip through a brick.
 
 **Idea.** A paddle at the bottom, a ball, and rows of bricks. Clear every brick in each
 numbered level.
