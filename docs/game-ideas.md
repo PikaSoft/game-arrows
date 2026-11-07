@@ -25,7 +25,7 @@ and art for each one and don't copy a specific existing game.
 | 11 | ~~[Stack Tower](#11-stack-tower)~~ | Arcade | Arcade | Small | **Built** (`src/games/stack/`) |
 | 12 | ~~[Lane Dodger](#12-lane-dodger)~~ | Arcade | Arcade | Small to medium | **Built** (`src/games/lanes/`) |
 | 13 | ~~[Merge Tiles](#13-merge-tiles)~~ | Endless | Number | Small | **Built** (`src/games/merge/`) |
-| 14 | [Word Grid](#14-word-grid) | Word | Word | Medium to large | Idea |
+| 14 | ~~[Word Grid](#14-word-grid)~~ | Word | Word | Medium to large | **Built** (`src/games/words/`) |
 
 Effort is a rough guide next to Squeeze: small is under half of its code, large is
 more than all of it.
@@ -652,6 +652,15 @@ not 8).
 ---
 
 ## 14. Word Grid
+
+> **Built.** Word Grid is in the collection (`src/games/words/`, route `#/words`). See the
+> Word Grid section of the README for how it ended up working. The word list is the
+> 12dicts 3of6game list (public domain, by Alan Beale), cleaned by
+> `tools/build-words.mjs`. It's loaded only by the level builder, which runs in a worker:
+> each level carries the words its grid holds, so the game screens never need the list.
+> Two changes from the plan: the star targets are a share of the grid's words but capped
+> (at most 10, 20 and 30 words), since 40% of 140 words in two minutes is out of reach;
+> and the label comes from how many words the grid hides.
 
 **Idea.** A 4x4 or 5x5 grid of letters. Trace words through touching letters before the
 timer runs out.

@@ -206,3 +206,17 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 /* Settings: the note shown on the home screen instead of reset buttons. */
 .setting-note { margin: 4px 0 0; font-size: 13px; color: var(--muted); text-align: center; }
+
+/* Word Grid: the word being traced, found words, and the star targets. */
+.word-line { min-height: 32px; margin: 4px 16px 0; text-align: center; font-size: 22px; font-weight: 800; letter-spacing: 0.06em; color: var(--text); }
+.word-line.good { color: #4a9a48; }
+.word-line.bad { color: var(--danger); }
+.word-line.meh { color: var(--muted); }
+.found-list { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 12px calc(10px + env(safe-area-inset-bottom)); max-height: 22vh; overflow-y: auto; justify-content: center; }
+.chip { display: inline-flex; align-items: baseline; gap: 4px; padding: 4px 10px; border-radius: 999px; background: var(--surface); color: var(--text); font-weight: 700; font-size: 14px; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--line) 20%, transparent); }
+.chip small { color: var(--muted); font-size: 11px; }
+.targets span { display: inline-flex; align-items: center; gap: 1px; color: var(--muted); }
+.targets span.got { color: var(--text); }
+.targets svg { width: 14px; height: 14px; }
+.timer.low { color: var(--danger); }
+.missed { line-height: 2; }

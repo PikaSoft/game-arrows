@@ -26,6 +26,7 @@ stars and settings.
 | Stack Tower | Tap to drop sliding blocks onto a tower; overhangs are cut off. Endless. |
 | Lane Dodger | Swipe between three lanes and jump hurdles. Endless. |
 | Merge Tiles | Slide tiles so three of a kind merge; stones get in the way. Endless. |
+| Word Grid | Trace words through touching letters against the clock. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -822,6 +823,60 @@ in them. While designing them, a bot that looks two moves ahead lasted about thr
 as long as one moving at random (a median of about 310 moves against 90), so planning
 pays off.
 
+## Word Grid
+
+A grid of letters (4x4, or 5x5 from level 10). Drag through touching letters, diagonals
+included, to spell a word of 3 letters or more, then let go to try it. Each square can be
+used once per word. Find as many words as you can before the clock runs out: 2 minutes on
+a 4x4 grid, 3 on a 5x5.
+
+### Rules
+
+- **Starting:** the clock starts when you first tap the grid, not while the level loads.
+- **Tracing:** going back over the last letter takes it off. Each word scores once:
+  1 point for 3 or 4 letters, 2 for 5, 3 for 6, 5 for 7 and 11 for 8 or more.
+- **Stars:** each level shows three targets, a number of words to find for each star:
+  about 12%, 22% and 33% of the words in the grid, but never more than 10, 20 and 30. One
+  star unlocks the next level. Your best stars, points and words found are kept.
+- **Hints:** 3 per level, free. Each one rings the first two letters of a word you haven't
+  found (5 to 7 letters if there is one) and says how long it is.
+- **End of round:** shows how many words the grid held and some of the longest you missed.
+  Opening a card or leaving the tab pauses the clock.
+
+### Levels
+
+Levels 1 and 2 are tutorials. After that, level N is generated from N as the seed, so
+everyone gets the same grid. Grids are drawn from a bag weighted by how often letters
+appear in English, with between a quarter and a half vowels, and are kept only if they
+hold at least 20 words and one of 6 letters or more. A search through the grid that
+follows a letter tree (`src/games/words/core/trie.ts`) finds every word. Each level's
+grid hides fewer words than the last over the first 30 or so levels, then it varies.
+
+The difficulty label comes from how many words the grid hides. Grids with plenty of words
+leave lots to choose from; sparse ones need a bigger share of them, and those tend to be
+harder to spot:
+
+| Label | Words in the grid |
+| --- | --- |
+| Easy | 120 or more |
+| Medium | 85 to 119 |
+| Hard | 55 to 84 |
+| Super Hard | under 55 |
+
+Hover the label in game to see the count.
+
+### The word list
+
+Word Grid accepts words from the **12dicts** word lists (version 6.0.2) compiled by
+**Alan Beale**, who has released them to the public domain and asks that their use be
+acknowledged: thank you, Alan. The game uses the 3of6game list, which is meant for word
+games, mixes American and British spellings (so both "colour" and "color" count), and
+includes plurals and other inflected forms. `tools/build-words.mjs` turns it into
+`src/games/words/data/words.txt`, keeping plain lower-case words of 3 to 10 letters and
+leaving out a short list of offensive words (52,325 words, about 440 KB, 136 KB
+compressed). Only the level builder loads the list, and it runs in a worker, so the rest
+of the app never downloads it.
+
 ## Development
 
 ```bash
@@ -833,12 +888,12 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
 ```
-src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture, #/numbers, #/tents, #/mines, #/bricks, #/stack, #/lanes, #/merge), settings
+src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture, #/numbers, #/tents, #/mines, #/bricks, #/stack, #/lanes, #/merge, #/words), settings
 src/shared/            sound, themes, icons, update check, seeded RNG, worker level loader
 src/games/arrows/      Arrow Escape: core rules, generator and solver, rendering, input, UI
 src/games/sandglass/   Sandglass: the same split
@@ -857,6 +912,8 @@ src/games/bricks/      Brick Breaker: rules in core/sim.ts (fixed steps), walls 
 src/games/stack/       Stack Tower: rules in core/sim.ts, no levels
 src/games/lanes/       Lane Dodger: rules in core/sim.ts, the course in core/course.ts
 src/games/merge/       Merge Tiles: sliding in core/rules.ts, a game (spawns, stones) in core/game.ts
+src/games/words/       Word Grid: word search in core/trie.ts, the word list in data/words.txt
+tools/build-words.mjs  builds Word Grid's word list from 12dicts
 ```
 
 Each game exports a `GameModule` (`src/games/types.ts`): it builds its own screens and
