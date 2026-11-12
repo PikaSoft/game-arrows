@@ -6,6 +6,7 @@ import { createIce } from './games/ice/ui';
 import { createLanes } from './games/lanes/ui';
 import { createLights } from './games/lights/ui';
 import { createLines } from './games/lines/ui';
+import { createLoop } from './games/loop/ui';
 import { createMerge } from './games/merge/ui';
 import { createMines } from './games/mines/ui';
 import { createNumbers } from './games/numbers/ui';
@@ -258,6 +259,7 @@ games.push(
   createMerge(shell),
   createWords(shell),
   createStars(shell),
+  createLoop(shell),
 );
 
 document.addEventListener('keydown', (e) => {

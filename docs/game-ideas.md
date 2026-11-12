@@ -26,6 +26,7 @@ and art for each one and don't copy a specific existing game.
 | 12 | ~~[Lane Dodger](#12-lane-dodger)~~ | Arcade | Arcade | Small to medium | **Built** (`src/games/lanes/`) |
 | 13 | ~~[Merge Tiles](#13-merge-tiles)~~ | Endless | Number | Small | **Built** (`src/games/merge/`) |
 | 14 | ~~[Word Grid](#14-word-grid)~~ | Word | Word | Medium to large | **Built** (`src/games/words/`) |
+| 15 | ~~[Colour Loop](#15-colour-loop)~~ | Sort on a belt | Arcade | Medium | **Built** (`src/games/loop/`) |
 
 Effort is a rough guide next to Squeeze: small is under half of its code, large is
 more than all of it.
@@ -695,3 +696,26 @@ harder.
 **Watch out for.** This is the only game that adds a large download. Keep it out of
 the main bundle (dynamic `import()`), and say in the README where the word list came
 from.
+
+---
+
+## 15. Colour Loop
+
+> **Built.** Colour Loop is in the collection (`src/games/loop/`, route `#/loop`). See the
+> Colour Loop section of the README for how it works.
+
+**Idea.** A belt turns in a loop. Tap a column to tip a crate of cubes onto it; trays
+below pick off the cubes of their own colour. Cubes nobody wants yet keep circling, and
+a belt with no room left jams.
+
+**What was learnt building it**
+
+- It is real time, but everything happens on the step the belt moves a slot. That keeps
+  the simulation exact, so undo can restore a snapshot and the solver can play the real
+  belt instead of a simplified model of it.
+- The solver only proves a careful solution (each tap waits for the belt to settle).
+  Rushing is the player's risk to take.
+- Every clear uses the same number of taps, so par moves cannot give stars. Stars come
+  from undos used instead.
+- Random play fails nearly every later level, so "share of random games that jam" is
+  useless as a label. The share of taps that jam spreads the levels out properly.
