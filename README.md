@@ -960,6 +960,9 @@ time: the belt never stops, and you can tap as fast as you like.
   saved.
 - **Clock:** from level 8 most levels have one. It starts on the first tap and the level
   ends if it runs out.
+- **Auto-finish:** once the belt has room for every cube still to come (or every crate
+  is already on it), nothing can jam. The game tips whatever is left, stops the clock
+  and runs the belt fast to the end.
 - **Later levels:** crates that hold two colours (from level 11) and crates that hide
   their colours until they reach the front (from level 18).
 - The HUD shows trays left and how full the belt is. The game pauses when the How to

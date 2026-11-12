@@ -206,6 +206,7 @@ export const HELP: Record<string, Help> = {
       'Now there is a clock. It starts on your first tap: ship every tray before it runs out.',
       'Some crates hold two colours. Both lots of cubes drop together.',
       'Crates marked ? show their colours only when they reach the front.',
+      'Once the belt has room for every cube still to come, nothing can jam: the rest plays out by itself and the clock stops.',
       'One or two undos leave two stars; more leave one. You can tap again before the belt has cleared, but that is how belts jam.',
     ],
   },

@@ -19,8 +19,8 @@ interface Board {
 
 /** Hand-made boards for the first levels. Colours: 0 red, 1 blue, 2 yellow, 3 green. */
 const TUTORIAL_BOARDS: Board[] = [
-  // Any order works: there is room for everything.
-  { supply: [[full(0), full(1)], [full(1), full(0)]], bays: [[0, 0], [1, 1]], capacity: 16 },
+  // Any order works: every cube always has a front tray waiting for it.
+  { supply: [[full(0), full(1)], [full(1), full(0)]], bays: [[0, 0], [1, 1]], capacity: 8 },
   // The second tray in each bay has to wait its turn.
   { supply: [[full(0), full(1)], [full(2), full(0)]], bays: [[0, 1], [2, 0]], capacity: 12 },
   // Both front crates are unwanted. Tipping both fills the belt.

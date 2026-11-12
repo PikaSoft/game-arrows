@@ -30,6 +30,7 @@ export interface Snapshot {
   fill: number[];
   busy: number[];
   taps: number;
+  auto: boolean;
 }
 
 const noEvents = (): Events => ({ dropped: [], taken: [], shipped: [], jammed: false, timeUp: false, won: false });
@@ -69,6 +70,8 @@ export class LoopSim {
   /** Per bay, slots left until the next tray is in place. */
   busy: number[];
   taps = 0;
+  /** The win is certain and the level is playing itself out. The clock has stopped. */
+  auto = false;
   jammed = false;
   timeUp = false;
   won = false;
@@ -119,7 +122,7 @@ export class LoopSim {
   }
 
   canTap(col: number): boolean {
-    return !this.over && col >= 0 && col < this.cols && this.next[col] < this.level.supply[col].length;
+    return !this.over && !this.auto && col >= 0 && col < this.cols && this.next[col] < this.level.supply[col].length;
   }
 
   /** Tip the front crate of a column into its chute. */
@@ -130,6 +133,29 @@ export class LoopSim {
     this.taps++;
     this.started = true;
     return true;
+  }
+
+  /**
+   * True once nothing can go wrong: after the first tap, every cube still to come (in
+   * the chutes and in untipped crates) fits in the belt's empty slots. Empty slots can
+   * then never run short, so no chute waits a whole lap, and every cube has a tray
+   * slot waiting for it.
+   */
+  get guaranteed(): boolean {
+    if (!this.started || this.over) return false;
+    let coming = this.cratesLeft * CRATE;
+    for (const c of this.chutes) coming += c.length;
+    return coming <= this.capacity - this.load;
+  }
+
+  /** Tip every crate that is left and let the level play itself out. Call once `guaranteed`. */
+  finish(): void {
+    if (this.over || this.auto) return;
+    for (let i = 0; i < this.cols; i++) {
+      const col = this.level.supply[i];
+      while (this.next[i] < col.length) this.chutes[i].push(...col[this.next[i]++]);
+    }
+    this.auto = true;
   }
 
   /** Nothing more will happen until the next tap. */
@@ -155,7 +181,7 @@ export class LoopSim {
   /** One step of 1/STEP_HZ seconds. */
   step(): Events {
     if (this.over) return noEvents();
-    if (this.started) {
+    if (this.started && !this.auto) {
       this.ticks++;
       if (this.level.limitTicks && this.ticks >= this.level.limitTicks) {
         this.timeUp = true;
@@ -225,6 +251,7 @@ export class LoopSim {
       fill: this.fill.slice(),
       busy: this.busy.slice(),
       taps: this.taps,
+      auto: this.auto,
     };
   }
 
@@ -242,6 +269,7 @@ export class LoopSim {
     this.fill = s.fill.slice();
     this.busy = s.busy.slice();
     this.taps = s.taps;
+    this.auto = s.auto;
     this.jammed = false;
     this.timeUp = false;
     this.won = this.traysLeft === 0;
