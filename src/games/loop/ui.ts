@@ -11,6 +11,10 @@ import { LoopRenderer } from './render/renderer';
 
 type Phase = 'playing' | 'paused' | 'over';
 
+/** How many times faster the belt runs once the win is certain. */
+const AUTO_SPEED = 3;
+const FINISHING = 'Nothing can jam now. Finishing up';
+
 export function createLoop(shell: Shell): GameModule {
   const progress: LoopProgress = loadLoop();
   const { sfx, openModal, closeModal, modalOpen } = shell;
@@ -190,7 +194,7 @@ export function createLoop(shell: Shell): GameModule {
     const s = sim;
     if (!s) return;
     $('#lp-stats').innerHTML = `Trays <b>${s.traysLeft}</b> · Belt <b>${s.load}/${s.capacity}</b>`;
-    $<HTMLButtonElement>('#lp-undo').disabled = !history.length || s.won;
+    $<HTMLButtonElement>('#lp-undo').disabled = !history.length || s.won || s.auto;
     const badge = $('#lp-undo-count');
     badge.hidden = undos === 0;
     badge.textContent = String(undos);
@@ -211,7 +215,7 @@ export function createLoop(shell: Shell): GameModule {
     if (phase !== 'paused') return;
     phase = 'playing';
     last = performance.now();
-    setOverlay(null);
+    setOverlay(sim?.auto ? FINISHING : null);
     updateHud();
   }
 
@@ -222,6 +226,20 @@ export function createLoop(shell: Shell): GameModule {
     updateHud();
   }
   $('#lp-pause').addEventListener('click', pause);
+
+  /** Once nothing can go wrong, tip whatever is left and let the level play itself out. */
+  function autoFinish() {
+    const s = sim;
+    if (!s || s.auto || !s.guaranteed) return;
+    const before = s.next.slice();
+    s.finish();
+    before.forEach((n, i) => {
+      if (s.next[i] !== n) renderer.tapped(i);
+    });
+    if (before.some((n, i) => s.next[i] !== n)) sfx.whoosh(0.14);
+    setOverlay(FINISHING);
+    updateHud();
+  }
 
   /** Tip the front crate of a column onto the belt. */
   function tap(col: number) {
@@ -239,12 +257,13 @@ export function createLoop(shell: Shell): GameModule {
     sfx.whoosh(0.14);
     shell.vibrate(8);
     updateHud();
+    autoFinish();
   }
 
   function undo() {
     const s = sim;
     const snap = history.pop();
-    if (!s || !snap || s.won) return;
+    if (!s || !snap || s.won || s.auto) return;
     closeModal();
     s.restore(snap);
     renderer.clearMotion();
@@ -265,8 +284,10 @@ export function createLoop(shell: Shell): GameModule {
       shell.vibrate(12);
     } else if (ev.taken.length) sfx.blip();
     if (ev.dropped.length || ev.taken.length) updateHud();
+    if (ev.taken.length) autoFinish();
     if (ev.won) {
       phase = 'over';
+      setOverlay(null);
       updateHud();
       setTimeout(showWin, 450);
     } else if (ev.jammed) {
@@ -297,7 +318,8 @@ export function createLoop(shell: Shell): GameModule {
         acc += dt;
         while (acc >= stepMs && phase === 'playing') {
           acc -= stepMs;
-          handle(s.step());
+          // Once the win is certain the belt runs fast to the end.
+          for (let k = s.auto ? AUTO_SPEED : 1; k > 0 && phase === 'playing'; k--) handle(s.step());
         }
         updateTimer();
       }

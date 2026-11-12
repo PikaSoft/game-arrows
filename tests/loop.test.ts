@@ -182,6 +182,71 @@ describe('belt', () => {
   });
 });
 
+describe('auto-finish', () => {
+  test('the win is guaranteed once the cubes still to come fit in the empty slots', () => {
+    const s = new LoopSim(lvl([[full(1), full(2), full(0)]], [[0, 1, 2]], 8, { limitTicks: 600 }));
+    expect(s.guaranteed).toBe(false); // nothing tapped yet
+    s.tap(0);
+    expect(s.guaranteed).toBe(false); // 12 cubes to come, 8 slots
+    runUntilSettled(s);
+    expect(s.guaranteed).toBe(false); // 8 to come, 4 free
+    const roomy = new LoopSim(lvl([[full(1), full(2), full(0)]], [[0, 1, 2]], 12, { limitTicks: 600 }));
+    expect(roomy.guaranteed).toBe(false);
+    roomy.tap(0);
+    expect(roomy.guaranteed).toBe(true); // 12 to come, 12 free
+    roomy.finish();
+    expect(roomy.auto).toBe(true);
+    expect(roomy.cratesLeft).toBe(0);
+    expect(roomy.tap(0)).toBe(false);
+    const ticks = roomy.ticks;
+    for (let k = 0; k < 5000 && !roomy.over; k++) roomy.step();
+    expect(roomy.won).toBe(true);
+    // The clock stopped when the finish began, so it cannot run out.
+    expect(roomy.ticks).toBe(ticks);
+  });
+
+  test('it is guaranteed when every crate is tipped and dropped', () => {
+    const s = new LoopSim(lvl([[full(1), full(0)]], [[0, 1]], 8));
+    s.tap(0);
+    s.tap(0);
+    expect(s.guaranteed).toBe(true);
+    shifts(s, 3);
+    expect(s.guaranteed).toBe(true);
+    const done = new LoopSim(lvl([[full(0)]], [[0]], 8));
+    done.tap(0);
+    runUntilSettled(done);
+    expect(done.guaranteed).toBe(false); // already won
+  });
+
+  test('finishing as soon as it is guaranteed never jams, on levels 1 to 60', () => {
+    for (let n = 1; n <= 60; n++) {
+      const level = buildLoopLevel(n);
+      const sim = new LoopSim(level);
+      let tapsMade = 0;
+      for (const col of level.solution) {
+        if (sim.auto) break;
+        sim.tap(col);
+        tapsMade++;
+        while (!sim.over && !sim.settled && !sim.auto) {
+          sim.step();
+          if (sim.guaranteed) sim.finish();
+        }
+      }
+      for (let k = 0; k < 20000 && !sim.over; k++) sim.step();
+      expect(sim.won, `level ${n}`).toBe(true);
+      expect(tapsMade, `level ${n}`).toBeGreaterThan(0);
+      // The same from every point a rushed player might reach: tap everything at once
+      // on a belt with room for it all.
+      const big = new LoopSim({ ...level, capacity: crateCount(level) * CRATE, limitTicks: 0 });
+      big.tap(0);
+      expect(big.guaranteed).toBe(true);
+      big.finish();
+      for (let k = 0; k < 40000 && !big.over; k++) big.step();
+      expect(big.won, `level ${n} all at once`).toBe(true);
+    }
+  });
+});
+
 describe('solver', () => {
   test('finds the order that keeps the belt clear, and knows a hopeless board', () => {
     // Both front crates are unwanted. On 8 slots only one of them may go before its partner.
