@@ -33,6 +33,7 @@ Real-time games pause while it is open.
 | Merge Tiles | Slide tiles so pairs merge; stones get in the way. Endless. |
 | Word Grid | Trace words through touching letters against the clock. |
 | Star Battle | Place stars so every row, column and region has the same count; stars never touch. |
+| Colour Loop | Tip crates of cubes onto a turning belt; trays sort them by colour. Don't jam it. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -937,6 +938,64 @@ The difficulty label is measured like Arrow Escape's: for each wave,
 Hover the label in game to see the number. Two-star boards take a second or so to build
 (sometimes several), in a worker, while the previous level is being played.
 
+## Colour Loop
+
+A belt turns in a loop. Above it are columns of crates, four cubes to a crate; below it
+are bays of coloured trays. Tip crates onto the belt and the trays pick off the cubes of
+their own colour as they ride past. Ship every tray to clear the level. It runs in real
+time: the belt never stops, and you can tap as fast as you like.
+
+### Rules
+
+- **Tipping:** tap a column (or press its number key) to tip its front crate into the
+  chute. The chute drops one cube into each empty belt slot that passes under it.
+- **Trays:** only the front tray of each bay collects. It takes each cube of its colour
+  that passes, ships out when it holds four, and the next tray slides up.
+- **Circling:** cubes that no front tray wants stay on the belt and take up room.
+- **Jam:** if a chute still holds cubes after a whole lap with no empty slot passing it,
+  the belt jams and the level stops. Undo, restart, or go back to the level list.
+- **Undo** takes back the last tap and puts the belt and the clock back exactly as they
+  were. It can be used at any time, as often as needed.
+- **Stars:** three with no undos, two with one or two, one otherwise. Best times are
+  saved.
+- **Clock:** from level 8 most levels have one. It starts on the first tap and the level
+  ends if it runs out.
+- **Later levels:** crates that hold two colours (from level 11) and crates that hide
+  their colours until they reach the front (from level 18).
+- The HUD shows trays left and how full the belt is. The game pauses when the How to
+  play or settings card is open, or the page is hidden.
+
+### Levels
+
+Levels 1 to 4 are hand-made tutorials. After that, level N is generated from N as the
+seed, so everyone gets the same board. Over the first 40 levels the colours grow from 3
+to 6, the columns from 2 to 4, the bays from 2 to 3, the crates from 5 to 12, and the belt
+speeds up from about 4 slots a second to nearly 7; then they vary, with the odd slower,
+roomier breather.
+
+The generator (`src/games/loop/core/levels.ts`) deals the trays into bays and one crate
+per tray into the columns, then looks for the shortest belt the board can be cleared on
+and adds the level's spare slots. The belt itself (`core/sim.ts`) is a fixed-step
+simulation where everything happens as the belt moves a slot, so the same taps on the
+same steps always play out the same way. That lets the solver (`core/solver.ts`) prove
+each level by playing the real belt: it searches tap orders in which every tap waits for
+the belt to settle, with a cap on taps tried rather than on time, and the order it finds
+is stored with the level. The clock is that careful run's time plus a quarter, half a
+second a tap and four seconds. Of a few deals the riskiest is kept.
+
+The difficulty label comes from playing each board carefully but at random 40 times and
+counting the share of taps that jam the belt. The score is three times that share (out
+of 100), plus 8 for a clock and 6 for covered crates:
+
+| Label | Score |
+| --- | --- |
+| Easy | under 20 |
+| Medium | 20 to 42 |
+| Hard | 42 to 68 |
+| Super Hard | 68 and up |
+
+Hover the label in game to see the number.
+
 ## Development
 
 ```bash
@@ -948,7 +1007,7 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 

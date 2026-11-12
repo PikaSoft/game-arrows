@@ -235,3 +235,4 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .targets svg { width: 14px; height: 14px; }
 .timer.low { color: var(--danger); }
 .missed { line-height: 2; }
+.badge[hidden] { display: none; }

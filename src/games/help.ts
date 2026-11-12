@@ -196,4 +196,17 @@ export const HELP: Record<string, Help> = {
       'A big one: two stars in every row, column and region.',
     ],
   },
+  loop: {
+    goal: 'Tip crates of cubes onto the turning belt. Trays pick up the cubes of their own colour. Ship every tray without jamming the belt.',
+    tips: [
+      'Tap a column to tip its front crate onto the belt. Each tray below picks up the cubes of its own colour.',
+      'A full tray ships out and the next one slides up. Only the front tray of each bay collects.',
+      'Cubes that no front tray wants keep circling and take up room. Tip the crates your trays are waiting for first.',
+      'If a crate cannot drop its cubes within one lap, the belt jams. Undo takes back your last tap. Clear a level with no undos for three stars.',
+      'Now there is a clock. It starts on your first tap: ship every tray before it runs out.',
+      'Some crates hold two colours. Both lots of cubes drop together.',
+      'Crates marked ? show their colours only when they reach the front.',
+      'One or two undos leave two stars; more leave one. You can tap again before the belt has cleared, but that is how belts jam.',
+    ],
+  },
 };
