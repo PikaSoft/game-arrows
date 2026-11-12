@@ -210,4 +210,15 @@ export const HELP: Record<string, Help> = {
       'One or two undos leave two stars; more leave one. You can tap again before the belt has cleared, but that is how belts jam.',
     ],
   },
+  fruit: {
+    goal: 'Drop fruit into the bucket. Two of the same kind that touch join into one bigger fruit. Score as much as you can before the bucket overflows.',
+    tips: [
+      'Drag to aim and let go to drop. A tap drops the fruit where you tapped. With keys, use the arrows to aim and Space to drop.',
+      'Fruit falls, rolls and gets pushed about by other fruit. A join can set off another one beside it.',
+      'Only the five smallest fruits are handed to you. The bigger ones (up to the melon) have to be made by joining. Bigger fruit scores more.',
+      'The corner shows the fruit that comes next. Keep equal fruit close together and the big ones low down.',
+      'When fruit stays above the dashed rim, the rim flashes red. If it is still there two seconds later, the game is over.',
+      'Two melons that touch pop and clear some room, for a bonus. A game in progress is kept: come back and Continue.',
+    ],
+  },
 };
