@@ -34,6 +34,7 @@ Real-time games pause while it is open.
 | Word Grid | Trace words through touching letters against the clock. |
 | Star Battle | Place stars so every row, column and region has the same count; stars never touch. |
 | Colour Loop | Tip crates of cubes onto a turning belt; trays sort them by colour. Don't jam it. |
+| Fruit Drop | Drop fruit into a bucket; matching fruits that touch join into a bigger one. Endless. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -999,6 +1000,37 @@ of 100), plus 8 for a clock and 6 for covered crates:
 
 Hover the label in game to see the number.
 
+## Fruit Drop
+
+A fruit hangs above a bucket. Drag to aim and let go to drop it (a tap drops it where you
+tapped; with keys, the arrows aim and Space drops). Fruit falls, rolls and gets pushed
+about by other fruit. Two of the same kind that touch join into one fruit of the next
+size up. Endless: score as much as you can before the bucket overflows.
+
+### Rules
+
+- **Fruits:** ten sizes, smallest first: blueberry, raspberry, lime, plum, lemon, orange,
+  apple, grapefruit, coconut, melon. Only the five smallest are handed out; the rest have
+  to be made by joining. The corner of the board shows the fruit that comes next.
+- **Joining:** two equal fruits that touch become one fruit of the next size, where they
+  met. The new fruit is bigger and shoves its neighbours, which can set off more joins.
+  Two melons that touch pop and vanish.
+- **Score:** making the second fruit scores 1, the third 3, then 6, 10 and so on up to 45
+  for a melon. Popping two melons scores 100.
+- **Overflowing:** when a fruit that has landed stays above the dashed rim, the rim
+  flashes red. If fruit is still above it two seconds later, the game is over. A fruit
+  on its way down does not count until it has touched something.
+- **Kept:** your best score, biggest fruit and games played. A game in progress is saved,
+  so the home screen offers Continue. Opening a card or leaving the tab holds everything
+  still.
+
+The physics is written for this game (`src/games/fruit/core/sim.ts`); there is no physics
+library. Fruits are discs. The bucket advances in fixed steps of 1/120 of a second: each
+step moves every fruit, then goes over every touching pair several times, pushing them
+apart by weight and working out the bounce and the rub that makes them roll. Nothing in
+it depends on the clock or the screen, so the same seed and the same drops always give
+the same bucket, and the tests play whole games.
+
 ## Development
 
 ```bash
@@ -1010,12 +1042,12 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
 ```
-src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture, #/numbers, #/tents, #/mines, #/bricks, #/stack, #/lanes, #/merge, #/words, #/stars), settings
+src/main.ts            the collection: home screen, routing (#/arrows, #/sandglass, #/snake, #/snake-trails, #/squeeze, #/pipes, #/lines, #/crates, #/lights, #/ice, #/picture, #/numbers, #/tents, #/mines, #/bricks, #/stack, #/lanes, #/merge, #/words, #/stars, #/loop, #/fruit), settings
 src/shared/            sound, themes, icons, update check, seeded RNG, worker level loader
 src/games/arrows/      Arrow Escape: core rules, generator and solver, rendering, input, UI
 src/games/sandglass/   Sandglass: the same split
@@ -1036,6 +1068,7 @@ src/games/lanes/       Lane Dodger: rules in core/sim.ts, the course in core/cou
 src/games/merge/       Merge Tiles: sliding in core/rules.ts, a game (spawns, stones) in core/game.ts
 src/games/words/       Word Grid: word search in core/trie.ts, the word list in data/words.txt
 src/games/stars/       Star Battle: stars and regions in core/layout.ts, search and reasoning in core/solver.ts
+src/games/fruit/       Fruit Drop: physics and rules in core/sim.ts (fixed steps), no levels
 tools/build-words.mjs  builds Word Grid's word list from 12dicts
 ```
 

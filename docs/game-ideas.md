@@ -27,6 +27,7 @@ and art for each one and don't copy a specific existing game.
 | 13 | ~~[Merge Tiles](#13-merge-tiles)~~ | Endless | Number | Small | **Built** (`src/games/merge/`) |
 | 14 | ~~[Word Grid](#14-word-grid)~~ | Word | Word | Medium to large | **Built** (`src/games/words/`) |
 | 15 | ~~[Colour Loop](#15-colour-loop)~~ | Sort on a belt | Arcade | Medium | **Built** (`src/games/loop/`) |
+| 16 | ~~[Fruit Drop](#16-fruit-drop)~~ | Drop and merge | Arcade | Small to medium | **Built** (`src/games/fruit/`) |
 
 Effort is a rough guide next to Squeeze: small is under half of its code, large is
 more than all of it.
@@ -719,3 +720,28 @@ a belt with no room left jams.
   from undos used instead.
 - Random play fails nearly every later level, so "share of random games that jam" is
   useless as a label. The share of taps that jam spreads the levels out properly.
+
+---
+
+## 16. Fruit Drop
+
+> **Built.** Fruit Drop is in the collection (`src/games/fruit/`, route `#/fruit`). See the
+> Fruit Drop section of the README for how it works.
+
+**Idea.** Drop fruit into a bucket from the top. Fruit falls and pushes other fruit
+about; two of the same kind that touch join into a bigger one. The game ends when the
+bucket overflows.
+
+**What was learnt building it**
+
+- Discs are enough. Pushing overlapping pairs apart by weight, then a small bounce and
+  some friction, gives a pile that settles in a few passes per step with no library.
+- Friction has to turn the fruit as well as slow it, or the pile looks like it is sliding
+  on ice. Landed fruit also needs a little rolling resistance, or it rolls along the
+  floor for seconds.
+- Fruit dropped on exactly the same spot balances in a tall column, which no real pile
+  does. A nudge of a fraction of a pixel on each drop is enough to topple it.
+- Tests that lean on where a pile ends up break when a constant changes. Putting fruit
+  in place directly and testing one thing at a time holds up better.
+- "Overflow" needs a pause before it counts (two seconds here), and must ignore fruit
+  that is still falling, or a bounce ends the game.

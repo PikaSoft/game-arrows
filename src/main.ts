@@ -2,6 +2,7 @@ import './styles.css';
 import { createArrows } from './games/arrows/ui';
 import { createBricks } from './games/bricks/ui';
 import { createCrates } from './games/crates/ui';
+import { createFruit } from './games/fruit/ui';
 import { createIce } from './games/ice/ui';
 import { createLanes } from './games/lanes/ui';
 import { createLights } from './games/lights/ui';
@@ -260,6 +261,7 @@ games.push(
   createWords(shell),
   createStars(shell),
   createLoop(shell),
+  createFruit(shell),
 );
 
 document.addEventListener('keydown', (e) => {
