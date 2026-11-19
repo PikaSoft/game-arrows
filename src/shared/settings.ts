@@ -2,6 +2,8 @@
 export interface Settings {
   sound: boolean;
   haptics: boolean;
+  /** Tipping the phone leans the Fruit Drop bucket. */
+  tilt: boolean;
   theme: string;
 }
 
@@ -9,7 +11,7 @@ export const SETTINGS_KEY = 'pocket-puzzles.settings.v1';
 /** Arrow Escape stored settings alongside its progress before the collection existed. */
 const LEGACY_KEY = 'arrow-escape.v1';
 
-const defaults = (): Settings => ({ sound: true, haptics: true, theme: 'auto' });
+const defaults = (): Settings => ({ sound: true, haptics: true, tilt: true, theme: 'auto' });
 
 function read(key: string): Record<string, unknown> | null {
   try {
@@ -30,6 +32,7 @@ export function loadSettings(): Settings {
   const s: Settings = {
     sound: legacy.settings?.sound ?? d.sound,
     haptics: legacy.settings?.haptics ?? d.haptics,
+    tilt: d.tilt,
     theme: typeof legacy.theme === 'string' ? legacy.theme : d.theme,
   };
   saveSettings(s);

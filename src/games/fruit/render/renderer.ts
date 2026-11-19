@@ -13,6 +13,8 @@ interface Pop {
 /** Room above the rim for the fruit in hand, and a little under the floor, in bucket units. */
 const ABOVE = 0.46;
 const BELOW = 0.06;
+/** Spare width either side so the bucket's corners stay on screen when it leans. */
+const SIDE = 0.05;
 const POP_MS = 380;
 const GROW_MS = 140;
 
@@ -34,6 +36,8 @@ export class FruitRenderer {
   sim: FruitSim | null = null;
   /** Where the fruit in hand hangs (bucket units). */
   aimX = W / 2;
+  /** How far the bucket leans, in radians (positive dips the right side). */
+  tilt = 0;
 
   private ctx: CanvasRenderingContext2D;
   private cssW = 0;
@@ -60,7 +64,7 @@ export class FruitRenderer {
     this.cssH = r.height;
     this.canvas.width = Math.round(r.width * this.dpr);
     this.canvas.height = Math.round(r.height * this.dpr);
-    this.unit = Math.max(40, Math.min((this.cssW - 28) / W, (this.cssH - 12) / (H + ABOVE + BELOW)));
+    this.unit = Math.max(40, Math.min((this.cssW - 28) / (W + 2 * SIDE), (this.cssH - 12) / (H + ABOVE + BELOW)));
     this.ox = (this.cssW - W * this.unit) / 2;
     const used = (H + ABOVE + BELOW) * this.unit;
     this.oy = (this.cssH - used) / 2 + ABOVE * this.unit;
@@ -102,6 +106,14 @@ export class FruitRenderer {
     const X = (x: number) => this.ox + x * u;
     const Y = (y: number) => this.oy + y * u;
     const wall = Math.max(4, u * 0.022);
+
+    // Lean the bucket and everything in it about its middle, to match the pull of the tilt.
+    ctx.save();
+    if (this.tilt) {
+      ctx.translate(X(W / 2), Y(H / 2));
+      ctx.rotate(this.tilt);
+      ctx.translate(-X(W / 2), -Y(H / 2));
+    }
 
     // Bucket: a tinted inside and a U-shaped wall.
     ctx.fillStyle = theme.surface;
@@ -175,6 +187,7 @@ export class FruitRenderer {
       ctx.stroke();
       ctx.restore();
     }
+    ctx.restore();
 
     // What comes after the fruit in hand.
     const nr = Math.min(RADII[s.next] * u, u * 0.075);

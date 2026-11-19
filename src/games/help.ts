@@ -215,6 +215,7 @@ export const HELP: Record<string, Help> = {
     tips: [
       'Drag to aim and let go to drop. A tap drops the fruit where you tapped. With keys, use the arrows to aim and Space to drop.',
       'Fruit falls, rolls and gets pushed about by other fruit. A join can set off another one beside it.',
+      'On a phone, tip it a little to one side and the bucket leans a few degrees that way, so loose fruit rolls over. You can turn this off in Settings.',
       'Only the five smallest fruits are handed to you. The bigger ones (up to the melon) have to be made by joining. Bigger fruit scores more.',
       'The corner shows the fruit that comes next. Keep equal fruit close together and the big ones low down.',
       'When fruit stays above the dashed rim, the rim flashes red. If it is still there two seconds later, the game is over.',

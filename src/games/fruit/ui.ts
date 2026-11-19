@@ -3,11 +3,14 @@ import { GameModule, Shell } from '../types';
 import { FRUITS, FruitSim, SavedFruit, STEP_HZ, StepEvents, W } from './core/sim';
 import { FruitProgress, loadFruit, noteBests, recordGame, resetFruit, saveFruit } from './game/storage';
 import { FruitRenderer } from './render/renderer';
+import { PhoneTilt } from './game/tilt';
 
 /** How far one press of an arrow key moves the fruit in hand (bucket widths). */
 const KEY_STEP = 0.04;
 /** Most steps run in one frame, so a slow frame cannot snowball. */
 const MAX_STEPS = 12;
+/** Share of the gap to the phone's tilt closed each frame, which smooths out sensor jitter. */
+const TILT_EASE = 0.15;
 
 export function createFruit(shell: Shell): GameModule {
   const progress: FruitProgress = loadFruit();
@@ -70,8 +73,14 @@ export function createFruit(shell: Shell): GameModule {
         : '';
     } else requestAnimationFrame(() => renderer.resize());
   }
-  $('#fd-play').addEventListener('click', () => begin(null));
-  $('#fd-continue').addEventListener('click', () => begin(progress.saved));
+  $('#fd-play').addEventListener('click', () => {
+    tilt.ask();
+    begin(null);
+  });
+  $('#fd-continue').addEventListener('click', () => {
+    tilt.ask();
+    begin(progress.saved);
+  });
   $('#fd-back').addEventListener('click', () => {
     closeModal();
     persist();
@@ -108,6 +117,9 @@ export function createFruit(shell: Shell): GameModule {
   let aimX = W / 2;
   /** The pointer that is aiming, if one is down. */
   let aiming: number | null = null;
+  /** Tipping the phone leans the bucket a few degrees. */
+  const tilt = new PhoneTilt();
+  let lean = 0;
 
   function begin(saved: SavedFruit | null) {
     closeModal();
@@ -117,6 +129,9 @@ export function createFruit(shell: Shell): GameModule {
     renderer.setSim(sim);
     aimX = renderer.aimX = W / 2;
     aiming = null;
+    lean = 0;
+    sim.setTilt(0);
+    tilt.start();
     acc = 0;
     last = performance.now();
     show('game');
@@ -129,6 +144,7 @@ export function createFruit(shell: Shell): GameModule {
   function stop() {
     cancelAnimationFrame(raf);
     raf = 0;
+    tilt.stop();
   }
 
   /** Keep the game in progress so it can be continued later. */
@@ -184,6 +200,9 @@ export function createFruit(shell: Shell): GameModule {
     if (!s) return;
     // A card on top or a hidden tab holds everything still.
     if (!s.over && !modalOpen() && document.visibilityState === 'visible') {
+      lean += ((shell.settings.tilt ? tilt.target : 0) - lean) * TILT_EASE;
+      if (Math.abs(lean) < 1e-4) lean = 0;
+      s.setTilt(lean);
       acc += dt;
       const stepMs = 1000 / STEP_HZ;
       let n = 0;
@@ -194,6 +213,7 @@ export function createFruit(shell: Shell): GameModule {
       if (acc >= stepMs) acc = 0;
     }
     renderer.aimX = aimX;
+    renderer.tilt = s.tilt;
     renderer.draw();
   }
 
@@ -221,6 +241,7 @@ export function createFruit(shell: Shell): GameModule {
   const stage = $('#fd-stage');
   stage.addEventListener('pointerdown', (e) => {
     if (e.button > 0 || !sim || sim.over) return;
+    tilt.ask();
     aiming = e.pointerId;
     try {
       stage.setPointerCapture(e.pointerId);

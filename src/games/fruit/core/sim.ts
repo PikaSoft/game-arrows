@@ -22,6 +22,9 @@ export const COOLDOWN_S = 0.45;
 export const DEALT_TIERS = 5;
 /** Bonus for popping two of the largest fruit. */
 export const POP_BONUS = 100;
+/** Most the bucket can lean when the phone is tipped, in degrees. */
+export const MAX_TILT_DEG = 4;
+const MAX_TILT = (MAX_TILT_DEG * Math.PI) / 180;
 
 export const FRUITS = ['Blueberry', 'Raspberry', 'Lime', 'Plum', 'Lemon', 'Orange', 'Apple', 'Grapefruit', 'Coconut', 'Melon'] as const;
 export const RADII = [0.042, 0.054, 0.068, 0.084, 0.103, 0.126, 0.153, 0.186, 0.222, 0.262] as const;
@@ -96,6 +99,11 @@ export class FruitSim {
   /** Largest fruit made so far (the size index). */
   biggest = 0;
   over = false;
+  /**
+   * How far gravity leans from straight down, in radians (positive pulls to the right).
+   * A live input from the phone, not part of the saved game.
+   */
+  tilt = 0;
 
   private rng: Rng;
   private dealt = 0;
@@ -114,6 +122,12 @@ export class FruitSim {
   private deal(): number {
     this.dealt++;
     return this.rng.int(0, DEALT_TIERS - 1);
+  }
+
+  /** Lean the bucket. Kept within a few degrees either way. */
+  setTilt(rad: number): void {
+    if (!Number.isFinite(rad)) return;
+    this.tilt = Math.max(-MAX_TILT, Math.min(MAX_TILT, rad));
   }
 
   /** True when a fruit is in hand and can be dropped. */
@@ -152,9 +166,12 @@ export class FruitSim {
     if (this.over) return ev;
     if (this.cooldown > 0) this.cooldown--;
     const bodies = this.bodies;
+    const gx = GRAVITY * Math.sin(this.tilt) * DT;
+    const gy = GRAVITY * Math.cos(this.tilt) * DT;
 
     for (const b of bodies) {
-      b.vy += GRAVITY * DT;
+      b.vx += gx;
+      b.vy += gy;
       const speed = Math.hypot(b.vx, b.vy);
       if (speed > MAX_SPEED) {
         b.vx *= MAX_SPEED / speed;
