@@ -35,6 +35,7 @@ Real-time games pause while it is open.
 | Star Battle | Place stars so every row, column and region has the same count; stars never touch. |
 | Colour Loop | Tip crates of cubes onto a turning belt; trays sort them by colour. Don't jam it. |
 | Fruit Drop | Drop fruit into a bucket; matching fruits that touch join into a bigger one. Endless. |
+| Star Raiders | Slide your ship and shoot down waves of marching raiders; it fires by itself. Endless. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -1031,6 +1032,38 @@ apart by weight and working out the bounce and the rub that makes them roll. Not
 it depends on the clock or the screen, so the same seed and the same drops always give
 the same bucket, and the tests play whole games.
 
+## Star Raiders
+
+A formation of raiders marches side to side across the top of the field, stepping down
+each time it reaches an edge and firing bolts as it comes. Your ship slides along the
+bottom and fires by itself. Endless: clear wave after wave and score as much as you can
+before your lives run out.
+
+### Rules
+
+- **Moving:** drag anywhere to slide the ship. It follows your finger's movement rather
+  than jumping under it, and sits well up from the bottom of the field, with a faint band
+  below it to drag in. Arrow keys work too. The first press starts the game.
+- **Firing:** the ship fires on its own, a shot about every third of a second, with at
+  most two shots in flight. A shot that meets a bolt cancels it.
+- **Raiders:** 5 rows of 8. Top row scores 30, the next two 20, the bottom two 10. The
+  formation speeds up as raiders fall. If a raider reaches the ship's row, the game is over.
+- **Bolts:** the lowest raider in a column fires, now and then the column nearest the ship.
+  More bolts, faster, wave by wave.
+- **Shields:** three blocks of small cells. Shots and bolts wear them away; raiders that
+  march into them wipe out what they touch. They are rebuilt each wave.
+- **Bonus ship:** now and then a ship crosses the top. Hit it for 50 to 300.
+- **Lives:** three hearts. A bolt costs one and the ship blinks, safe, for two seconds.
+  Every 5000 points brings an extra life, up to five.
+- **Waves:** clearing a wave scores 100 times its number. The next wave starts a little
+  lower (up to four steps) and marches and fires faster.
+- **Kept:** best score, furthest wave and games played. A game is not saved part way
+  through. The pause button (or P or Space), opening a card or leaving the tab pauses.
+
+The rules are in `src/games/raiders/core/sim.ts`, in fixed steps of 1/120 of a second
+with a seeded random source, so the same seed and the same moves always give the same
+game and the tests can play whole waves.
+
 ## Development
 
 ```bash
@@ -1069,6 +1102,7 @@ src/games/merge/       Merge Tiles: sliding in core/rules.ts, a game (spawns, st
 src/games/words/       Word Grid: word search in core/trie.ts, the word list in data/words.txt
 src/games/stars/       Star Battle: stars and regions in core/layout.ts, search and reasoning in core/solver.ts
 src/games/fruit/       Fruit Drop: physics and rules in core/sim.ts (fixed steps), no levels
+src/games/raiders/     Star Raiders: rules in core/sim.ts (fixed steps), endless waves
 tools/build-words.mjs  builds Word Grid's word list from 12dicts
 ```
 
