@@ -281,4 +281,15 @@ export const HELP: Record<string, Help> = {
       'Hints are free: each one builds a bridge that can be worked out from the board as it is.',
     ],
   },
+  shapes: {
+    goal: 'Drag pieces onto the board. A full row or column clears. Place all three pieces to get three more; the game ends when none of them fits.',
+    tips: [
+      'Drag a piece onto the board. Fill a whole row or column to clear it. The game ends when no piece fits.',
+      'Pieces never turn. A shadow shows where the piece will land and lights up the lines it would clear.',
+      'Clearing several lines at once scores far more: 10, 40, 90 points for one, two, three lines.',
+      'Clear on placements in a row for a streak bonus. A piece that clears nothing ends the streak.',
+      'A faded piece in the tray fits nowhere right now. Clear some room for it.',
+      'Undo once per game. A game in progress is kept, so you can leave and continue later.',
+    ],
+  },
 };

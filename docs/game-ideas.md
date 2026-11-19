@@ -31,7 +31,7 @@ and art for each one and don't copy a specific existing game.
 | 17 | ~~[Star Raiders](#17-star-raiders)~~ | Shoot the formation | Arcade | Small to medium | **Built** (`src/games/raiders/`) |
 | 18 | ~~[Island Bridges](#18-island-bridges)~~ | Deduction | Logic | Medium | **Built** (`src/games/bridges/`) |
 | 19 | ~~[Mirror Beam](#19-mirror-beam)~~ | Rotate tiles | Closest | Small | **Built** (`src/games/beams/`) |
-| 20 | [Shape Fit](#20-shape-fit) | Place pieces | Endless | Small | |
+| 20 | ~~[Shape Fit](#20-shape-fit)~~ | Place pieces | Endless | Small | **Built** (`src/games/shapes/`) |
 | 21 | [Fence Loop](#21-fence-loop) | Deduction | Logic | Medium to large | |
 | 22 | [Layer Pairs](#22-layer-pairs) | Match free tiles | Closest | Medium | |
 | 23 | ~~[Two Tones](#23-two-tones)~~ | Deduction | Logic | Small | **Built** (`src/games/tones/`) |
@@ -886,6 +886,12 @@ direction repeats.
 ---
 
 ## 20. Shape Fit
+
+> **Built.** Shape Fit is in the collection (`src/games/shapes/`, route `#/shapes`). See the
+> README for how it ended up working. The main differences from the plan below: the
+> fairness check goes further (each new set is checked to be placeable in full, not just
+> for one piece fitting, for the whole game); there is one undo per game, as in Merge
+> Tiles; and points are 10 x lines squared plus a streak bonus.
 
 **Idea.** An 8 by 8 board and three pieces made of squares. Drag a piece onto the board.
 A full row or column clears. When none of the three can fit anywhere, the game ends.

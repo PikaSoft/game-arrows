@@ -21,6 +21,7 @@ import { createTones } from './games/tones/ui';
 import { createWords } from './games/words/ui';
 import { createPipes } from './games/pipes/ui';
 import { createSandglass } from './games/sandglass/ui';
+import { createShapes } from './games/shapes/ui';
 import { createSnakeGame } from './games/snake/ui';
 import { createSqueeze } from './games/squeeze/ui';
 import { createStars } from './games/stars/ui';
@@ -275,6 +276,7 @@ games.push(
   createBeams(shell),
   createTones(shell),
   createBridges(shell),
+  createShapes(shell),
 );
 
 document.addEventListener('keydown', (e) => {

@@ -22,7 +22,7 @@ import { wordsSpecFor } from '../src/games/words/core/difficulty';
 import { buildLevel } from '../src/games/arrows/core/levels';
 import { HELP } from '../src/games/help';
 
-const IDS = ['arrows', 'sandglass', 'snake', 'snake-trails', 'squeeze', 'pipes', 'lines', 'crates', 'lights', 'ice', 'picture', 'numbers', 'tents', 'mines', 'bricks', 'stack', 'lanes', 'merge', 'words', 'stars', 'loop', 'fruit', 'raiders', 'codes', 'beams', 'tones', 'bridges'];
+const IDS = ['arrows', 'sandglass', 'snake', 'snake-trails', 'squeeze', 'pipes', 'lines', 'crates', 'lights', 'ice', 'picture', 'numbers', 'tents', 'mines', 'bricks', 'stack', 'lanes', 'merge', 'words', 'stars', 'loop', 'fruit', 'raiders', 'codes', 'beams', 'tones', 'bridges', 'shapes'];
 
 const SPECS: Record<string, (n: number) => { tip?: string }> = {
   beams: beamSpecFor,

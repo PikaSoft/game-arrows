@@ -40,6 +40,7 @@ Real-time games pause while it is open.
 | Mirror Beam | Turn mirrors so every beam of light reaches the target of its colour. |
 | Two Tones | Fill the grid with orange and blue: never three in a row, every line half and half. |
 | Island Bridges | Join numbered islands with straight bridges that never cross, until every island is linked. |
+| Shape Fit | Drag pieces onto an 8x8 board; full rows and columns clear. Endless. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -1290,6 +1291,42 @@ settles anything:
 
 Hover the label in game to see the step.
 
+## Shape Fit
+
+An 8x8 board and a tray of three pieces made of squares. Drag a piece onto the board; a
+full row or column clears. Once all three are placed, three more arrive. The game ends
+when none of the pieces left in the tray fits anywhere.
+
+### Rules
+
+- **Placing:** press a piece in the tray and drag it up. It rides above the finger, so the
+  thumb never hides where it will land, and a shadow on the board shows the spot and
+  lights up the lines it would clear. Let go over a spot that fits to place it; anywhere
+  else it goes back to the tray. Pieces never turn.
+- **Points:** one per square placed, plus 10, 40 or 90 for clearing one, two or three
+  lines at once (10 x lines squared). Clearing on placements in a row is a streak: each
+  clear after the first in a streak adds 10 more per step. A placement that clears
+  nothing ends the streak. The title shows the streak while it lasts.
+- **Faded pieces** in the tray fit nowhere right now.
+- **Undo:** once per game.
+- **Saving:** a game in progress is kept, so you can leave and Continue later. Best
+  score, most lines in a game and games played are kept too.
+
+### Pieces and fairness
+
+There are 37 pieces (`src/games/shapes/core/pieces.ts`): dots, lines of two to five,
+squares and blocks, small and large corners, L, T, S and Z shapes, each turned every way
+it can go (a piece never turns once dealt). Each has a weight at the start of a game and
+one for later; over the first 60 pieces the draw shifts from mostly small, easy pieces
+toward more of the big, awkward ones.
+
+Each new set of three is checked: the game (`src/games/shapes/core/game.ts`) tries up to
+8 sets for one whose pieces can all be placed, one after another, in some order (a short
+search capped by steps). Failing that it takes a set where at least one piece fits. So a
+game ends because of how the board was filled, not because of an unlucky deal. In
+simulation, a player who prefers clearing lines and otherwise places pieces snugly lasts
+a median of about 150 pieces; one placing at random lasts about 17.
+
 ## Development
 
 ```bash
@@ -1301,7 +1338,7 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1`, `shapes.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
