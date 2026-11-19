@@ -45,6 +45,7 @@ Real-time games pause while it is open.
 | Cage Sums | Each number once per row and column; the numbers in each cage make its target. |
 | Peg Jump | Jump pegs over each other to take them off; finish with one peg on the ring. |
 | Tumble Block | Swipe to tip a tall block end over end; stand it upright in the hole. |
+| Pair Flip | Turn cards over two at a time and find every matching pair. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -1544,6 +1545,52 @@ where you must wander away to come back the right way up is not:
 Hover the label in game to see the numbers. The view is cropped to the squares in use, so
 small boards fill the screen.
 
+## Pair Flip
+
+A grid of face-down cards, each picture on exactly two of them. Tap a card to turn it
+over, then another: a matching pair stays face up; two different pictures show for a
+moment and turn back. Find every pair.
+
+### Rules
+
+- **Turning cards:** a missed pair turns back by itself after about a second; tap
+  anywhere to turn it back early and carry on.
+- **Look-alike pictures** (from level 10, then on about half the levels): the pictures
+  share a shape and colour and differ only in style (solid, ring or twin).
+- **Swapping cards** (from level 18, then on about half the levels): every third miss,
+  two face-down cards with different pictures slide past each other into each other's
+  places. They are outlined while they move, so you can follow them.
+- **Stars** come from misses against par: par or fewer is three, up to twice par two,
+  otherwise one. Best times are kept.
+- **Pictures** are the same plain shapes as Layer Pairs (8 shapes, each in its own colour,
+  in 3 styles), so every picture can be told apart without colour. A face-down card
+  carries no picture at all (not even in its label for screen readers).
+
+### Levels
+
+Levels 1 to 3 are tutorials (3x2, 3x4 and 4x4). After that, level N is dealt from N as
+the seed (`src/games/flip/core/levels.ts`), so everyone gets the same grid. Grids grow
+from 4x4 (8 pairs) to 6x6 (18 pairs) over the first 30 levels, then vary, with the odd
+smaller breather. Normal levels spread their pictures over as many shapes as possible;
+look-alike levels use every style of a few shapes.
+
+There is no solver: par is three misses for every four pairs, rounded up. Even a
+perfect memory misses about 0.6 times per pair on average, since the first look at each
+card is a guess, so par can be met with care but not by luck alone.
+
+The label comes from the number of pairs, plus 5 for look-alike pictures and 7 for
+swapping cards:
+
+| Label | Score |
+| --- | --- |
+| Easy | under 10 |
+| Medium | 10 to 14 |
+| Hard | 15 to 20 |
+| Super Hard | 21 or more |
+
+The cards are plain HTML buttons that flip with CSS (no canvas), and the flip is
+skipped when the device asks for reduced motion.
+
 ## Development
 
 ```bash
@@ -1555,7 +1602,7 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1`, `shapes.v1`, `pairs.v1`, `cages.v1`, `pegs.v1`, `tumble.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1`, `shapes.v1`, `pairs.v1`, `cages.v1`, `pegs.v1`, `tumble.v1`, `flip.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 

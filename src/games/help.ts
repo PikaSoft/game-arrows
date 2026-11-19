@@ -336,4 +336,16 @@ export const HELP: Record<string, Help> = {
       'A hint points the way a shortest route tips next. Each hint costs a star.',
     ],
   },
+  flip: {
+    goal: 'Turn cards over two at a time and find every matching pair. Remember where each picture was.',
+    tips: [
+      'Tap two cards to turn them over. A matching pair stays face up; find every pair.',
+      'Remember where each picture was. Finish within par misses for three stars.',
+      'Tap anywhere to turn a missed pair back early and keep going.',
+      'Look closely: some pictures share a shape and colour, and differ only in style.',
+      'Every third miss, two face-down cards swap places. Watch them move.',
+      'Within par is three stars, up to twice par two, otherwise one.',
+      'Pictures differ by shape and style (solid, ring or twin), so you can play without telling colours apart.',
+    ],
+  },
 };

@@ -268,3 +268,18 @@ button.cb-slot { cursor: pointer; }
 
 /* ---------- Two Tones ---------- */
 #to-mode button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+
+/* ---------- Pair Flip ---------- */
+.pf-stage { display: grid; place-items: center; padding: 8px; }
+.pf-cards { display: grid; grid-template-columns: repeat(var(--cols, 4), var(--card, 64px)); gap: 8px; justify-content: center; }
+.pf-card { width: var(--card, 64px); aspect-ratio: 4 / 5; padding: 0; border: 0; background: none; cursor: pointer; perspective: 600px; }
+.pf-inner { position: relative; display: block; width: 100%; height: 100%; transition: transform 0.28s ease; transform-style: preserve-3d; }
+.pf-card.up .pf-inner { transform: rotateY(180deg); }
+.pf-back, .pf-face { position: absolute; inset: 0; border-radius: 10px; backface-visibility: hidden; display: grid; place-items: center; box-shadow: 0 2px 0 color-mix(in srgb, var(--line) 35%, transparent); }
+.pf-back { background: var(--accent); background-image: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--surface) 40%, transparent) 18%, transparent 19%), repeating-linear-gradient(45deg, color-mix(in srgb, var(--line) 12%, transparent) 0 4px, transparent 4px 9px); }
+.pf-face { background: var(--surface); transform: rotateY(180deg); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--line) 25%, transparent); }
+.pf-face svg { width: 70%; height: 70%; }
+.pf-card.done .pf-face { box-shadow: inset 0 0 0 3px var(--accent); opacity: 0.8; }
+.pf-card.swap { z-index: 2; }
+.pf-card.swap .pf-back { box-shadow: 0 0 0 3px var(--line), 0 6px 14px rgba(0, 0, 0, 0.25); }
+@media (prefers-reduced-motion: reduce) { .pf-inner { transition: none; } }

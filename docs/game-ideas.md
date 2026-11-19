@@ -39,7 +39,7 @@ and art for each one and don't copy a specific existing game.
 | 25 | ~~[Tumble Block](#25-tumble-block)~~ | Roll puzzle | Closest | Small to medium | **Built** (`src/games/tumble/`) |
 | 26 | [Cave Glider](#26-cave-glider) | One-tap flyer | Arcade | Small | |
 | 27 | ~~[Code Breaker](#27-code-breaker)~~ | Guess the code | Logic | Small | **Built** (`src/games/codes/`) |
-| 28 | [Pair Flip](#28-pair-flip) | Memory | Casual | Small | |
+| 28 | ~~[Pair Flip](#28-pair-flip)~~ | Memory | Casual | Small | **Built** (`src/games/flip/`) |
 | 29 | ~~[Cage Sums](#29-cage-sums)~~ | Deduction | Logic | Medium | **Built** (`src/games/cages/`) |
 
 Effort is a rough guide next to Squeeze: small is under half of its code, large is
@@ -1181,6 +1181,13 @@ the level worker and cap the work.
 ---
 
 ## 28. Pair Flip
+
+> **Built.** Pair Flip is in the collection (`src/games/flip/`, route `#/flip`). See the
+> README for how it ended up working. The main differences from the plan below: swapped
+> cards slide past each other in plain view (every third miss) rather than one card
+> shuffling unseen; look-alike pictures share a shape and colour and differ in style;
+> there is no timer bonus star (best times are kept instead); and par is three misses
+> per four pairs.
 
 **Idea.** Cards lie face down. Flip two at a time; a match stays up, a miss turns back.
 Find every pair.
