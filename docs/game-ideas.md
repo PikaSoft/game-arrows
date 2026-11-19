@@ -30,7 +30,7 @@ and art for each one and don't copy a specific existing game.
 | 16 | ~~[Fruit Drop](#16-fruit-drop)~~ | Drop and merge | Arcade | Small to medium | **Built** (`src/games/fruit/`) |
 | 17 | ~~[Star Raiders](#17-star-raiders)~~ | Shoot the formation | Arcade | Small to medium | **Built** (`src/games/raiders/`) |
 | 18 | [Island Bridges](#18-island-bridges) | Deduction | Logic | Medium | |
-| 19 | [Mirror Beam](#19-mirror-beam) | Rotate tiles | Closest | Small | |
+| 19 | ~~[Mirror Beam](#19-mirror-beam)~~ | Rotate tiles | Closest | Small | **Built** (`src/games/beams/`) |
 | 20 | [Shape Fit](#20-shape-fit) | Place pieces | Endless | Small | |
 | 21 | [Fence Loop](#21-fence-loop) | Deduction | Logic | Medium to large | |
 | 22 | [Layer Pairs](#22-layer-pairs) | Match free tiles | Closest | Medium | |
@@ -832,6 +832,14 @@ Big boards need the zoom and pan from Arrow Escape (`src/games/arrows/render/cam
 ---
 
 ## 19. Mirror Beam
+
+> **Built.** Mirror Beam is in the collection (`src/games/beams/`, route `#/beams`). See
+> the Mirror Beam section of the README for how it ended up working. The main
+> differences from the plan below: crystals that must be lit took the place of splitters
+> and filters (they keep the solver simple and still make every mirror count), the
+> solver is a search that decides mirrors only as beams reach them rather than Pipe
+> Link's constraint passes, and boards may have up to three solutions, with par the
+> cheapest.
 
 **Idea.** Lamps around the edge shine coloured beams into a grid of angled mirrors. Tap
 a mirror to turn it. Get every beam to the target of its colour.

@@ -244,4 +244,16 @@ export const HELP: Record<string, Help> = {
       'The bulb fills the row with a code that fits every answer so far. Each hint costs a star.',
     ],
   },
+  beams: {
+    goal: 'Tap mirrors to turn them. Guide every beam from its lamp to the target of the same colour, and light every crystal on the way.',
+    tips: [
+      'Tap a mirror to turn it. Guide the beam from the lamp to the target of the same colour.',
+      'Each lamp needs the target of its own colour. Beams pass straight through each other.',
+      'Mirrors with a pin are fixed. Walls stop a beam dead.',
+      'Finish within par taps for three stars. Stuck? A hint turns one mirror into place.',
+      'Crystals must be lit by a beam too. Any colour will do.',
+      'Each colour has its own shape on its lamp and target, so you can play without telling colours apart.',
+      'Undo is free, but an undone tap still counts.',
+    ],
+  },
 };

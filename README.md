@@ -37,6 +37,7 @@ Real-time games pause while it is open.
 | Fruit Drop | Drop fruit into a bucket; matching fruits that touch join into a bigger one. Endless. |
 | Star Raiders | Slide your ship and shoot down waves of marching raiders; it fires by itself. Endless. |
 | Code Breaker | Guess the hidden row of colours; each answer says how many pegs are right. |
+| Mirror Beam | Turn mirrors so every beam of light reaches the target of its colour. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -1117,6 +1118,66 @@ The label comes from how many codes are possible, in bits (log2 of the count):
 
 Hover the label in game to see the size, the bits and the solver's average.
 
+## Mirror Beam
+
+Coloured lamps around the edge of the board shine beams in. Mirrors on the board lean
+one way or the other (`/` or `\`). Tap a mirror to turn it the other way. Get every
+beam to the target of its own colour, also on the edge.
+
+### Rules
+
+- **Beams:** a beam goes straight until it meets a mirror, which turns it a quarter
+  turn. Beams pass straight through each other. A wall stops a beam dead.
+- **Pinned mirrors:** a mirror with a bolt in the middle can't be turned. Tapping one
+  gives a small shake.
+- **Crystals:** from level 12, some boards have crystals. A beam of any colour must pass
+  through each one.
+- **Colour-blind play:** each colour's lamp and target share a shape (dot, triangle,
+  square, diamond).
+- **Taps and stars:** each level has a par from the solver: the fewest taps that solve
+  it. Finish within par for three stars, within par + 25% for two, otherwise one.
+  Nothing can fail. The HUD counts targets lit (and crystals, when there are any).
+- **Undo:** unlimited and free, but an undone tap still counts.
+- **Hints:** 3 per level. Each one turns a mirror that a cheapest solution from where you
+  are needs turned (the first one along the beams) and pins it. Its tap counts, so par
+  is still possible.
+
+### Levels
+
+Levels 1 to 4 are tutorials. After that, level N is generated from N as the seed, so
+everyone gets the same board. Boards grow from 5x6 to about 7x9 over the first 36
+levels, then vary, with two to four beams, more decoy mirrors and fewer pinned ones as
+levels go on.
+
+The generator (`src/games/beams/core/levels.ts`) lays the beams out one by one. Each
+starts at a free spot on the edge and goes straight, now and then placing a mirror in a
+free cell to turn. It follows mirrors earlier beams placed, and never puts a mirror where
+a beam already passes straight through, so earlier beams keep their paths. Where it
+leaves the board becomes its target. The other cells get decoy mirrors and walls,
+crystals go on cells a beam passes through, some of the path's mirrors are pinned, and
+then most of the turnable ones are turned the wrong way.
+
+The solver (`src/games/beams/core/solver.ts`) follows the beams one at a time and only
+decides a mirror when a beam first reaches it, trying it as it is and then turned. A
+mirror no beam reaches can't matter, so it is never turned. That gives par (the fewest
+turns), the number of solutions, and the search effort. Boards with more than three
+solutions are thrown away (the mirrors would barely matter), and of up to 40 candidates
+the one whose effort is closest to the level's target is kept. The work is capped by
+search steps, not time, so every device builds the same board.
+
+The label comes from the search effort in bits: log2 of the steps the solver takes to
+explore every way of turning the mirrors the beams reach. A board where wrong turns die
+out at once is quick to search and quick to read; one where they wander far is not.
+
+| Label | Search effort |
+| --- | --- |
+| Easy | under 6 bits |
+| Medium | 6 to 8.4 |
+| Hard | 8.5 to 10.4 |
+| Super Hard | 10.5 or more |
+
+Hover the label in game to see the number.
+
 ## Development
 
 ```bash
@@ -1128,7 +1189,7 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 
