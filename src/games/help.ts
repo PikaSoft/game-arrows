@@ -269,4 +269,16 @@ export const HELP: Record<string, Help> = {
       'Hints are free: each one fills a square that can be worked out from the board as it is.',
     ],
   },
+  bridges: {
+    goal: 'Join the islands with straight bridges. Each number says how many bridges that island needs, bridges never cross, and every island must end up joined in one group.',
+    tips: [
+      'Drag from an island toward another to build a bridge. Each number says how many bridges that island needs.',
+      'Two islands can share one or two bridges. Drag again for the second one.',
+      'Bridges run straight and never cross, and every island must end up joined in one group.',
+      'You can also tap the water between two islands. A wrong bridge costs a heart.',
+      "Don't cut a group off: two 1s joined together could never reach the rest.",
+      'An island fills in once it has all its bridges.',
+      'Hints are free: each one builds a bridge that can be worked out from the board as it is.',
+    ],
+  },
 };

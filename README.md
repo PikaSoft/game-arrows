@@ -39,6 +39,7 @@ Real-time games pause while it is open.
 | Code Breaker | Guess the hidden row of colours; each answer says how many pegs are right. |
 | Mirror Beam | Turn mirrors so every beam of light reaches the target of its colour. |
 | Two Tones | Fill the grid with orange and blue: never three in a row, every line half and half. |
+| Island Bridges | Join numbered islands with straight bridges that never cross, until every island is linked. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -1233,6 +1234,62 @@ technique first. The difficulty label is the hardest technique it needs:
 
 Hover the label in game to see the technique.
 
+## Island Bridges
+
+Islands sit in the sea, each with a number. Join them with straight bridges, across or up
+and down, so that:
+
+1. each island has exactly as many bridges as its number,
+2. any two islands share at most two bridges,
+3. bridges never cross each other or pass over an island, and
+4. every island ends up joined, through bridges, in one group.
+
+Every map has exactly one answer.
+
+### Rules
+
+- **Building:** drag from an island toward another to build one bridge between them (the
+  link is previewed while dragging). Or tap the water between two islands. Where two
+  links cross, lean the tap toward the way the bridge should run; a tap in the very
+  middle of such a square is too close to call and only shows a reminder.
+- **Hearts:** every bridge is checked straight away, as in the other deduction games.
+  A wrong one isn't built, flashes red and costs one of three hearts.
+- **Free refusals:** a bridge the board itself rules out (one that would cross a bridge,
+  a third bridge, or one more than an island needs) is refused without costing a heart.
+- **Out of hearts:** keep going for no stars, or restart.
+- **Stars** equal the hearts left when every island is joined.
+- **Finished islands** fill in once they have all their bridges. The HUD counts them.
+- **Hints:** 3 per level, free. Each one builds a bridge the reasoning steps below can
+  work out from the board as it is.
+
+### Levels
+
+Levels 1 to 4 are tutorials. After that, level N is generated from N as the seed, so
+everyone gets the same map. Maps grow from 7x7 to 9x12 over the first 36 levels, then
+vary. Isolation is first needed on level 9, and trial and error from level 22.
+
+The generator (`src/games/bridges/core/levels.ts`) grows a map from one island: again and
+again it picks an island and a direction and puts a new island some way off, joined by
+one or two bridges. Islands never sit next to each other (even at a corner), and new
+bridges never cross old ones. A few extra bridges go between islands that already see
+each other, and each island's number is its bridge total. The reasoning solver then has
+to finish the map without guessing (which proves it has one answer); of up to 80 maps
+(700 for the hardest levels), the first that needs exactly the level's hardest step is
+kept.
+
+The solver (`src/games/bridges/core/solver.ts`) keeps, for each link, the bridge counts
+(0, 1 or 2) still possible, and narrows them in waves, always with the easiest step that
+settles anything:
+
+| Label | Hardest step needed |
+| --- | --- |
+| Easy | Counting: an island's number against what its links can still give, and no crossing a certain bridge |
+| Medium | Isolation: no bridge may finish off a group of islands that isn't the whole map, and a group with one way out must take it |
+| Hard | Trial and error: a count that leads, by the steps above, to an impossible map is ruled out |
+| Super Hard | Trial and error, three or more times |
+
+Hover the label in game to see the step.
+
 ## Development
 
 ```bash
@@ -1244,7 +1301,7 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 

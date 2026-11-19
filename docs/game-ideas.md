@@ -29,7 +29,7 @@ and art for each one and don't copy a specific existing game.
 | 15 | ~~[Colour Loop](#15-colour-loop)~~ | Sort on a belt | Arcade | Medium | **Built** (`src/games/loop/`) |
 | 16 | ~~[Fruit Drop](#16-fruit-drop)~~ | Drop and merge | Arcade | Small to medium | **Built** (`src/games/fruit/`) |
 | 17 | ~~[Star Raiders](#17-star-raiders)~~ | Shoot the formation | Arcade | Small to medium | **Built** (`src/games/raiders/`) |
-| 18 | [Island Bridges](#18-island-bridges) | Deduction | Logic | Medium | |
+| 18 | ~~[Island Bridges](#18-island-bridges)~~ | Deduction | Logic | Medium | **Built** (`src/games/bridges/`) |
 | 19 | ~~[Mirror Beam](#19-mirror-beam)~~ | Rotate tiles | Closest | Small | **Built** (`src/games/beams/`) |
 | 20 | [Shape Fit](#20-shape-fit) | Place pieces | Endless | Small | |
 | 21 | [Fence Loop](#21-fence-loop) | Deduction | Logic | Medium to large | |
@@ -786,6 +786,14 @@ lives, a best score.
 ---
 
 ## 18. Island Bridges
+
+> **Built.** Island Bridges is in the collection (`src/games/bridges/`, route `#/bridges`).
+> See the README for how it ended up working. The main differences from the plan below:
+> it uses the hearts model of the other deduction games, so bridges are only ever added
+> (wrong ones aren't built) and there is no third drag to remove a pair; bridges the
+> board itself forbids are refused for free; a tap on the water builds too; and the
+> label comes from the hardest of three steps (counting, isolation, trial and error)
+> rather than counting passes. Big maps fit the screen without zoom so far.
 
 **Idea.** Numbered islands sit on a grid. Join them with straight bridges, across or up
 and down. Each number says how many bridges touch that island. Every island must end up
