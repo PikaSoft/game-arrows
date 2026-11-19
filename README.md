@@ -36,6 +36,7 @@ Real-time games pause while it is open.
 | Colour Loop | Tip crates of cubes onto a turning belt; trays sort them by colour. Don't jam it. |
 | Fruit Drop | Drop fruit into a bucket; matching fruits that touch join into a bigger one. Endless. |
 | Star Raiders | Slide your ship and shoot down waves of marching raiders; it fires by itself. Endless. |
+| Code Breaker | Guess the hidden row of colours; each answer says how many pegs are right. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -1064,6 +1065,58 @@ The rules are in `src/games/raiders/core/sim.ts`, in fixed steps of 1/120 of a s
 with a seeded random source, so the same seed and the same moves always give the same
 game and the tests can play whole waves.
 
+## Code Breaker
+
+A hidden row of coloured pegs. Make a guess and the game answers with dots: a filled dot
+for each peg that is the right colour in the right place, and a hollow dot for each one
+that is the right colour in the wrong place. The dots are always listed filled first, so
+they never say which pegs they mean. Find the code in as few guesses as you can.
+
+### Rules
+
+- **Guessing:** tap a colour to put it in the selected slot; the selection then moves to
+  the next empty slot. Tap a slot to select it, and tap it again to empty it. The undo
+  button clears the last peg. Check is enabled once the row is full. On a keyboard, keys
+  1 to 8 pick colours, Backspace clears, the arrow keys move the selection and Enter checks.
+- **Colour-blind play:** every colour also has its own white shape (dot, triangle, square,
+  diamond, plus, ring, bar, cross).
+- **Repeats:** from level 10, most codes may use a colour more than once. Guesses may
+  always repeat colours.
+- **Guesses and stars:** there is no guess limit and nothing can fail. Crack it within
+  par for three stars, within par + 2 for two, otherwise one. Empty rows on the board
+  show how many guesses par allows.
+- **Hints:** 3 per level. Each one fills the row with a code that fits every answer so
+  far (the one the solver would try next). It costs a star (never below one).
+
+### Levels
+
+Levels 1 to 3 are tutorials (three pegs and four or five colours, then four pegs). After
+that, level N is generated from N as the seed, so everyone gets the same code. Levels 4
+to 9 use four pegs and five or six colours with no repeats; level 10 brings in repeats.
+Over the next 30 or so levels the code grows to five pegs and up to eight colours, with
+the odd easier breather, and late levels sometimes use six pegs with no repeats.
+
+The solver (`src/games/codes/core/solver.ts`) plays like a careful player: it only
+guesses codes that still fit every answer, and picks the one that leaves the fewest codes
+in the worst case. To keep that quick on a phone it weighs a fixed sample of up to 48
+guesses against up to 600 remaining codes, capped by counts rather than time so every
+device picks the same guess.
+
+Par doesn't depend on the level's code, since any one code can fall to a lucky early
+guess. Instead it is the solver's average over a fixed sample of 16 codes of the same
+size, rounded up, plus one guess of slack for not having the solver's perfect memory.
+
+The label comes from how many codes are possible, in bits (log2 of the count):
+
+| Label | Bits | For example |
+| --- | --- | --- |
+| Easy | under 8 | 4 pegs, 5 colours, no repeats |
+| Medium | 8 to 10.9 | 4 pegs, 6 colours, repeats |
+| Hard | 11 to 13.9 | 4 pegs, 8 colours, repeats |
+| Super Hard | 14 or more | 5 pegs, 8 colours, repeats |
+
+Hover the label in game to see the size, the bits and the solver's average.
+
 ## Development
 
 ```bash
@@ -1075,7 +1128,7 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 

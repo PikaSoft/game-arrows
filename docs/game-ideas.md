@@ -38,7 +38,7 @@ and art for each one and don't copy a specific existing game.
 | 24 | [Peg Jump](#24-peg-jump) | Jump puzzle | Closest | Small | |
 | 25 | [Tumble Block](#25-tumble-block) | Roll puzzle | Closest | Small to medium | |
 | 26 | [Cave Glider](#26-cave-glider) | One-tap flyer | Arcade | Small | |
-| 27 | [Code Breaker](#27-code-breaker) | Guess the code | Logic | Small | |
+| 27 | ~~[Code Breaker](#27-code-breaker)~~ | Guess the code | Logic | Small | **Built** (`src/games/codes/`) |
 | 28 | [Pair Flip](#28-pair-flip) | Memory | Casual | Small | |
 | 29 | [Cage Sums](#29-cage-sums) | Deduction | Logic | Medium | |
 
@@ -1095,6 +1095,12 @@ edge so there is room to see what's coming.
 ---
 
 ## 27. Code Breaker
+
+> **Built.** Code Breaker is in the collection (`src/games/codes/`, route `#/codes`). See
+> the Code Breaker section of the README for how it ended up working. The main
+> differences from the plan below: there is no guess limit (stars only), and par is the
+> solver's average for the level's size rather than its count for the one code, since a
+> single code can fall to a lucky guess.
 
 **Idea.** A hidden row of coloured pegs. Make a guess; you are told how many pegs are the
 right colour in the right place and how many are the right colour in the wrong place.

@@ -232,4 +232,16 @@ export const HELP: Record<string, Help> = {
       'A hit costs a heart and the ship blinks for a moment. Every 5000 points brings an extra life, up to five.',
     ],
   },
+  codes: {
+    goal: 'Guess the hidden row of colours. After each guess, dots tell you how many pegs are right and how many are the right colour in the wrong place.',
+    tips: [
+      'Guess the hidden code. A filled dot is a right colour in the right place; a hollow dot is a right colour in the wrong place.',
+      "The dots don't say which pegs they mean. Compare your guesses to work it out.",
+      'Crack the code in par guesses or fewer for three stars.',
+      'From now on the code can use a colour more than once.',
+      'Tap a colour to fill the selected slot. Tap a slot to select it, and tap it again to empty it. Keys 1 to 8, Backspace and Enter work too.',
+      'Each colour has its own shape, so you can play without telling colours apart.',
+      'The bulb fills the row with a code that fits every answer so far. Each hint costs a star.',
+    ],
+  },
 };

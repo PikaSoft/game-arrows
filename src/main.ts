@@ -1,6 +1,7 @@
 import './styles.css';
 import { createArrows } from './games/arrows/ui';
 import { createBricks } from './games/bricks/ui';
+import { createCodes } from './games/codes/ui';
 import { createCrates } from './games/crates/ui';
 import { createFruit } from './games/fruit/ui';
 import { createRaiders } from './games/raiders/ui';
@@ -267,6 +268,7 @@ games.push(
   createLoop(shell),
   createFruit(shell),
   createRaiders(shell),
+  createCodes(shell),
 );
 
 document.addEventListener('keydown', (e) => {
