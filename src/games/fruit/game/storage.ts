@@ -1,4 +1,4 @@
-import { SavedFruit } from '../core/sim';
+import { BounceLevel, DEFAULT_BOUNCE, SavedFruit, isBounceLevel } from '../core/sim';
 
 /** Fruit Drop progress: bests, games played, and the game in progress (if any). */
 export interface FruitProgress {
@@ -7,16 +7,21 @@ export interface FruitProgress {
   bestFruit: number;
   games: number;
   saved: SavedFruit | null;
+  /** How bouncy the fruit are. A preference, so resetting progress keeps it. */
+  bounce: BounceLevel;
 }
 
 export const FRUIT_KEY = 'fruit.v1';
 
-const defaults = (): FruitProgress => ({ bestScore: 0, bestFruit: -1, games: 0, saved: null });
+const defaults = (): FruitProgress => ({ bestScore: 0, bestFruit: -1, games: 0, saved: null, bounce: DEFAULT_BOUNCE });
 
 export function loadFruit(): FruitProgress {
   try {
     const raw = localStorage.getItem(FRUIT_KEY);
-    return raw ? { ...defaults(), ...(JSON.parse(raw) as Partial<FruitProgress>) } : defaults();
+    if (!raw) return defaults();
+    const p = { ...defaults(), ...(JSON.parse(raw) as Partial<FruitProgress>) };
+    if (!isBounceLevel(p.bounce)) p.bounce = DEFAULT_BOUNCE;
+    return p;
   } catch {
     return defaults();
   }
@@ -45,6 +50,6 @@ export function recordGame(p: FruitProgress, score: number, fruit: number): void
 }
 
 export function resetFruit(p: FruitProgress): void {
-  Object.assign(p, defaults());
+  Object.assign(p, defaults(), { bounce: p.bounce });
   saveFruit(p);
 }

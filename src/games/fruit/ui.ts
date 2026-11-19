@@ -1,6 +1,6 @@
 import { fruitLogo, icons } from '../../shared/icons';
 import { GameModule, Shell } from '../types';
-import { FRUITS, FruitSim, SavedFruit, STEP_HZ, StepEvents, W } from './core/sim';
+import { BOUNCE_LEVELS, BounceLevel, FRUITS, FruitSim, SavedFruit, STEP_HZ, StepEvents, W, isBounceLevel } from './core/sim';
 import { FruitProgress, loadFruit, noteBests, recordGame, resetFruit, saveFruit } from './game/storage';
 import { FruitRenderer } from './render/renderer';
 
@@ -8,6 +8,13 @@ import { FruitRenderer } from './render/renderer';
 const KEY_STEP = 0.04;
 /** Most steps run in one frame, so a slow frame cannot snowball. */
 const MAX_STEPS = 12;
+const BOUNCE_OPTIONS: [BounceLevel, string][] = [
+  ['none', 'None'],
+  ['low', 'Low (default)'],
+  ['medium', 'Medium'],
+  ['high', 'High'],
+  ['super', 'Super'],
+];
 
 export function createFruit(shell: Shell): GameModule {
   const progress: FruitProgress = loadFruit();
@@ -114,6 +121,7 @@ export function createFruit(shell: Shell): GameModule {
     // A game left unfinished still counts towards the bests when it is replaced.
     if (!saved && progress.saved) noteBests(progress, progress.saved.score, progress.saved.biggest);
     sim = (saved && FruitSim.restore(saved)) || new FruitSim((Date.now() ^ (Math.random() * 1e9)) >>> 0);
+    sim.restitution = BOUNCE_LEVELS[progress.bounce];
     renderer.setSim(sim);
     aimX = renderer.aimX = W / 2;
     aiming = null;
@@ -306,6 +314,20 @@ export function createFruit(shell: Shell): GameModule {
       renderer.setSim(null);
     },
     resetProgress: () => resetFruit(progress),
+    settings: () => ({
+      html: `<div class="setting"><span>Bounciness</span><select class="select" id="fd-bounce">${BOUNCE_OPTIONS.map(
+        ([id, label]) => `<option value="${id}" ${id === progress.bounce ? 'selected' : ''}>${label}</option>`,
+      ).join('')}</select></div>`,
+      bind: (card) => {
+        card.querySelector<HTMLSelectElement>('#fd-bounce')!.addEventListener('change', (e) => {
+          const v = (e.target as HTMLSelectElement).value;
+          if (!isBounceLevel(v)) return;
+          progress.bounce = v;
+          saveFruit(progress);
+          if (sim) sim.restitution = BOUNCE_LEVELS[v];
+        });
+      },
+    }),
     modalLocked: () => false,
   };
 }
