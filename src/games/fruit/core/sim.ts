@@ -36,7 +36,11 @@ export const pointsFor = (tier: number): number => (tier * (tier + 1)) / 2;
 const DT = 1 / STEP_HZ;
 const GRAVITY = 5;
 const ITERATIONS = 8;
-const RESTITUTION = 0.15;
+/** How much fruits bounce off each other and the bucket (the share of speed kept). */
+export const BOUNCE_LEVELS = { none: 0, low: 0.15, medium: 0.4, high: 0.65, super: 0.85 } as const;
+export type BounceLevel = keyof typeof BOUNCE_LEVELS;
+export const DEFAULT_BOUNCE: BounceLevel = 'low';
+export const isBounceLevel = (v: unknown): v is BounceLevel => typeof v === 'string' && Object.prototype.hasOwnProperty.call(BOUNCE_LEVELS, v);
 /** Below this closing speed a contact does not bounce (stops resting fruit from jittering). */
 const BOUNCE_MIN = 0.35;
 const FRICTION = 0.35;
@@ -104,6 +108,8 @@ export class FruitSim {
    * A live input from the phone, not part of the saved game.
    */
   tilt = 0;
+  /** Bounciness of every contact. A player setting, so it is not part of the saved game. */
+  restitution: number = BOUNCE_LEVELS[DEFAULT_BOUNCE];
 
   private rng: Rng;
   private dealt = 0;
@@ -207,15 +213,15 @@ export class FruitSim {
           if (!a.landed) ev.landings++;
           if (!b.landed) ev.landings++;
           a.landed = b.landed = true;
-          collide(a, b, nx, ny, reach - d);
+          collide(a, b, nx, ny, reach - d, this.restitution);
         }
         // Walls and floor: the normal points from the fruit into the wall.
-        if (a.x < ra) collide(a, null, -1, 0, ra - a.x);
-        if (a.x > W - ra) collide(a, null, 1, 0, a.x - (W - ra));
+        if (a.x < ra) collide(a, null, -1, 0, ra - a.x, this.restitution);
+        if (a.x > W - ra) collide(a, null, 1, 0, a.x - (W - ra), this.restitution);
         if (a.y > H - ra) {
           if (!a.landed) ev.landings++;
           a.landed = true;
-          collide(a, null, 0, 1, a.y - (H - ra));
+          collide(a, null, 0, 1, a.y - (H - ra), this.restitution);
         }
       }
     }
@@ -328,10 +334,10 @@ export class FruitSim {
 
 /**
  * Settle one contact. `n` points from `a` towards `b` (or into the wall when `b` is null)
- * and `depth` is how far they overlap. Fruits are pushed apart by weight, then bounce a
- * little and rub: the rubbing is what makes them roll.
+ * and `depth` is how far they overlap. Fruits are pushed apart by weight, then bounce
+ * (by `restitution`) and rub: the rubbing is what makes them roll.
  */
-function collide(a: Body, b: Body | null, nx: number, ny: number, depth: number): void {
+function collide(a: Body, b: Body | null, nx: number, ny: number, depth: number, restitution: number): void {
   const ra = RADII[a.tier];
   const rb = b ? RADII[b.tier] : 0;
   // Weight goes with area.
@@ -359,7 +365,7 @@ function collide(a: Body, b: Body | null, nx: number, ny: number, depth: number)
   const vn = rvx * nx + rvy * ny;
   if (vn >= 0) return;
 
-  const jn = (-(1 + (vn < -BOUNCE_MIN ? RESTITUTION : 0)) * vn) / sum;
+  const jn = (-(1 + (vn < -BOUNCE_MIN ? restitution : 0)) * vn) / sum;
   a.vx -= jn * nx * ia;
   a.vy -= jn * ny * ia;
   if (b) {

@@ -156,12 +156,14 @@ function openSettings() {
   const resets = activeGame
     ? `<button class="btn small secondary" data-action="reset" data-game="${activeGame.id}">Reset ${activeGame.name}</button>`
     : '<p class="setting-note">To reset a game\'s progress, open its settings from inside the game.</p>';
+  const extra = activeGame?.settings?.();
   openModal(
     `<h2>Settings</h2>
      <div class="setting"><span>Sound</span>${sw('sound', settings.sound)}</div>
      <div class="setting"><span>Vibration</span>${sw('haptics', settings.haptics)}</div>
      <div class="setting"><span>Tip phone to lean the Fruit Drop bucket</span>${sw('tilt', settings.tilt)}</div>
      <div class="setting"><span>Colours</span><select class="select" id="theme-select">${opts}</select></div>
+     ${extra?.html ?? ''}
      <div class="actions" style="margin-top:18px">
        <button class="btn small" data-action="close">Done</button>
        <div class="row">${resets}</div>
@@ -189,6 +191,7 @@ function openSettings() {
     },
   );
   $<HTMLSelectElement>('#theme-select').addEventListener('change', (e) => setTheme((e.target as HTMLSelectElement).value));
+  extra?.bind($('#card'));
 }
 $('#hub-settings').addEventListener('click', openSettings);
 

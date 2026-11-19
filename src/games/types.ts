@@ -42,6 +42,8 @@ export interface GameModule {
   /** Leaving the game (back to hub). Stop timers, close anything open. */
   leave(): void;
   resetProgress(): void;
+  /** Extra rows for the Settings card while this game is open, and a hook to wire them up. */
+  settings?(): { html: string; bind(card: HTMLElement): void };
   /** True when Escape should not close the current modal. */
   modalLocked?(): boolean;
 }

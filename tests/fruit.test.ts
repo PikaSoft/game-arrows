@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { FruitSim, H, MAX_TILT_DEG, OVERFLOW_S, POP_BONUS, RADII, STEP_HZ, TOP_TIER, W, pointsFor } from '../src/games/fruit/core/sim';
+import { BOUNCE_LEVELS, FruitSim, H, MAX_TILT_DEG, OVERFLOW_S, POP_BONUS, RADII, STEP_HZ, TOP_TIER, W, pointsFor } from '../src/games/fruit/core/sim';
 import { sidewaysTip, tiltFromPhone } from '../src/games/fruit/game/tilt';
 import { FRUIT_KEY, loadFruit, noteBests, recordGame, resetFruit, saveFruit } from '../src/games/fruit/game/storage';
 
@@ -211,16 +211,62 @@ describe('storage', () => {
       removeItem: (k: string) => mem.delete(k),
     };
     const p = loadFruit();
-    expect(p).toEqual({ bestScore: 0, bestFruit: -1, games: 0, saved: null });
+    expect(p).toEqual({ bestScore: 0, bestFruit: -1, games: 0, saved: null, bounce: 'low' });
     p.saved = new FruitSim(1).save();
     saveFruit(p);
     expect(loadFruit().saved?.seed).toBe(1);
     noteBests(p, 30, 4);
     recordGame(p, 20, 6);
-    expect(p).toEqual({ bestScore: 30, bestFruit: 6, games: 1, saved: null });
+    expect(p).toEqual({ bestScore: 30, bestFruit: 6, games: 1, saved: null, bounce: 'low' });
     expect(JSON.parse(mem.get(FRUIT_KEY)!).bestScore).toBe(30);
     resetFruit(p);
-    expect(loadFruit()).toEqual({ bestScore: 0, bestFruit: -1, games: 0, saved: null });
+    expect(loadFruit()).toEqual({ bestScore: 0, bestFruit: -1, games: 0, saved: null, bounce: 'low' });
+  });
+});
+
+describe('bounciness', () => {
+  /** Drop a fruit from high up and report the fastest it moves upward after first landing. */
+  function rebound(restitution: number) {
+    const sim = new FruitSim(1);
+    sim.restitution = restitution;
+    dropTier(sim, 3, 0.5);
+    let up = 0;
+    for (let i = 0; i < 2 * STEP_HZ; i++) {
+      sim.step();
+      const [b] = sim.bodies;
+      if (b.landed) up = Math.max(up, -b.vy);
+    }
+    return up;
+  }
+
+  test('higher bounciness makes a fruit rebound higher', () => {
+    const none = rebound(BOUNCE_LEVELS.none);
+    const low = rebound(BOUNCE_LEVELS.low);
+    const high = rebound(BOUNCE_LEVELS.super);
+    expect(none).toBeLessThan(0.05);
+    expect(low).toBeGreaterThan(none);
+    expect(high).toBeGreaterThan(low * 2);
+  });
+
+  test('a bouncy fruit still comes to rest', () => {
+    const sim = new FruitSim(1);
+    sim.restitution = BOUNCE_LEVELS.super;
+    dropTier(sim, 3, 0.5);
+    run(sim, 12);
+    expect(speed(sim)).toBeLessThan(0.05);
+  });
+
+  test('the bounciness choice is stored, validated, and kept on reset', () => {
+    localStorage.setItem(FRUIT_KEY, JSON.stringify({ bestScore: 5, bounce: 'bogus' }));
+    expect(loadFruit().bounce).toBe('low');
+    const p = loadFruit();
+    p.bounce = 'high';
+    saveFruit(p);
+    expect(loadFruit().bounce).toBe('high');
+    resetFruit(p);
+    expect(p.bounce).toBe('high');
+    expect(loadFruit().bounce).toBe('high');
+    expect(loadFruit().bestScore).toBe(0);
   });
 });
 
