@@ -138,7 +138,9 @@ function route() {
 }
 
 function renderHub() {
-  $('#game-cards').innerHTML = orderByFavourites(games, settings.favourites)
+  // Alphabetical by name, with starred favourites (also alphabetical) at the top.
+  const byName = [...games].sort((a, b) => a.name.localeCompare(b.name));
+  $('#game-cards').innerHTML = orderByFavourites(byName, settings.favourites)
     .map((g) => {
       const s = g.summary();
       const fav = settings.favourites.includes(g.id);
