@@ -3,7 +3,9 @@
 A mobile-first collection of puzzle games. The home screen shows a card for each game
 with your current level and stars. Sound, vibration and colours are shared by every
 game; progress is kept per game. A game's progress can be reset from the settings card
-inside that game (the home screen's settings card has no reset buttons). Players who had Arrow Escape before keep their levels,
+inside that game (the home screen's settings card has no reset buttons). Tap the star on a
+game's card to make it a favourite: favourites are listed first on the home screen, in
+the collection's usual order, and are saved with the shared settings. Players who had Arrow Escape before keep their levels,
 stars and settings.
 
 Every game has a How to play card, opened from the ? button in its top bar or the How to

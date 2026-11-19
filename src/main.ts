@@ -24,7 +24,7 @@ import { createStack } from './games/stack/ui';
 import { HELP } from './games/help';
 import { GameModule, Shell } from './games/types';
 import { hubLogo, starIcon } from './shared/icons';
-import { loadSettings, saveSettings } from './shared/settings';
+import { loadSettings, orderByFavourites, saveSettings, toggleFavourite } from './shared/settings';
 import { Sfx, vibrate } from './shared/sfx';
 import { applyTheme, resolveTheme, Theme, THEME_ORDER, themeLabel } from './shared/themes';
 import { startUpdateCheck } from './shared/updateCheck';
@@ -126,23 +126,41 @@ function route() {
 }
 
 function renderHub() {
-  $('#game-cards').innerHTML = games
+  $('#game-cards').innerHTML = orderByFavourites(games, settings.favourites)
     .map((g) => {
       const s = g.summary();
-      return `<button class="game-card" data-game="${g.id}">
-        <span class="game-icon">${g.icon}</span>
-        <span class="game-text">
-          <b>${g.name}</b>
-          <span class="tagline">${g.tagline}</span>
-          <span class="game-status">${s.status}${s.stars ? ` · ${starIcon(true)} ${s.stars}` : ''}</span>
-        </span>
-      </button>`;
+      const fav = settings.favourites.includes(g.id);
+      return `<div class="game-card-wrap">
+        <button class="game-card" data-game="${g.id}">
+          <span class="game-icon">${g.icon}</span>
+          <span class="game-text">
+            <b>${g.name}</b>
+            <span class="tagline">${g.tagline}</span>
+            <span class="game-status">${s.status}${s.stars ? ` · ${starIcon(true)} ${s.stars}` : ''}</span>
+          </span>
+        </button>
+        <button class="fav-toggle" data-fav="${g.id}" aria-pressed="${fav}"
+          aria-label="${fav ? 'Remove' : 'Add'} ${g.name} ${fav ? 'from' : 'to'} favourites">${starIcon(fav)}</button>
+      </div>`;
     })
     .join('');
 }
 
 $('#game-cards').addEventListener('click', (e) => {
-  const c = (e.target as HTMLElement).closest<HTMLElement>('[data-game]');
+  const target = e.target as HTMLElement;
+  const f = target.closest<HTMLElement>('[data-fav]');
+  if (f) {
+    const id = f.dataset.fav!;
+    const on = toggleFavourite(settings, id);
+    saveSettings(settings);
+    renderHub();
+    const name = games.find((g) => g.id === id)?.name ?? '';
+    toast(on ? `${name} added to favourites` : `${name} removed from favourites`);
+    // Keep focus on the same game's star after the list is redrawn.
+    $<HTMLElement>(`[data-fav="${id}"]`)?.focus();
+    return;
+  }
+  const c = target.closest<HTMLElement>('[data-game]');
   if (!c) return;
   sfx.unlock();
   location.hash = `#/${c.dataset.game}`;
