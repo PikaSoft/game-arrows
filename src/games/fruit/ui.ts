@@ -208,7 +208,7 @@ export function createFruit(shell: Shell): GameModule {
     if (!s) return;
     // A card on top or a hidden tab holds everything still.
     if (!s.over && !modalOpen() && document.visibilityState === 'visible') {
-      lean += ((shell.settings.tilt ? tilt.target : 0) - lean) * TILT_EASE;
+      lean += ((progress.tilt ? tilt.target : 0) - lean) * TILT_EASE;
       if (Math.abs(lean) < 1e-4) lean = 0;
       s.setTilt(lean);
       acc += dt;
@@ -338,8 +338,15 @@ export function createFruit(shell: Shell): GameModule {
     settings: () => ({
       html: `<div class="setting"><span>Bounciness</span><select class="select" id="fd-bounce">${BOUNCE_OPTIONS.map(
         ([id, label]) => `<option value="${id}" ${id === progress.bounce ? 'selected' : ''}>${label}</option>`,
-      ).join('')}</select></div>`,
+      ).join('')}</select></div>
+      <div class="setting"><span>Tip phone to lean bucket</span><button class="switch" role="switch" id="fd-tilt" aria-checked="${progress.tilt}"></button></div>`,
       bind: (card) => {
+        card.querySelector<HTMLButtonElement>('#fd-tilt')!.addEventListener('click', (e) => {
+          progress.tilt = !progress.tilt;
+          (e.currentTarget as HTMLElement).setAttribute('aria-checked', String(progress.tilt));
+          saveFruit(progress);
+          if (progress.tilt) tilt.ask();
+        });
         card.querySelector<HTMLSelectElement>('#fd-bounce')!.addEventListener('change', (e) => {
           const v = (e.target as HTMLSelectElement).value;
           if (!isBounceLevel(v)) return;

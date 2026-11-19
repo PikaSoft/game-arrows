@@ -211,16 +211,16 @@ describe('storage', () => {
       removeItem: (k: string) => mem.delete(k),
     };
     const p = loadFruit();
-    expect(p).toEqual({ bestScore: 0, bestFruit: -1, games: 0, saved: null, bounce: 'low' });
+    expect(p).toEqual({ bestScore: 0, bestFruit: -1, games: 0, saved: null, bounce: 'low', tilt: true });
     p.saved = new FruitSim(1).save();
     saveFruit(p);
     expect(loadFruit().saved?.seed).toBe(1);
     noteBests(p, 30, 4);
     recordGame(p, 20, 6);
-    expect(p).toEqual({ bestScore: 30, bestFruit: 6, games: 1, saved: null, bounce: 'low' });
+    expect(p).toEqual({ bestScore: 30, bestFruit: 6, games: 1, saved: null, bounce: 'low', tilt: true });
     expect(JSON.parse(mem.get(FRUIT_KEY)!).bestScore).toBe(30);
     resetFruit(p);
-    expect(loadFruit()).toEqual({ bestScore: 0, bestFruit: -1, games: 0, saved: null, bounce: 'low' });
+    expect(loadFruit()).toEqual({ bestScore: 0, bestFruit: -1, games: 0, saved: null, bounce: 'low', tilt: true });
   });
 });
 
@@ -267,6 +267,18 @@ describe('bounciness', () => {
     expect(p.bounce).toBe('high');
     expect(loadFruit().bounce).toBe('high');
     expect(loadFruit().bestScore).toBe(0);
+  });
+
+  test('the tilt switch is stored, validated, and kept on reset', () => {
+    localStorage.setItem(FRUIT_KEY, JSON.stringify({ bestScore: 5, tilt: 'yes' }));
+    expect(loadFruit().tilt).toBe(true);
+    const p = loadFruit();
+    p.tilt = false;
+    saveFruit(p);
+    expect(loadFruit().tilt).toBe(false);
+    resetFruit(p);
+    expect(p.tilt).toBe(false);
+    expect(loadFruit().tilt).toBe(false);
   });
 });
 

@@ -161,7 +161,6 @@ function openSettings() {
     `<h2>Settings</h2>
      <div class="setting"><span>Sound</span>${sw('sound', settings.sound)}</div>
      <div class="setting"><span>Vibration</span>${sw('haptics', settings.haptics)}</div>
-     <div class="setting"><span>Tip phone to lean the Fruit Drop bucket</span>${sw('tilt', settings.tilt)}</div>
      <div class="setting"><span>Colours</span><select class="select" id="theme-select">${opts}</select></div>
      ${extra?.html ?? ''}
      <div class="actions" style="margin-top:18px">
@@ -169,7 +168,7 @@ function openSettings() {
        <div class="row">${resets}</div>
      </div>`,
     (action, el) => {
-      if (action === 'sound' || action === 'haptics' || action === 'tilt') {
+      if (action === 'sound' || action === 'haptics') {
         settings[action] = !settings[action];
         el.setAttribute('aria-checked', String(settings[action]));
         sfx.enabled = settings.sound;
