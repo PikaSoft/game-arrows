@@ -243,6 +243,7 @@ export const HELP: Record<string, Help> = {
       'Tap a colour to fill the selected slot. Tap a slot to select it, and tap it again to empty it. Keys 1 to 8, Backspace and Enter work too.',
       'Each colour has its own shape, so you can play without telling colours apart.',
       'The bulb fills the row with a code that fits every answer so far. Each hint costs a star.',
+      'Guesses fill from the bottom up. Long press a filled slot to lock it in: it fills itself on every guess after. Long press again (or press L) to unlock.',
     ],
   },
   beams: {

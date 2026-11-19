@@ -162,7 +162,10 @@ export function createCodes(shell: Shell): GameModule {
     render();
   }
 
-  /** Rows for every guess made, the row being filled in, and empty rows up to par. */
+  /**
+   * Rows for every guess made, the row being filled in, and empty rows up to par.
+   * The board fills from the bottom up: the first guess sits at the bottom.
+   */
   function render() {
     const s = session;
     if (!s) return;
@@ -185,9 +188,9 @@ export function createCodes(shell: Shell): GameModule {
           <span class="cb-pegs">${s.row
             .map(
               (c, i) =>
-                `<button class="cb-slot${i === s.cursor ? ' sel' : ''}" data-slot="${i}" aria-label="Slot ${i + 1}${c === null ? ', empty' : `, ${PEG_NAMES[c]}`}">${
-                  c === null ? '' : pegSvg(c)
-                }</button>`,
+                `<button class="cb-slot${i === s.cursor ? ' sel' : ''}${s.locked[i] ? ' locked' : ''}" data-slot="${i}" aria-label="Slot ${i + 1}${
+                  c === null ? ', empty' : `, ${PEG_NAMES[c]}`
+                }${s.locked[i] ? ', locked' : ''}">${c === null ? '' : pegSvg(c)}${s.locked[i] ? `<span class="cb-lock">${icons.lock}</span>` : ''}</button>`,
             )
             .join('')}</span>
           <span class="cb-fb"></span>
@@ -208,7 +211,7 @@ export function createCodes(shell: Shell): GameModule {
     }
     const board = $('#cb-board');
     board.style.setProperty('--slots', String(slots));
-    board.innerHTML = rows.join('');
+    board.innerHTML = rows.reverse().join('');
     board.querySelector('.current, .answer')?.scrollIntoView({ block: 'nearest' });
     updateHud();
   }
@@ -270,11 +273,58 @@ export function createCodes(shell: Shell): GameModule {
     const b = (e.target as HTMLElement).closest<HTMLElement>('[data-colour]');
     if (b) place(Number(b.dataset.colour));
   });
-  $('#cb-board').addEventListener('click', (e) => {
+  // A long press on a filled slot locks it in (or unlocks it); locked colours fill the next guess.
+  const LONG_PRESS_MS = 450;
+  let pressTimer = 0;
+  let pressStart: { x: number; y: number } | null = null;
+  let suppressClick = false;
+  const cancelPress = () => {
+    clearTimeout(pressTimer);
+    pressStart = null;
+  };
+  function toggleLock(i: number) {
+    const s = session;
+    if (!s || modalOpen() || !s.toggleLock(i)) return;
+    sfx.unlock();
+    sfx.blip();
+    shell.vibrate(s.locked[i] ? [10, 40, 10] : 10);
+    render();
+  }
+  const board = $('#cb-board');
+  board.addEventListener('pointerdown', (e) => {
+    suppressClick = false;
+    cancelPress();
+    const b = (e.target as HTMLElement).closest<HTMLElement>('[data-slot]');
+    if (!b || !session || modalOpen()) return;
+    const i = Number(b.dataset.slot);
+    pressStart = { x: e.clientX, y: e.clientY };
+    pressTimer = window.setTimeout(() => {
+      pressStart = null;
+      suppressClick = true;
+      toggleLock(i);
+    }, LONG_PRESS_MS);
+  });
+  board.addEventListener('pointermove', (e) => {
+    if (pressStart && Math.hypot(e.clientX - pressStart.x, e.clientY - pressStart.y) > 10) cancelPress();
+  });
+  for (const ev of ['pointerup', 'pointercancel', 'pointerleave'] as const) board.addEventListener(ev, cancelPress);
+  board.addEventListener('contextmenu', (e) => {
+    if ((e.target as HTMLElement).closest('[data-slot]')) e.preventDefault();
+  });
+  board.addEventListener('click', (e) => {
+    if (suppressClick) {
+      suppressClick = false;
+      return;
+    }
     const b = (e.target as HTMLElement).closest<HTMLElement>('[data-slot]');
     const s = session;
     if (!b || !s || modalOpen()) return;
-    s.select(Number(b.dataset.slot));
+    const i = Number(b.dataset.slot);
+    if (s.locked[i]) {
+      shell.toast('Locked in. Long press to unlock');
+      return;
+    }
+    s.select(i);
     render();
   });
   $('#cb-erase').addEventListener('click', erase);
@@ -296,6 +346,9 @@ export function createCodes(shell: Shell): GameModule {
       e.preventDefault();
     } else if (e.key === 'Backspace' || e.key === 'Delete') {
       erase();
+      e.preventDefault();
+    } else if (e.key === 'l' || e.key === 'L') {
+      toggleLock(s.cursor);
       e.preventDefault();
     } else if (e.key === 'Enter') {
       check();
