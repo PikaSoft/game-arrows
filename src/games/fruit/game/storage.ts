@@ -9,11 +9,13 @@ export interface FruitProgress {
   saved: SavedFruit | null;
   /** How bouncy the fruit are. A preference, so resetting progress keeps it. */
   bounce: BounceLevel;
+  /** Tipping the phone leans the bucket. A preference, so resetting progress keeps it. */
+  tilt: boolean;
 }
 
 export const FRUIT_KEY = 'fruit.v1';
 
-const defaults = (): FruitProgress => ({ bestScore: 0, bestFruit: -1, games: 0, saved: null, bounce: DEFAULT_BOUNCE });
+const defaults = (): FruitProgress => ({ bestScore: 0, bestFruit: -1, games: 0, saved: null, bounce: DEFAULT_BOUNCE, tilt: true });
 
 export function loadFruit(): FruitProgress {
   try {
@@ -21,6 +23,7 @@ export function loadFruit(): FruitProgress {
     if (!raw) return defaults();
     const p = { ...defaults(), ...(JSON.parse(raw) as Partial<FruitProgress>) };
     if (!isBounceLevel(p.bounce)) p.bounce = DEFAULT_BOUNCE;
+    if (typeof p.tilt !== 'boolean') p.tilt = true;
     return p;
   } catch {
     return defaults();
@@ -50,6 +53,6 @@ export function recordGame(p: FruitProgress, score: number, fruit: number): void
 }
 
 export function resetFruit(p: FruitProgress): void {
-  Object.assign(p, defaults(), { bounce: p.bounce });
+  Object.assign(p, defaults(), { bounce: p.bounce, tilt: p.tilt });
   saveFruit(p);
 }

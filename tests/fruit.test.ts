@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { BOUNCE_LEVELS, FruitSim, H, OVERFLOW_S, POP_BONUS, RADII, STEP_HZ, TOP_TIER, W, pointsFor } from '../src/games/fruit/core/sim';
+import { BOUNCE_LEVELS, FruitSim, H, MAX_TILT_DEG, OVERFLOW_S, POP_BONUS, RADII, STEP_HZ, TOP_TIER, W, pointsFor } from '../src/games/fruit/core/sim';
+import { sidewaysTip, tiltFromPhone } from '../src/games/fruit/game/tilt';
 import { FRUIT_KEY, loadFruit, noteBests, recordGame, resetFruit, saveFruit } from '../src/games/fruit/game/storage';
 
 /** Run the bucket for a while. */
@@ -210,16 +211,16 @@ describe('storage', () => {
       removeItem: (k: string) => mem.delete(k),
     };
     const p = loadFruit();
-    expect(p).toEqual({ bestScore: 0, bestFruit: -1, games: 0, saved: null, bounce: 'low' });
+    expect(p).toEqual({ bestScore: 0, bestFruit: -1, games: 0, saved: null, bounce: 'low', tilt: true });
     p.saved = new FruitSim(1).save();
     saveFruit(p);
     expect(loadFruit().saved?.seed).toBe(1);
     noteBests(p, 30, 4);
     recordGame(p, 20, 6);
-    expect(p).toEqual({ bestScore: 30, bestFruit: 6, games: 1, saved: null, bounce: 'low' });
+    expect(p).toEqual({ bestScore: 30, bestFruit: 6, games: 1, saved: null, bounce: 'low', tilt: true });
     expect(JSON.parse(mem.get(FRUIT_KEY)!).bestScore).toBe(30);
     resetFruit(p);
-    expect(loadFruit()).toEqual({ bestScore: 0, bestFruit: -1, games: 0, saved: null, bounce: 'low' });
+    expect(loadFruit()).toEqual({ bestScore: 0, bestFruit: -1, games: 0, saved: null, bounce: 'low', tilt: true });
   });
 });
 
@@ -266,5 +267,86 @@ describe('bounciness', () => {
     expect(p.bounce).toBe('high');
     expect(loadFruit().bounce).toBe('high');
     expect(loadFruit().bestScore).toBe(0);
+  });
+
+  test('the tilt switch is stored, validated, and kept on reset', () => {
+    localStorage.setItem(FRUIT_KEY, JSON.stringify({ bestScore: 5, tilt: 'yes' }));
+    expect(loadFruit().tilt).toBe(true);
+    const p = loadFruit();
+    p.tilt = false;
+    saveFruit(p);
+    expect(loadFruit().tilt).toBe(false);
+    resetFruit(p);
+    expect(p.tilt).toBe(false);
+    expect(loadFruit().tilt).toBe(false);
+  });
+});
+
+describe('tilt', () => {
+  const MAX = (MAX_TILT_DEG * Math.PI) / 180;
+
+  test('the lean is kept to a few degrees', () => {
+    const sim = new FruitSim(1);
+    sim.setTilt(1);
+    expect(sim.tilt).toBeCloseTo(MAX);
+    sim.setTilt(-1);
+    expect(sim.tilt).toBeCloseTo(-MAX);
+    sim.setTilt(NaN);
+    expect(sim.tilt).toBeCloseTo(-MAX);
+    sim.setTilt(0.01);
+    expect(sim.tilt).toBe(0.01);
+  });
+
+  test('a lean rolls loose fruit to the low side', () => {
+    const level = new FruitSim(1);
+    dropTier(level, 2, 0.5);
+    run(level, 3);
+    expect(level.bodies[0].x).toBeCloseTo(0.5, 2);
+
+    const right = new FruitSim(1);
+    right.setTilt(1);
+    dropTier(right, 2, 0.5);
+    run(right, 4);
+    expect(right.bodies[0].x).toBeCloseTo(W - RADII[2], 2);
+
+    const left = new FruitSim(1);
+    left.setTilt(-1);
+    dropTier(left, 2, 0.5);
+    run(left, 4);
+    expect(left.bodies[0].x).toBeCloseTo(RADII[2], 2);
+  });
+
+  test('the lean is not saved with the game', () => {
+    const sim = new FruitSim(1);
+    sim.setTilt(1);
+    dropTier(sim, 1, 0.5);
+    const back = FruitSim.restore(JSON.parse(JSON.stringify(sim.save())))!;
+    expect(back.tilt).toBe(0);
+    expect(back.bodies).toEqual(sim.bodies);
+  });
+
+  test('phone tip maps to a small, capped lean', () => {
+    expect(tiltFromPhone(0)).toBe(0);
+    expect(tiltFromPhone(2)).toBe(0);
+    expect(tiltFromPhone(-2)).toBe(0);
+    expect(tiltFromPhone(11.5)).toBeCloseTo(MAX / 2);
+    expect(tiltFromPhone(20)).toBeCloseTo(MAX);
+    expect(tiltFromPhone(90)).toBeCloseTo(MAX);
+    expect(tiltFromPhone(-90)).toBeCloseTo(-MAX);
+    expect(tiltFromPhone(NaN)).toBe(0);
+  });
+
+  test('phone tip is read the same held flat or upright, and follows screen rotation', () => {
+    // Flat on a table, right edge lowered 10 degrees.
+    expect(sidewaysTip({ beta: 0, gamma: 10 }, 0)).toBeCloseTo(10);
+    // Held upright and level.
+    expect(Math.abs(sidewaysTip({ beta: 90, gamma: 0 }, 0)!)).toBeLessThan(1e-9);
+    // Held at 45 degrees and rolled right a little.
+    expect(sidewaysTip({ beta: 45, gamma: 10 }, 0)!).toBeGreaterThan(5);
+    // Screen turned: the left-to-right line follows the phone's long edge.
+    expect(sidewaysTip({ beta: 10, gamma: 0 }, 90)).toBeCloseTo(10);
+    expect(sidewaysTip({ beta: 10, gamma: 0 }, 270)).toBeCloseTo(-10);
+    expect(sidewaysTip({ beta: 0, gamma: 10 }, 180)).toBeCloseTo(-10);
+    expect(sidewaysTip({ beta: null, gamma: 10 }, 0)).toBeNull();
   });
 });
