@@ -185,6 +185,49 @@ describe('session', () => {
     expect(t.stars()).toBe(2);
   });
 
+  test('locked slots keep their colour, are skipped, and fill the next guess', () => {
+    const s = new Session(level);
+    expect(s.toggleLock(0)).toBe(false); // can't lock an empty slot
+    s.place(2);
+    expect(s.toggleLock(0)).toBe(true);
+    s.select(0);
+    s.select(0); // tapping a locked slot doesn't clear it
+    expect(s.row[0]).toBe(2);
+    s.place(1);
+    s.place(0);
+    expect(s.row).toEqual([2, 1, 0]);
+    s.backspace();
+    s.backspace();
+    expect(s.backspace()).toBe(false); // the locked slot stays
+    expect(s.row).toEqual([2, null, null]);
+    s.place(1);
+    s.place(0);
+    s.submit();
+    expect(s.row).toEqual([2, null, null]);
+    expect(s.cursor).toBe(1);
+    s.place(0);
+    s.place(3);
+    expect(s.row).toEqual([2, 0, 3]);
+    s.submit();
+    expect(s.won).toBe(true);
+    expect(s.locked).toEqual([false, false, false]);
+  });
+
+  test('a fully locked row refills itself and ignores new colours', () => {
+    const s = new Session(level);
+    for (const c of [0, 1, 2]) s.place(c);
+    for (let i = 0; i < 3; i++) s.toggleLock(i);
+    expect(s.rowEmpty).toBe(true);
+    expect(s.place(3)).toBe(false);
+    s.submit();
+    expect(s.row).toEqual([0, 1, 2]);
+    expect(s.rowFull).toBe(true);
+    s.toggleLock(1);
+    s.select(1);
+    s.place(3);
+    expect(s.row).toEqual([0, 3, 2]);
+  });
+
   test('a hint fills the row with a code that fits, and costs a star', () => {
     const s = new Session(level);
     for (const c of [0, 1, 2]) s.place(c);
