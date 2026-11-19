@@ -28,6 +28,7 @@ and art for each one and don't copy a specific existing game.
 | 14 | ~~[Word Grid](#14-word-grid)~~ | Word | Word | Medium to large | **Built** (`src/games/words/`) |
 | 15 | ~~[Colour Loop](#15-colour-loop)~~ | Sort on a belt | Arcade | Medium | **Built** (`src/games/loop/`) |
 | 16 | ~~[Fruit Drop](#16-fruit-drop)~~ | Drop and merge | Arcade | Small to medium | **Built** (`src/games/fruit/`) |
+| 17 | ~~[Star Raiders](#17-star-raiders)~~ | Shoot the formation | Arcade | Small to medium | **Built** (`src/games/raiders/`) |
 
 Effort is a rough guide next to Squeeze: small is under half of its code, large is
 more than all of it.
@@ -745,3 +746,23 @@ bucket overflows.
   in place directly and testing one thing at a time holds up better.
 - "Overflow" needs a pause before it counts (two seconds here), and must ignore fruit
   that is still falling, or a bounce ends the game.
+
+## 17. Star Raiders
+
+> **Built.** Star Raiders is in the collection (`src/games/raiders/`, route `#/raiders`).
+> See the Star Raiders section of the README for how it works.
+
+**Idea.** A formation of raiders marches side to side and steps down at each edge, firing
+bolts. The player's ship slides along the bottom and shoots back. Endless waves, three
+lives, a best score.
+
+**What was learnt building it**
+
+- On a phone, firing by itself is the right call: one thumb moves the ship and nothing
+  else is asked of it. Two shots in flight at most keeps aiming worth doing.
+- The ship moves with the finger rather than jumping under it (as in Brick Breaker), and
+  sits well above the bottom, so the thumb never hides it or the bolts.
+- Stepping the formation in jumps, faster as raiders fall, gives the familiar build-up
+  of pressure with one timer and no per-raider motion.
+- Shields as a grid of small cells are cheap to test against and wear away nicely; bolts
+  take two cells, shots one.

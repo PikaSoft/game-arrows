@@ -221,4 +221,15 @@ export const HELP: Record<string, Help> = {
       'Two melons that touch pop and clear some room, for a bonus. A game in progress is kept: come back and Continue.',
     ],
   },
+  raiders: {
+    goal: 'Raiders march down in waves, firing as they come. Your ship fires by itself: slide it to aim and to dodge. Score as much as you can before you run out of lives.',
+    tips: [
+      'Drag anywhere to slide the ship. It follows your finger without jumping under it. With keys, use the arrows to move and Space to pause.',
+      'Your ship fires on its own, two shots at a time. Line it up under the raiders.',
+      'The formation steps down each time it reaches an edge, and speeds up as raiders fall. If a raider reaches your row, the game is over.',
+      'The shields soak up shots from both sides and wear away. Shoot a bolt to cancel it out.',
+      'Top-row raiders score 30, middle rows 20, bottom rows 10. The ship crossing the top scores 50 to 300. Clearing a wave adds 100 times its number.',
+      'A hit costs a heart and the ship blinks for a moment. Every 5000 points brings an extra life, up to five.',
+    ],
+  },
 };
