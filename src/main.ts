@@ -9,6 +9,7 @@ import { createCrates } from './games/crates/ui';
 import { createFence } from './games/fence/ui';
 import { createFlip } from './games/flip/ui';
 import { createFruit } from './games/fruit/ui';
+import { createGlider } from './games/glider/ui';
 import { createRaiders } from './games/raiders/ui';
 import { createIce } from './games/ice/ui';
 import { createLanes } from './games/lanes/ui';
@@ -289,6 +290,7 @@ games.push(
   createTumble(shell),
   createFlip(shell),
   createFence(shell),
+  createGlider(shell),
 );
 
 document.addEventListener('keydown', (e) => {

@@ -37,7 +37,7 @@ and art for each one and don't copy a specific existing game.
 | 23 | ~~[Two Tones](#23-two-tones)~~ | Deduction | Logic | Small | **Built** (`src/games/tones/`) |
 | 24 | ~~[Peg Jump](#24-peg-jump)~~ | Jump puzzle | Closest | Small | **Built** (`src/games/pegs/`) |
 | 25 | ~~[Tumble Block](#25-tumble-block)~~ | Roll puzzle | Closest | Small to medium | **Built** (`src/games/tumble/`) |
-| 26 | [Cave Glider](#26-cave-glider) | One-tap flyer | Arcade | Small | |
+| 26 | ~~[Cave Glider](#26-cave-glider)~~ | One-tap flyer | Arcade | Small | **Built** (`src/games/glider/`) |
 | 27 | ~~[Code Breaker](#27-code-breaker)~~ | Guess the code | Logic | Small | **Built** (`src/games/codes/`) |
 | 28 | ~~[Pair Flip](#28-pair-flip)~~ | Memory | Casual | Small | **Built** (`src/games/flip/`) |
 | 29 | ~~[Cage Sums](#29-cage-sums)~~ | Deduction | Logic | Medium | **Built** (`src/games/cages/`) |
@@ -1127,6 +1127,13 @@ to the board's own axes and show arrows on the first levels.
 ---
 
 ## 26. Cave Glider
+
+> **Built.** Cave Glider is in the collection (`src/games/glider/`, route `#/glider`). See
+> the README for how it ended up working. The main differences from the plan below: the
+> cave is a smooth random walk sampled every unit (not chunks), with its slope and bend
+> capped from the glider's own climb, sink and speed rather than checked chunk by chunk;
+> a test pilot flying 3,000 units on every seed is the passability check. Gems sit
+> near the walls and only count towards bests, not a separate score.
 
 **Idea.** A small glider flies through a cave that scrolls past. Hold to climb, let go
 to sink. Don't touch the walls. Endless, with a best distance.

@@ -47,6 +47,7 @@ Real-time games pause while it is open.
 | Tumble Block | Swipe to tip a tall block end over end; stand it upright in the hole. |
 | Pair Flip | Turn cards over two at a time and find every matching pair. |
 | Fence Loop | Draw one closed fence along the dotted lines; each number counts its square's sides. |
+| Cave Glider | Hold to climb, let go to sink, through a winding cave. Endless. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -1655,6 +1656,37 @@ step that settles anything:
 
 Hover the label in game to see the hardest step.
 
+## Cave Glider
+
+A glider flies through a cave that scrolls past. Hold anywhere to climb and let go to
+sink; touching a wall ends the flight. Endless: fly as far as you can, picking up gems on
+the way.
+
+### Rules
+
+- **One input:** press and hold anywhere on the cave to climb; let go to sink. Space, Up
+  and W work as hold too. The first press starts the flight. The glider carries its
+  speed up or down for a moment, so let go a little before the height you want.
+- **Speed:** starts at 2.6 units a second (the cave is 12 units tall on screen) and rises
+  by 1 for every 600 flown, up to 4.6. The meter in the title bar shows it.
+- **The cave** starts straight and wide, then twists, and narrows from 6.5 units to 3.1
+  (the glider's hitbox is under half a unit across, a little smaller than it looks).
+- **Gems** sit near the walls, a little in from them. They count towards the best gems in
+  a flight and the total, but flying close to a wall is the risk.
+- **Bests:** the furthest flight, the most gems in one flight and gems collected in total
+  are kept. The pause button (or P), opening a card or leaving the tab pauses the flight.
+
+The cave (`src/games/glider/core/cave.ts`) is laid ahead as samples one unit apart:
+a centre line and a gap height, from a seeded random walk. Its slope is capped by what
+the glider can follow at the speed it will be going there (a share of its top vertical
+speed over its forward speed), and its change of slope by how quickly the glider can
+turn (a share of its climb and sink over speed squared); it steers away from the top and
+bottom of the screen in time to level out. The rules (`src/games/glider/core/sim.ts`) run
+in fixed steps of 1/120 s with no drawing or timing. The tests check the slope and bend
+caps on 20 caves of 3,000 units, and fly a simple test pilot (hold when below the
+centre a moment ahead, let go when above) 3,000 units to top speed on every seed
+without touching a wall.
+
 ## Development
 
 ```bash
@@ -1666,7 +1698,7 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1`, `shapes.v1`, `pairs.v1`, `cages.v1`, `pegs.v1`, `tumble.v1`, `flip.v1`, `fence.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1`, `shapes.v1`, `pairs.v1`, `cages.v1`, `pegs.v1`, `tumble.v1`, `flip.v1`, `fence.v1`, `glider.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 

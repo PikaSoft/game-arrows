@@ -360,4 +360,14 @@ export const HELP: Record<string, Help> = {
       'Hints are free: each one reveals a line that can be worked out from the board as it is.',
     ],
   },
+  glider: {
+    goal: 'Fly a glider as far as you can through a winding cave. Hold anywhere to climb, let go to sink, and don\'t touch the walls.',
+    tips: [
+      'Hold anywhere to climb, let go to sink. Hold to start.',
+      'The glider keeps its speed up or down for a moment: let go a little before you reach the height you want.',
+      'The cave narrows and twists more, and the glider speeds up, the further you go.',
+      'Gems sit near the walls. Each one counts, but flying close to a wall is a risk.',
+      'Space, Up or W work as hold too. P (or the pause button) pauses; so does leaving the tab or opening a card.',
+    ],
+  },
 };
