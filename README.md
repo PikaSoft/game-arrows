@@ -38,6 +38,18 @@ Real-time games pause while it is open.
 | Colour Loop | Tip crates of cubes onto a turning belt; trays sort them by colour. Don't jam it. |
 | Fruit Drop | Drop fruit into a bucket; matching fruits that touch join into a bigger one. Endless. |
 | Star Raiders | Slide your ship and shoot down waves of marching raiders; it fires by itself. Endless. |
+| Code Breaker | Guess the hidden row of colours; each answer says how many pegs are right. |
+| Mirror Beam | Turn mirrors so every beam of light reaches the target of its colour. |
+| Two Tones | Fill the grid with orange and blue: never three in a row, every line half and half. |
+| Island Bridges | Join numbered islands with straight bridges that never cross, until every island is linked. |
+| Shape Fit | Drag pieces onto an 8x8 board; full rows and columns clear. Endless. |
+| Layer Pairs | Clear a layered pile of tiles two matching free tiles at a time. |
+| Cage Sums | Each number once per row and column; the numbers in each cage make its target. |
+| Peg Jump | Jump pegs over each other to take them off; finish with one peg on the ring. |
+| Tumble Block | Swipe to tip a tall block end over end; stand it upright in the hole. |
+| Pair Flip | Turn cards over two at a time and find every matching pair. |
+| Fence Loop | Draw one closed fence along the dotted lines; each number counts its square's sides. |
+| Cave Glider | Hold to climb, let go to sink, through a winding cave. Endless. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -1066,6 +1078,617 @@ The rules are in `src/games/raiders/core/sim.ts`, in fixed steps of 1/120 of a s
 with a seeded random source, so the same seed and the same moves always give the same
 game and the tests can play whole waves.
 
+## Code Breaker
+
+A hidden row of coloured pegs. Make a guess and the game answers with dots: a filled dot
+for each peg that is the right colour in the right place, and a hollow dot for each one
+that is the right colour in the wrong place. The dots are always listed filled first, so
+they never say which pegs they mean. Find the code in as few guesses as you can.
+
+### Rules
+
+- **Guessing:** tap a colour to put it in the selected slot; the selection then moves to
+  the next empty slot. Tap a slot to select it, and tap it again to empty it. The undo
+  button clears the last peg. Check is enabled once the row is full. On a keyboard, keys
+  1 to 8 pick colours, Backspace clears, the arrow keys move the selection and Enter checks.
+- **Colour-blind play:** every colour also has its own white shape (dot, triangle, square,
+  diamond, plus, ring, bar, cross).
+- **Repeats:** from level 10, most codes may use a colour more than once. Guesses may
+  always repeat colours.
+- **Guesses and stars:** there is no guess limit and nothing can fail. Crack it within
+  par for three stars, within par + 2 for two, otherwise one. Empty rows on the board
+  show how many guesses par allows.
+- **Hints:** 3 per level. Each one fills the row with a code that fits every answer so
+  far (the one the solver would try next). It costs a star (never below one).
+
+### Levels
+
+Levels 1 to 3 are tutorials (three pegs and four or five colours, then four pegs). After
+that, level N is generated from N as the seed, so everyone gets the same code. Levels 4
+to 9 use four pegs and five or six colours with no repeats; level 10 brings in repeats.
+Over the next 30 or so levels the code grows to five pegs and up to eight colours, with
+the odd easier breather, and late levels sometimes use six pegs with no repeats.
+
+The solver (`src/games/codes/core/solver.ts`) plays like a careful player: it only
+guesses codes that still fit every answer, and picks the one that leaves the fewest codes
+in the worst case. To keep that quick on a phone it weighs a fixed sample of up to 48
+guesses against up to 600 remaining codes, capped by counts rather than time so every
+device picks the same guess.
+
+Par doesn't depend on the level's code, since any one code can fall to a lucky early
+guess. Instead it is the solver's average over a fixed sample of 16 codes of the same
+size, rounded up, plus one guess of slack for not having the solver's perfect memory.
+
+The label comes from how many codes are possible, in bits (log2 of the count):
+
+| Label | Bits | For example |
+| --- | --- | --- |
+| Easy | under 8 | 4 pegs, 5 colours, no repeats |
+| Medium | 8 to 10.9 | 4 pegs, 6 colours, repeats |
+| Hard | 11 to 13.9 | 4 pegs, 8 colours, repeats |
+| Super Hard | 14 or more | 5 pegs, 8 colours, repeats |
+
+Hover the label in game to see the size, the bits and the solver's average.
+
+## Mirror Beam
+
+Coloured lamps around the edge of the board shine beams in. Mirrors on the board lean
+one way or the other (`/` or `\`). Tap a mirror to turn it the other way. Get every
+beam to the target of its own colour, also on the edge.
+
+### Rules
+
+- **Beams:** a beam goes straight until it meets a mirror, which turns it a quarter
+  turn. Beams pass straight through each other. A wall stops a beam dead.
+- **Pinned mirrors:** a mirror with a bolt in the middle can't be turned. Tapping one
+  gives a small shake.
+- **Crystals:** from level 12, some boards have crystals. A beam of any colour must pass
+  through each one.
+- **Colour-blind play:** each colour's lamp and target share a shape (dot, triangle,
+  square, diamond).
+- **Taps and stars:** each level has a par from the solver: the fewest taps that solve
+  it. Finish within par for three stars, within par + 25% for two, otherwise one.
+  Nothing can fail. The HUD counts targets lit (and crystals, when there are any).
+- **Undo:** unlimited and free, but an undone tap still counts.
+- **Hints:** 3 per level. Each one turns a mirror that a cheapest solution from where you
+  are needs turned (the first one along the beams) and pins it. Its tap counts, so par
+  is still possible.
+
+### Levels
+
+Levels 1 to 4 are tutorials. After that, level N is generated from N as the seed, so
+everyone gets the same board. Boards grow from 5x6 to about 7x9 over the first 36
+levels, then vary, with two to four beams, more decoy mirrors and fewer pinned ones as
+levels go on.
+
+The generator (`src/games/beams/core/levels.ts`) lays the beams out one by one. Each
+starts at a free spot on the edge and goes straight, now and then placing a mirror in a
+free cell to turn. It follows mirrors earlier beams placed, and never puts a mirror where
+a beam already passes straight through, so earlier beams keep their paths. Where it
+leaves the board becomes its target. The other cells get decoy mirrors and walls,
+crystals go on cells a beam passes through, some of the path's mirrors are pinned, and
+then most of the turnable ones are turned the wrong way.
+
+The solver (`src/games/beams/core/solver.ts`) follows the beams one at a time and only
+decides a mirror when a beam first reaches it, trying it as it is and then turned. A
+mirror no beam reaches can't matter, so it is never turned. That gives par (the fewest
+turns), the number of solutions, and the search effort. Boards with more than three
+solutions are thrown away (the mirrors would barely matter), and of up to 40 candidates
+the one whose effort is closest to the level's target is kept. The work is capped by
+search steps, not time, so every device builds the same board.
+
+The label comes from the search effort in bits: log2 of the steps the solver takes to
+explore every way of turning the mirrors the beams reach. A board where wrong turns die
+out at once is quick to search and quick to read; one where they wander far is not.
+
+| Label | Search effort |
+| --- | --- |
+| Easy | under 6 bits |
+| Medium | 6 to 8.4 |
+| Hard | 8.5 to 10.4 |
+| Super Hard | 10.5 or more |
+
+Hover the label in game to see the number.
+
+## Two Tones
+
+Fill every square of an even-sized grid with orange or blue. Three rules:
+
+1. Never three of one colour in a row, across or down.
+2. Every row and every column holds as many orange as blue.
+3. No two rows are the same, and no two columns.
+
+Orange is a filled disc and blue a ring, so the game can be played without telling the
+colours apart. Every board has exactly one answer.
+
+### Rules
+
+- **Marking:** tap a square to fill it with the colour on the Orange / Blue switch under
+  the board. Hold a square for a moment to use the other colour. Drag to fill several
+  squares in one stroke. Keyboard: arrow keys move, 1 or A for orange, 2 or B for blue,
+  Space flips the switch.
+- **Counters:** the numbers right of each row and below each column say how many of each
+  colour that line still needs. They fade at 0.
+- **Hearts:** every square is checked straight away, as in Star Battle. A wrong one shows
+  its real colour (outlined in red), costs one of three hearts and ends the stroke.
+- **Out of hearts:** keep going for no stars, or restart.
+- **Stars** equal the hearts left when the grid is full.
+- **Hints:** 3 per level, free. Each one fills a square the easiest technique that
+  works can settle from the board as it is.
+
+### Levels
+
+Levels 1 to 3 are tutorials (4x4, then two 6x6). After that, level N is generated from N
+as the seed, so everyone gets the same puzzle. Grids grow from 6x6 to 12x12 over the
+first 35 levels, then vary. The no-copies rule is first needed on level 15, and trial and
+error from level 26.
+
+The generator (`src/games/tones/core/levels.ts`) builds a full valid grid row by row from
+the list of valid rows, keeping every column legal and every row and column different.
+It then takes clues away in a seeded random order, keeping a removal only if the
+reasoning solver can still finish with nothing harder than the level calls for. Since
+that solver only ever places squares that are forced, a board it finishes has exactly
+one answer. Of a few tries, a board that really needs the level's hardest technique, with
+the fewest clues, is kept. Trial-and-error boards are slow to check, so they get only a
+short last pass of removals; they take up to about a second to build, in a worker.
+
+The solver (`src/games/tones/core/solver.ts`) works in waves, always trying the easiest
+technique first. The difficulty label is the hardest technique it needs:
+
+| Label | Hardest technique needed |
+| --- | --- |
+| Easy | Pairs and gaps (two alike side by side, or with one gap, fix their neighbours), or counting (a line with half of one colour fills the rest) |
+| Medium | Line logic: of every way left to finish a line, a square that comes out the same in all of them |
+| Hard | No copies: as line logic, ruling out ways that copy a finished line |
+| Super Hard | Trial and error: a square where one colour leads, by the rules above, to a broken board |
+
+Hover the label in game to see the technique.
+
+## Island Bridges
+
+Islands sit in the sea, each with a number. Join them with straight bridges, across or up
+and down, so that:
+
+1. each island has exactly as many bridges as its number,
+2. any two islands share at most two bridges,
+3. bridges never cross each other or pass over an island, and
+4. every island ends up joined, through bridges, in one group.
+
+Every map has exactly one answer.
+
+### Rules
+
+- **Building:** drag from an island toward another to build one bridge between them (the
+  link is previewed while dragging). Or tap the water between two islands. Where two
+  links cross, lean the tap toward the way the bridge should run; a tap in the very
+  middle of such a square is too close to call and only shows a reminder.
+- **Hearts:** every bridge is checked straight away, as in the other deduction games.
+  A wrong one isn't built, flashes red and costs one of three hearts.
+- **Free refusals:** a bridge the board itself rules out (one that would cross a bridge,
+  a third bridge, or one more than an island needs) is refused without costing a heart.
+- **Out of hearts:** keep going for no stars, or restart.
+- **Stars** equal the hearts left when every island is joined.
+- **Finished islands** fill in once they have all their bridges. The HUD counts them.
+- **Hints:** 3 per level, free. Each one builds a bridge the reasoning steps below can
+  work out from the board as it is.
+
+### Levels
+
+Levels 1 to 4 are tutorials. After that, level N is generated from N as the seed, so
+everyone gets the same map. Maps grow from 7x7 to 9x12 over the first 36 levels, then
+vary. Isolation is first needed on level 9, and trial and error from level 22.
+
+The generator (`src/games/bridges/core/levels.ts`) grows a map from one island: again and
+again it picks an island and a direction and puts a new island some way off, joined by
+one or two bridges. Islands never sit next to each other (even at a corner), and new
+bridges never cross old ones. A few extra bridges go between islands that already see
+each other, and each island's number is its bridge total. The reasoning solver then has
+to finish the map without guessing (which proves it has one answer); of up to 80 maps
+(700 for the hardest levels), the first that needs exactly the level's hardest step is
+kept.
+
+The solver (`src/games/bridges/core/solver.ts`) keeps, for each link, the bridge counts
+(0, 1 or 2) still possible, and narrows them in waves, always with the easiest step that
+settles anything:
+
+| Label | Hardest step needed |
+| --- | --- |
+| Easy | Counting: an island's number against what its links can still give, and no crossing a certain bridge |
+| Medium | Isolation: no bridge may finish off a group of islands that isn't the whole map, and a group with one way out must take it |
+| Hard | Trial and error: a count that leads, by the steps above, to an impossible map is ruled out |
+| Super Hard | Trial and error, three or more times |
+
+Hover the label in game to see the step.
+
+## Shape Fit
+
+An 8x8 board and a tray of three pieces made of squares. Drag a piece onto the board; a
+full row or column clears. Once all three are placed, three more arrive. The game ends
+when none of the pieces left in the tray fits anywhere.
+
+### Rules
+
+- **Placing:** press a piece in the tray and drag it up. It rides above the finger, so the
+  thumb never hides where it will land, and a shadow on the board shows the spot and
+  lights up the lines it would clear. Let go over a spot that fits to place it; anywhere
+  else it goes back to the tray. Pieces never turn.
+- **Points:** one per square placed, plus 10, 40 or 90 for clearing one, two or three
+  lines at once (10 x lines squared). Clearing on placements in a row is a streak: each
+  clear after the first in a streak adds 10 more per step. A placement that clears
+  nothing ends the streak. The title shows the streak while it lasts.
+- **Faded pieces** in the tray fit nowhere right now.
+- **Undo:** once per game.
+- **Saving:** a game in progress is kept, so you can leave and Continue later. Best
+  score, most lines in a game and games played are kept too.
+
+### Pieces and fairness
+
+There are 37 pieces (`src/games/shapes/core/pieces.ts`): dots, lines of two to five,
+squares and blocks, small and large corners, L, T, S and Z shapes, each turned every way
+it can go (a piece never turns once dealt). Each has a weight at the start of a game and
+one for later; over the first 60 pieces the draw shifts from mostly small, easy pieces
+toward more of the big, awkward ones.
+
+Each new set of three is checked: the game (`src/games/shapes/core/game.ts`) tries up to
+8 sets for one whose pieces can all be placed, one after another, in some order (a short
+search capped by steps). Failing that it takes a set where at least one piece fits. So a
+game ends because of how the board was filled, not because of an unlucky deal. In
+simulation, a player who prefers clearing lines and otherwise places pieces snugly lasts
+a median of about 150 pieces; one placing at random lasts about 17.
+
+## Layer Pairs
+
+A pile of picture tiles in layers. A tile is free when nothing lies on it (even partly)
+and its left or right side is open. Tap a free tile, then a free tile with the same
+picture, to lift both off. Clear the table.
+
+### Rules
+
+- **Picking:** the first tap lifts a tile a little; tapping it again puts it down, and
+  tapping a free tile with a different picture picks that one instead. Covered tiles
+  are dimmed and give a small shake when tapped.
+- **Every pile can be cleared**, but some pairs lead to a dead end: when a picture has
+  four free copies, which two go first can matter.
+- **Undo:** unlimited and free.
+- **Hints:** 3 per level. Each one points at a pair that still leads to a clear table (or
+  says there is no way out from here, for free). Each hint used costs a star.
+- **Shuffles:** 3 per level. A shuffle deals the pictures still on the table again so that
+  they can all be cleared. Each costs a star. When no free pair is left, a screen offers
+  Undo, Shuffle or Restart.
+- **Stars:** three, minus one for each hint or shuffle used, never below one. Best times
+  are kept.
+- **HUD:** how many free tiles have a free match right now, and how many tiles are left.
+- **Pictures** are 8 shapes, each in its own colour, in 3 styles (solid, ring, or two
+  small ones), so every picture can be told apart by shape and style alone. They are
+  plain shapes, not taken from any traditional tile set.
+
+### Levels
+
+Levels 1 to 3 are tutorials (one layer, then two). After that, level N is generated from
+N as the seed, so everyone gets the same pile. Piles grow from a 5x4 base with two layers
+to 8x7 with three or four over the first 35 levels (up to about 116 tiles), then vary.
+
+The layout (`src/games/pairs/core/levels.ts`) is mirrored left to right: a bottom block
+of tiles with some edge tiles left out, then layers that sit either straight on the
+tiles below or straddling four of them, only where every part rests on a tile. Pictures
+are dealt backwards (`src/games/pairs/core/solver.ts`): again and again two tiles that
+are free in what is left get the same picture and are lifted off. Played forwards, those
+pairs in reverse order clear the pile, so every deal can be cleared. Of up to 30 deals,
+the one closest to the level's difficulty target is kept. More different pictures make
+dead ends more likely (fewer matches to choose from), so the number of pictures grows
+with the levels too.
+
+The difficulty label is the share of 60 random playthroughs (each taking any free pair
+at random) that get stuck:
+
+| Label | Random playthroughs that get stuck |
+| --- | --- |
+| Easy | under 20% |
+| Medium | 20% to 44% |
+| Hard | 45% to 69% |
+| Super Hard | 70% or more |
+
+Hover the label in game to see the number. Hints search for a way to clear the rest
+(depth first, trying first the pairs that uncover the most, remembering dead ends),
+capped by steps; on the biggest piles that takes well under a tenth of a second.
+
+## Cage Sums
+
+Fill a square grid so that every row and every column holds each number from 1 to the
+grid's size exactly once. The grid is split into outlined cages, each with a target and a
+sign in its corner: the numbers in the cage must make the target with that sign. For −
+and ÷ (always two squares), take the smaller number from, or into, the larger one. A
+cage with no sign is a single square showing its own number. A number may repeat in a
+cage, as long as the two are not in the same row or column. Every board has exactly one
+answer.
+
+### Rules
+
+Entering numbers, notes, hearts, stars and hints work as in Number Place (the same
+session and number pad, `src/games/cages/game/session.ts`):
+
+- **Entering numbers:** tap a square, then a number on the pad. Keyboard: numbers, arrow
+  keys to move, N for notes, Backspace to clear notes.
+- **Notes:** switch to Notes to pencil in what a square could be. They sit below the
+  cage's label.
+- **Hearts:** every number is checked straight away; a wrong one isn't placed and costs
+  one of three hearts. Out of hearts: keep going for no stars, or restart.
+- **Stars** equal the hearts left when the grid is full.
+- **Hints:** 3 per level, free. Each one fills the next square the steps below can work
+  out from the board as it is.
+
+### Levels
+
+Levels 1 to 3 are tutorials (4x4 with sums only, 4x4 with every sign, then 5x5). After
+that, level N is generated from N as the seed, so everyone gets the same board. Grids
+grow from 5x5 to 8x8 over the first 35 levels, then vary, with smaller ones back now and
+then as breathers. Pairs and pointing are first needed on level 10, and trial and error
+from level 24.
+
+The generator (`src/games/cages/core/levels.ts`) shuffles the rows, columns and numbers
+of a simple Latin square, splits it into cages of two to four squares (with at most one
+or two single squares), and gives each cage a sign its numbers allow (− and ÷ are
+favoured for two-square cages when they work). A reasoning solver then has to finish the
+board without guessing, which proves it has one answer. Of up to 120 boards (150 for the
+hardest levels), the first that needs exactly the level's hardest step is kept; if none
+does, the next step up is tried. Each attempt has a work budget (in cage-filling steps,
+not time), so every device builds the same board, mostly in well under a second.
+
+The solver (`src/games/cages/core/solver.ts`) keeps the numbers each square could still
+be and works in waves, always with the easiest step that narrows anything:
+
+| Label | Hardest step needed |
+| --- | --- |
+| Easy | Singles (a settled square clears its row and column; a number with one place left in a line goes there) and cage combinations (a number no working way of filling the cage uses is out) |
+| Medium | Pairs and pointing: two squares in a line with the same two numbers left, or a number every way of filling a cage puts in the same line |
+| Hard | Trial and error: a number that leads, by the steps above, to an impossible board is out |
+| Super Hard | Trial and error, three or more times |
+
+Hover the label in game to see the step.
+
+## Peg Jump
+
+Pegs sit in holes on a board. Jump a peg over a neighbouring peg (across or up and
+down, never diagonally) into an empty hole just beyond; the jumped peg is taken off.
+Keep going until no jump is left.
+
+### Rules
+
+- **Jumping:** tap a peg to pick it up (the holes it can jump to are marked), then tap
+  one of them. Or drag the peg straight onto the hole. A peg that can't jump gives a
+  small shake; tapping a picked-up peg puts it down.
+- **Finishing:** when no jump is left, the level is cleared if one or two pegs remain.
+  Three or more is not a clear: a screen offers Undo or Restart.
+- **Stars:** one peg on the ringed hole (drawn dashed) is three, one peg anywhere else
+  two, two pegs one. Each hint used costs a star (never below one on a clear).
+- **Undo:** unlimited and free.
+- **Hints:** 3 per level. Each one picks up a peg and rings the hole for a jump that can
+  still finish with one peg on the ring (or, if that's no longer possible, one peg
+  anywhere). If neither is possible from here, it says so for free.
+
+### Levels
+
+Levels 1 to 3 are tutorials (two pegs in a row, then 4 and 6 pegs). After that, level N
+is generated from N as the seed, so everyone gets the same board. Boards grow from 5x5
+to 7x7, and pegs from about 6 to 20, over the first 35 levels, then vary, with the odd
+easier breather.
+
+The board (`src/games/pegs/core/levels.ts`) is the union of one to three centred bars and
+blocks, so it is mirrored both ways (crosses, fat pluses, wide blocks). Each level is
+built backwards from one peg on the ringed hole: a reverse jump takes a peg and puts pegs
+on the two holes behind it, which played forwards is an ordinary jump. So every level
+can be finished with one peg on the ring. The solver (`src/games/pegs/core/solver.ts`) is
+a depth-first search that remembers dead ends, capped by positions (60,000 while
+building, 150,000 for hints); boards that need more are skipped. Of up to 40 boards, the
+one closest to the level's difficulty target is kept.
+
+The difficulty label is the search effort in bits: log2 of the positions the solver
+looks at, trying jumps in a fixed order, before it finds a finish on the ring. A board
+where most jumps lead nowhere takes longer to search, and to think through:
+
+| Label | Search effort |
+| --- | --- |
+| Easy | under 4 bits |
+| Medium | 4 to 6.9 |
+| Hard | 7 to 9.9 |
+| Super Hard | 10 or more |
+
+Hover the label in game to see the number.
+
+## Tumble Block
+
+A tall block, one square by two, stands on a path of squares over nothing. Each swipe
+tips it one way: a standing block falls flat across two squares, and a lying one either
+rolls over sideways or stands back up. Stand it upright on the hole to finish.
+
+### Rules
+
+- **Moving:** swipe anywhere on the board, one tip per swipe. Arrow keys and WASD work
+  too; Z undoes.
+- **Wasted moves:** a tip that would leave any part of the block over nothing (or over a
+  closed bridge), or stand it on a cracked square, is wasted: it counts as a move, but the
+  block stays where it was.
+- **Cracked squares** (from level 8) hold a lying block but break under a standing one.
+- **Switches and bridges** (from level 14): tipping onto a switch, with either end of the
+  block, opens its bridges, and doing it again closes them. Each switch has its own
+  colour, and closed bridges show as a dashed outline in that colour. A switch board
+  always needs its switch.
+- **Moves and stars:** each level has a par from the solver: the fewest moves to the hole.
+  Within par is three stars, within par + 25% two, otherwise one. Each hint used costs a
+  star (never below one).
+- **Undo:** unlimited and free: the move doesn't count.
+- **Hints:** 3 per level. Each one shows an arrow for the way a shortest route from here
+  tips next.
+
+### Levels
+
+Levels 1 to 3 are tutorials. After that, level N is generated from N as the seed, so
+everyone gets the same board. Boards grow from about 7x8 to 9x12 over the first 35
+levels, and par from about 6 to 18, then vary, with the odd easier breather.
+
+The generator (`src/games/tumble/core/levels.ts`) grows each board from a random walk of
+the block: every square it touches becomes floor, it starts standing, and the hole is
+where the walk ends standing. Extra squares go round the walk, some plain squares crack,
+and for a switch level a short run of squares the walk reached late becomes bridges
+(closed), with the switch on a square it passed earlier. A breadth-first search over
+the block's square, pose and which bridges are open (`src/games/tumble/core/solver.ts`)
+then finds the true shortest way, which is often not the walk. Of up to 60 boards (200
+with switches), the one closest to the level's difficulty target is kept.
+
+The label comes from par weighted by detours: par plus two for every move of a shortest
+answer that takes the block further from the hole. A board crossed head on is easy; one
+where you must wander away to come back the right way up is not:
+
+| Label | Weighted par |
+| --- | --- |
+| Easy | under 10 |
+| Medium | 10 to 16 |
+| Hard | 17 to 24 |
+| Super Hard | 25 or more |
+
+Hover the label in game to see the numbers. The view is cropped to the squares in use, so
+small boards fill the screen.
+
+## Pair Flip
+
+A grid of face-down cards, each picture on exactly two of them. Tap a card to turn it
+over, then another: a matching pair stays face up; two different pictures show for a
+moment and turn back. Find every pair.
+
+### Rules
+
+- **Turning cards:** a missed pair turns back by itself after about a second; tap
+  anywhere to turn it back early and carry on.
+- **Look-alike pictures** (from level 10, then on about half the levels): the pictures
+  share a shape and colour and differ only in style (solid, ring or twin).
+- **Swapping cards** (from level 18, then on about half the levels): every third miss,
+  two face-down cards with different pictures slide past each other into each other's
+  places. They are outlined while they move, so you can follow them.
+- **Stars** come from misses against par: par or fewer is three, up to twice par two,
+  otherwise one. Best times are kept.
+- **Pictures** are the same plain shapes as Layer Pairs (8 shapes, each in its own colour,
+  in 3 styles), so every picture can be told apart without colour. A face-down card
+  carries no picture at all (not even in its label for screen readers).
+
+### Levels
+
+Levels 1 to 3 are tutorials (3x2, 3x4 and 4x4). After that, level N is dealt from N as
+the seed (`src/games/flip/core/levels.ts`), so everyone gets the same grid. Grids grow
+from 4x4 (8 pairs) to 6x6 (18 pairs) over the first 30 levels, then vary, with the odd
+smaller breather. Normal levels spread their pictures over as many shapes as possible;
+look-alike levels use every style of a few shapes.
+
+There is no solver: par is three misses for every four pairs, rounded up. Even a
+perfect memory misses about 0.6 times per pair on average, since the first look at each
+card is a guess, so par can be met with care but not by luck alone.
+
+The label comes from the number of pairs, plus 5 for look-alike pictures and 7 for
+swapping cards:
+
+| Label | Score |
+| --- | --- |
+| Easy | under 10 |
+| Medium | 10 to 14 |
+| Hard | 15 to 20 |
+| Super Hard | 21 or more |
+
+The cards are plain HTML buttons that flip with CSS (no canvas), and the flip is
+skipped when the device asks for reduced motion.
+
+## Fence Loop
+
+A grid of dots with numbers in some of the squares between them. Draw one closed fence
+along the lines between dots. Each number says how many of its square's four sides the
+fence uses. The fence is a single loop: it never branches, never crosses itself and
+never splits in two. Every board has exactly one answer.
+
+### Rules
+
+- **Marking:** tap a line (anywhere near it) to mark it, as fence or as a cross (no fence)
+  depending on the Fence / Cross switch under the board. Hold a line for a moment to use
+  the other mark. Drag along the lines to mark several in one stroke.
+- **Hearts:** every mark is checked straight away, as in Star Battle. A wrong one shows
+  what the line really is (in red), costs one of three hearts and ends the stroke. Out of
+  hearts: keep going for no stars, or restart.
+- **Crosses for free:** every line round a 0, the rest of any dot that has two fences,
+  and the rest of a numbered square that has all its fence cross themselves out.
+  Numbers fade once their square has all its fence.
+- **Stars** equal the hearts left when the whole fence is drawn (crosses aren't needed).
+- **Hints:** 3 per level, free. Each one reveals a line the steps below can work out
+  from the board as it is, preferring fence.
+
+### Levels
+
+Levels 1 to 3 are tutorials (4x4 and 5x5). After that, level N is generated from N as the
+seed, so everyone gets the same board. Boards grow from 5x5 to 8x10 over the first 35
+levels, then vary. Inside and outside is introduced on level 8, and trial and error is
+needed from level 20.
+
+The generator (`src/games/fence/core/levels.ts`) grows a blob of squares from one square,
+adding neighbours only where the blob stays free of holes and never touches itself only
+at a corner, so its outline is one loop: the answer. Every square gets its count, then
+clues are taken away in a seeded random order. A removal stays only if the reasoning
+solver can still finish the board, and the board's score is no higher than the level
+calls for. Trial and error is slow to check, so it only gets a short last pass of
+removals. Every solve has a work budget, so every device builds the same board, mostly
+in well under half a second.
+
+The solver (`src/games/fence/core/solver.ts`) works in waves, always with the easiest
+step that settles anything:
+
+1. **Counting:** a number with all its fence crosses out the rest of its square; one that
+   needs every open side fences them all. A dot with two fences crosses out the rest; a
+   dot with one fence and one open line must use it; a dot with no fence and one open
+   line can't use it.
+2. **One loop:** a line that would close the fence into a loop is crossed out unless that
+   loop would be the whole answer.
+3. **Inside and outside:** every square is inside the fence or out, and beyond the border
+   is out. Fence between two squares puts them on different sides; no fence, the same
+   side. Squares tied together this way settle the lines between them, and a number
+   counts the neighbours on the other side of its square.
+4. **Trial and error:** a line whose one setting leads, by the steps above, to an
+   impossible board takes the other.
+
+| Label | What the board needs |
+| --- | --- |
+| Easy | No trial and error, and at most one wave of inside and outside |
+| Medium | No trial and error, two or more waves of inside and outside |
+| Hard | Trial and error, once or twice |
+| Super Hard | Trial and error, three or more times |
+
+Hover the label in game to see the hardest step.
+
+## Cave Glider
+
+A glider flies through a cave that scrolls past. Hold anywhere to climb and let go to
+sink; touching a wall ends the flight. Endless: fly as far as you can, picking up gems on
+the way.
+
+### Rules
+
+- **One input:** press and hold anywhere on the cave to climb; let go to sink. Space, Up
+  and W work as hold too. The first press starts the flight. The glider carries its
+  speed up or down for a moment, so let go a little before the height you want.
+- **Speed:** starts at 2.6 units a second (the cave is 12 units tall on screen) and rises
+  by 1 for every 600 flown, up to 4.6. The meter in the title bar shows it.
+- **The cave** starts straight and wide, then twists, and narrows from 6.5 units to 3.1
+  (the glider's hitbox is under half a unit across, a little smaller than it looks).
+- **Gems** sit near the walls, a little in from them. They count towards the best gems in
+  a flight and the total, but flying close to a wall is the risk.
+- **Bests:** the furthest flight, the most gems in one flight and gems collected in total
+  are kept. The pause button (or P), opening a card or leaving the tab pauses the flight.
+
+The cave (`src/games/glider/core/cave.ts`) is laid ahead as samples one unit apart:
+a centre line and a gap height, from a seeded random walk. Its slope is capped by what
+the glider can follow at the speed it will be going there (a share of its top vertical
+speed over its forward speed), and its change of slope by how quickly the glider can
+turn (a share of its climb and sink over speed squared); it steers away from the top and
+bottom of the screen in time to level out. The rules (`src/games/glider/core/sim.ts`) run
+in fixed steps of 1/120 s with no drawing or timing. The tests check the slope and bend
+caps on 20 caves of 3,000 units, and fly a simple test pilot (hold when below the
+centre a moment ahead, let go when above) 3,000 units to top speed on every seed
+without touching a wall.
+
 ## Development
 
 ```bash
@@ -1077,7 +1700,7 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1`, `shapes.v1`, `pairs.v1`, `cages.v1`, `pegs.v1`, `tumble.v1`, `flip.v1`, `fence.v1`, `glider.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 

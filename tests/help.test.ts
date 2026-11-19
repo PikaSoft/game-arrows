@@ -1,40 +1,60 @@
 import { describe, expect, it } from 'vitest';
+import { beamSpecFor } from '../src/games/beams/core/difficulty';
 import { bricksSpecFor } from '../src/games/bricks/core/difficulty';
+import { bridgesSpecFor } from '../src/games/bridges/core/difficulty';
+import { cagesSpecFor } from '../src/games/cages/core/difficulty';
+import { codesSpecFor } from '../src/games/codes/core/difficulty';
 import { crateSpecFor } from '../src/games/crates/core/difficulty';
+import { fenceSpecFor } from '../src/games/fence/core/difficulty';
+import { flipSpecFor } from '../src/games/flip/core/levels';
 import { iceSpecFor } from '../src/games/ice/core/difficulty';
 import { lightsSpecFor } from '../src/games/lights/core/difficulty';
 import { linesSpecFor } from '../src/games/lines/core/difficulty';
 import { loopSpecFor } from '../src/games/loop/core/difficulty';
 import { minesSpecFor } from '../src/games/mines/core/difficulty';
 import { numbersSpecFor } from '../src/games/numbers/core/difficulty';
+import { pairsSpecFor } from '../src/games/pairs/core/difficulty';
+import { pegsSpecFor } from '../src/games/pegs/core/difficulty';
 import { pictureSpecFor } from '../src/games/picture/core/difficulty';
 import { pipeSpecFor } from '../src/games/pipes/core/difficulty';
 import { sandSpecFor } from '../src/games/sandglass/core/difficulty';
 import { buildSnakeLevel } from '../src/games/snake/core/levels';
 import { squeezeSpecFor } from '../src/games/squeeze/core/difficulty';
 import { starsSpecFor } from '../src/games/stars/core/difficulty';
+import { tonesSpecFor } from '../src/games/tones/core/difficulty';
 import { tentsSpecFor } from '../src/games/tents/core/difficulty';
+import { tumbleSpecFor } from '../src/games/tumble/core/difficulty';
 import { wordsSpecFor } from '../src/games/words/core/difficulty';
 import { buildLevel } from '../src/games/arrows/core/levels';
 import { HELP } from '../src/games/help';
 
-const IDS = ['arrows', 'sandglass', 'snake', 'snake-trails', 'squeeze', 'pipes', 'lines', 'crates', 'lights', 'ice', 'picture', 'numbers', 'tents', 'mines', 'bricks', 'stack', 'lanes', 'merge', 'words', 'stars', 'loop', 'fruit', 'raiders'];
+const IDS = ['arrows', 'sandglass', 'snake', 'snake-trails', 'squeeze', 'pipes', 'lines', 'crates', 'lights', 'ice', 'picture', 'numbers', 'tents', 'mines', 'bricks', 'stack', 'lanes', 'merge', 'words', 'stars', 'loop', 'fruit', 'raiders', 'codes', 'beams', 'tones', 'bridges', 'shapes', 'pairs', 'cages', 'pegs', 'tumble', 'flip', 'fence', 'glider'];
 
 const SPECS: Record<string, (n: number) => { tip?: string }> = {
+  beams: beamSpecFor,
   bricks: bricksSpecFor,
+  bridges: bridgesSpecFor,
+  cages: cagesSpecFor,
+  codes: codesSpecFor,
   crates: crateSpecFor,
+  fence: fenceSpecFor,
+  flip: flipSpecFor,
   ice: iceSpecFor,
   lights: lightsSpecFor,
   lines: linesSpecFor,
   loop: loopSpecFor,
   mines: minesSpecFor,
   numbers: numbersSpecFor,
+  pairs: pairsSpecFor,
+  pegs: pegsSpecFor,
   picture: pictureSpecFor,
   pipes: pipeSpecFor,
   sandglass: sandSpecFor,
   squeeze: squeezeSpecFor,
   stars: starsSpecFor,
   tents: tentsSpecFor,
+  tones: tonesSpecFor,
+  tumble: tumbleSpecFor,
   words: wordsSpecFor,
 };
 

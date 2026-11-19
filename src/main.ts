@@ -1,8 +1,15 @@
 import './styles.css';
 import { createArrows } from './games/arrows/ui';
+import { createBeams } from './games/beams/ui';
 import { createBricks } from './games/bricks/ui';
+import { createBridges } from './games/bridges/ui';
+import { createCages } from './games/cages/ui';
+import { createCodes } from './games/codes/ui';
 import { createCrates } from './games/crates/ui';
+import { createFence } from './games/fence/ui';
+import { createFlip } from './games/flip/ui';
 import { createFruit } from './games/fruit/ui';
+import { createGlider } from './games/glider/ui';
 import { createRaiders } from './games/raiders/ui';
 import { createIce } from './games/ice/ui';
 import { createLanes } from './games/lanes/ui';
@@ -12,11 +19,16 @@ import { createLoop } from './games/loop/ui';
 import { createMerge } from './games/merge/ui';
 import { createMines } from './games/mines/ui';
 import { createNumbers } from './games/numbers/ui';
+import { createPairs } from './games/pairs/ui';
+import { createPegs } from './games/pegs/ui';
 import { createPicture } from './games/picture/ui';
 import { createTents } from './games/tents/ui';
+import { createTones } from './games/tones/ui';
+import { createTumble } from './games/tumble/ui';
 import { createWords } from './games/words/ui';
 import { createPipes } from './games/pipes/ui';
 import { createSandglass } from './games/sandglass/ui';
+import { createShapes } from './games/shapes/ui';
 import { createSnakeGame } from './games/snake/ui';
 import { createSqueeze } from './games/squeeze/ui';
 import { createStars } from './games/stars/ui';
@@ -285,6 +297,18 @@ games.push(
   createLoop(shell),
   createFruit(shell),
   createRaiders(shell),
+  createCodes(shell),
+  createBeams(shell),
+  createTones(shell),
+  createBridges(shell),
+  createShapes(shell),
+  createPairs(shell),
+  createCages(shell),
+  createPegs(shell),
+  createTumble(shell),
+  createFlip(shell),
+  createFence(shell),
+  createGlider(shell),
 );
 
 document.addEventListener('keydown', (e) => {

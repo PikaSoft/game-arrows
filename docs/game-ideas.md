@@ -29,17 +29,33 @@ and art for each one and don't copy a specific existing game.
 | 15 | ~~[Colour Loop](#15-colour-loop)~~ | Sort on a belt | Arcade | Medium | **Built** (`src/games/loop/`) |
 | 16 | ~~[Fruit Drop](#16-fruit-drop)~~ | Drop and merge | Arcade | Small to medium | **Built** (`src/games/fruit/`) |
 | 17 | ~~[Star Raiders](#17-star-raiders)~~ | Shoot the formation | Arcade | Small to medium | **Built** (`src/games/raiders/`) |
+| 18 | ~~[Island Bridges](#18-island-bridges)~~ | Deduction | Logic | Medium | **Built** (`src/games/bridges/`) |
+| 19 | ~~[Mirror Beam](#19-mirror-beam)~~ | Rotate tiles | Closest | Small | **Built** (`src/games/beams/`) |
+| 20 | ~~[Shape Fit](#20-shape-fit)~~ | Place pieces | Endless | Small | **Built** (`src/games/shapes/`) |
+| 21 | ~~[Fence Loop](#21-fence-loop)~~ | Deduction | Logic | Medium to large | **Built** (`src/games/fence/`) |
+| 22 | ~~[Layer Pairs](#22-layer-pairs)~~ | Match free tiles | Closest | Medium | **Built** (`src/games/pairs/`) |
+| 23 | ~~[Two Tones](#23-two-tones)~~ | Deduction | Logic | Small | **Built** (`src/games/tones/`) |
+| 24 | ~~[Peg Jump](#24-peg-jump)~~ | Jump puzzle | Closest | Small | **Built** (`src/games/pegs/`) |
+| 25 | ~~[Tumble Block](#25-tumble-block)~~ | Roll puzzle | Closest | Small to medium | **Built** (`src/games/tumble/`) |
+| 26 | ~~[Cave Glider](#26-cave-glider)~~ | One-tap flyer | Arcade | Small | **Built** (`src/games/glider/`) |
+| 27 | ~~[Code Breaker](#27-code-breaker)~~ | Guess the code | Logic | Small | **Built** (`src/games/codes/`) |
+| 28 | ~~[Pair Flip](#28-pair-flip)~~ | Memory | Casual | Small | **Built** (`src/games/flip/`) |
+| 29 | ~~[Cage Sums](#29-cage-sums)~~ | Deduction | Logic | Medium | **Built** (`src/games/cages/`) |
 
 Effort is a rough guide next to Squeeze: small is under half of its code, large is
 more than all of it.
 
-**Top picks**
+**Top picks (second batch, 18 to 29)**
 
-- **Colour Lines** and **Crate Push** are most like Arrow Escape and Squeeze, and the
-  generator, solver and difficulty code carries over best.
-- **Picture Grid** adds a new kind of thinking (deduction rather than spotting free
-  moves) and keeps players coming back.
-- **Stack Tower** is the cheapest way to add a quick arcade game beside Snake.
+The first batch (1 to 17) is all built. Of the new ideas:
+
+- **Mirror Beam** and **Two Tones** cost the least: they reuse most of Pipe Link and
+  Number Place.
+- **Island Bridges** adds a kind of deduction the collection lacks (counting links
+  between islands) and still plays with one thumb.
+- **Shape Fit** is a calm endless game to sit beside Merge Tiles and Fruit Drop.
+- **Layer Pairs** feels most like Arrow Escape (spot the free piece), and a solver can
+  promise the deal never dead-ends.
 
 ---
 
@@ -766,3 +782,483 @@ lives, a best score.
   of pressure with one timer and no per-raider motion.
 - Shields as a grid of small cells are cheap to test against and wear away nicely; bolts
   take two cells, shots one.
+
+---
+
+## 18. Island Bridges
+
+> **Built.** Island Bridges is in the collection (`src/games/bridges/`, route `#/bridges`).
+> See the README for how it ended up working. The main differences from the plan below:
+> it uses the hearts model of the other deduction games, so bridges are only ever added
+> (wrong ones aren't built) and there is no third drag to remove a pair; bridges the
+> board itself forbids are refused for free; a tap on the water builds too; and the
+> label comes from the hardest of three steps (counting, isolation, trial and error)
+> rather than counting passes. Big maps fit the screen without zoom so far.
+
+**Idea.** Numbered islands sit on a grid. Join them with straight bridges, across or up
+and down. Each number says how many bridges touch that island. Every island must end up
+joined into one group.
+
+**Rules**
+
+- Drag from one island towards another in a straight line to lay a bridge. Dragging the
+  same way again makes it a double bridge; a third drag removes it.
+- At most two bridges between any pair of islands. Bridges never cross each other or
+  pass over an island.
+- An island turns solid when its count is met, and red if it goes over.
+- Solved when every count is met and all islands are joined.
+- Stars: mistakes are not possible to count fairly (players experiment), so use the
+  Picture Grid rule: hints and checks used.
+
+**Generator**
+
+1. Scatter islands with `Rng` from `src/shared/rng.ts`: place the first, then grow by
+   picking an existing island and a direction and dropping a new island at a random
+   distance, adding a bridge (1 or 2) between them. Skip spots that would cross a bridge.
+2. Add a few extra bridges between islands that already see each other, so the answer
+   is not just a tree.
+3. Each island's number is its bridge total. Throw away the bridges.
+4. Run the logic solver; if it needs a guess, or finds a second answer, reject and try
+   again.
+
+**Solver and difficulty**
+
+- Keep, for each pair of neighbouring islands, the set of bridge counts still possible
+  (0, 1, 2). Rules: an island's remaining need must fit what its open neighbours can
+  give; a 1 can never bridge to another 1 when that would cut the pair off; crossing
+  bridges rule each other out; any choice that splits off a finished group is out.
+- Difficulty: the number of passes needed and how often the "no closed group" rule had
+  to be used, the same "waves of deduction" idea as Pipe Link.
+
+**Rendering and input.** Islands as circles with the number; bridges as one or two
+lines. A drag only has to head roughly the right way; snap to the nearest island in
+that direction. Tap an island to light up its bridges.
+
+**Watch out for.** Double bridges must be easy to tell from single ones at small sizes.
+Big boards need the zoom and pan from Arrow Escape (`src/games/arrows/render/camera.ts`).
+
+---
+
+## 19. Mirror Beam
+
+> **Built.** Mirror Beam is in the collection (`src/games/beams/`, route `#/beams`). See
+> the Mirror Beam section of the README for how it ended up working. The main
+> differences from the plan below: crystals that must be lit took the place of splitters
+> and filters (they keep the solver simple and still make every mirror count), the
+> solver is a search that decides mirrors only as beams reach them rather than Pipe
+> Link's constraint passes, and boards may have up to three solutions, with par the
+> cheapest.
+
+**Idea.** Lamps around the edge shine coloured beams into a grid of angled mirrors. Tap
+a mirror to turn it. Get every beam to the target of its colour.
+
+**Rules**
+
+- Mirrors are `/` or `\`; a tap flips one. Later levels add splitters (a beam goes on
+  and also turns), fixed mirrors, walls, and filters that only let one colour through.
+- Beams draw live, so the player sees the effect of each tap.
+- Solved when every target is lit by its own colour and no target is lit by the wrong
+  one.
+- Stars from par: the fewest taps from the start position.
+
+**Generator**
+
+1. Place lamps and targets on the edge with `Rng`.
+2. Lay a path for each beam through the grid, putting a mirror wherever it turns.
+3. Fill some empty cells with decoy mirrors that the solution leaves alone or that must
+   face a set way so they don't catch a beam.
+4. Scramble about half the mirrors. Check with the solver that the answer is unique.
+
+**Solver and difficulty**
+
+- Reuse the shape of Pipe Link's solver: each mirror keeps its possible states; trace
+  each beam as far as the fixed mirrors allow and rule out states that send a beam off
+  the board or into the wrong target. Fall back to a capped search for splitters.
+- Difficulty: passes needed, plus mirrors that two beams pass through (those are where
+  the thinking is).
+
+**Rendering and input.** One tap per cell, as in Pipe Link. Beams glow in the shared
+theme colours; give each colour a pattern too (dashes, dots) for colour-blind play.
+
+**Watch out for.** Beams can loop forever between mirrors; stop tracing when a cell and
+direction repeats.
+
+---
+
+## 20. Shape Fit
+
+> **Built.** Shape Fit is in the collection (`src/games/shapes/`, route `#/shapes`). See the
+> README for how it ended up working. The main differences from the plan below: the
+> fairness check goes further (each new set is checked to be placeable in full, not just
+> for one piece fitting, for the whole game); there is one undo per game, as in Merge
+> Tiles; and points are 10 x lines squared plus a streak bonus.
+
+**Idea.** An 8 by 8 board and three pieces made of squares. Drag a piece onto the board.
+A full row or column clears. When none of the three can fit anywhere, the game ends.
+
+**Rules**
+
+- Place all three pieces (in any order) and three new ones arrive.
+- Points for each square placed and more for each line cleared; clearing several lines
+  at once, or clearing on placements in a row, adds a bonus.
+- Endless, with a best score, like Merge Tiles.
+
+**Pieces.** A fixed set of shapes made of one to five squares, with no turning (that
+keeps the thumb's job to one drag). Draw them with `Rng` seeded from the game's start,
+weighted so big awkward pieces come less often early on.
+
+**Fairness.** After each new set, check whether at least one piece fits. Optionally
+bias the draw so a set where nothing fits is rare in the first minute.
+
+**Rendering and input.** The piece lifts above the finger while dragging so the thumb
+never hides where it will land, and the board shows a shadow of where it will go and
+which lines would clear. Clearing lines flash and fade.
+
+**Watch out for.** Save the game after every placement so leaving and coming back
+continues it, as Merge Tiles does.
+
+---
+
+## 21. Fence Loop
+
+> **Built.** Fence Loop is in the collection (`src/games/fence/`, route `#/fence`). See the
+> README for how it ended up working. The main differences from the plan below: it uses
+> the hearts model of the other deduction games, with a Fence / Cross switch (hold or
+> drag as in Star Battle) instead of tapping to cycle; instead of a library of named
+> patterns, the solver's third step is inside-and-outside reasoning, which covers most of
+> them, with trial and error after it; and boards fit the screen without zoom (up to 8x10).
+
+**Idea.** A grid of dots with some numbers between them. Draw one closed fence along the
+lines between dots. Each number says how many of the four sides around it the fence
+uses.
+
+**Rules**
+
+- Tap a line between two dots to put fence there; tap again to mark it "no fence" (a
+  small cross); a third tap clears it. Dragging along dots draws several at once.
+- The fence must be one loop with no branches and no crossings.
+- Stars: hints and checks used, as in Picture Grid.
+
+**Generator**
+
+1. Grow a random shape of cells with `Rng` (one connected group with no holes); its
+   outline is the loop.
+2. Write the count for every cell, then remove clues one at a time while the logic
+   solver can still finish.
+3. Reject boards the solver can't finish without guessing.
+
+**Solver and difficulty**
+
+- Line states: fence, no fence, unknown. Rules: each dot has 0 or 2 fence lines; each
+  clue's count; a loop that closes early, before all fence is joined, is not allowed.
+- Add common patterns (two 3s side by side, a 3 in a corner, a 0 next to a 3) as rules
+  so the solver thinks the way a player does.
+- Difficulty: which rules were needed, and how many passes.
+
+**Rendering and input.** Lines are thin, so make the tap target the whole band between
+two dots. Use Colour Lines' path drawing (`src/games/lines/render/renderer.ts`) for the
+fence.
+
+**Watch out for.** The "one loop" rule is the hard part to check quickly; keep a
+union-find of joined dots. Mis-taps on small boards are the biggest risk, so zoom and pan
+from the start.
+
+---
+
+## 22. Layer Pairs
+
+> **Built.** Layer Pairs is in the collection (`src/games/pairs/`, route `#/pairs`). See the
+> README for how it ended up working. The main differences from the plan below: undo is
+> free and unlimited, so stars come only from hints and shuffles; the HUD counts free
+> tiles that have a match rather than pairs; layouts are generated (mirrored, with
+> straddling upper layers) rather than picked from a list; and the label comes from the
+> share of random playthroughs that get stuck. Piles fit the screen without zoom so far.
+
+**Idea.** A pile of picture tiles stacked in layers. A tile is free when nothing lies on
+top of it and it is open on its left or right. Tap two free tiles with the same picture
+to take them away. Clear the pile.
+
+**Rules**
+
+- Tap one free tile, then a match. Tapping a covered tile gives a small shake.
+- Three shuffles a level, if the player runs out of pairs.
+- Hints: 3 per level, showing a pair that keeps the pile solvable.
+- HUD: pairs free right now and tiles left (the same idea as Arrow Escape's free count).
+- Stars: shuffles and hints used.
+
+**Generator**
+
+1. Pick a layout (a set of tile positions in layers) for level N.
+2. Deal backwards: repeatedly take two positions that would be free in the current pile,
+   put a matching pair there, and remove them. This guarantees a way through.
+3. Mix the picture order a little with `Rng` so the safe order is not obvious.
+
+**Solver and difficulty**
+
+- A search over which free pair to take, capped by states; it proves solvable and
+  counts "traps" (pairs that would leave the pile stuck).
+- Difficulty: the share of moves at each step that lead to a dead end.
+
+**Rendering and input.** Draw tiles with a slight offset per layer so depth is clear.
+Free tiles are brighter. Big layouts use Arrow Escape's camera.
+
+**Watch out for.** Pictures must be simple shapes in the shared theme colours, readable
+at small size and in dark mode, and not copied from any traditional tile set.
+
+---
+
+## 23. Two Tones
+
+> **Built.** Two Tones is in the collection (`src/games/tones/`, route `#/tones`). See the
+> README for how it ended up working. The main differences from the plan below: it uses
+> the hearts model of the other deduction games (every square checked straight away,
+> stars from hearts, free hints) instead of hints and checks, input is a colour switch
+> with hold and drag as in Star Battle rather than tapping to cycle, edge counters show
+> what each line still needs, the first tutorial is 4x4, and trial and error is a fifth
+> technique tier for the hardest boards.
+
+**Idea.** Fill a square grid with two colours. No three of one colour in a row, each row
+and column has as many of one colour as the other, and no two rows (or columns) are the
+same.
+
+**Rules**
+
+- Tap an empty cell to cycle: colour A, colour B, empty. Given cells are locked.
+- A rule broken shows on the row or column at once.
+- Stars: hints and checks, as in Number Place.
+
+**Generator**
+
+1. Build a full valid grid with a seeded search (`Rng` decides the order of choices).
+2. Remove cells while the logic solver can still finish uniquely.
+
+**Solver and difficulty**
+
+- Rules from easiest to hardest: a pair forces both ends; a gap between two of one
+  colour is the other colour; a line with all of one colour used fills the rest; a
+  line that would copy a finished line is ruled out.
+- Difficulty: which rule was needed and how often. Sizes run 6, 8, 10, 12.
+
+**Rendering and input.** Reuse Number Place's grid, selection and undo. Use two shapes
+as well as two colours (filled circle, ring) so colour-blind players can play.
+
+**Watch out for.** Odd sizes cannot balance, so keep sizes even.
+
+---
+
+## 24. Peg Jump
+
+> **Built.** Peg Jump is in the collection (`src/games/pegs/`, route `#/pegs`). See the
+> README for how it ended up working. The main differences from the plan below: hints
+> (3 per level) cost a star; finishing with three or more pegs doesn't clear the level;
+> and the label comes from the solver's search effort, since counting every reachable
+> position (the planned measure) is far too slow on boards with 20 pegs.
+
+**Idea.** Pegs sit in holes on a board. Jump a peg over a neighbour into an empty hole;
+the jumped peg is removed. Finish with one peg left.
+
+**Rules**
+
+- Tap a peg, then a hole two steps away with a peg between. Or drag the peg there.
+- Undo is free. Three stars for one peg left on the marked hole, two for one peg
+  anywhere, one for finishing with two pegs.
+
+**Generator**
+
+- Early levels: small boards (triangles, crosses, odd shapes) built backwards from a
+  single peg by doing jumps in reverse with `Rng`. That proves a solution exists.
+- Later: bigger shapes and fewer obvious first moves.
+
+**Solver and difficulty**
+
+- A search capped by states, as Crate Push does (`src/games/crates/core/solver.ts`),
+  with the board as a bit set and a seen-set for repeated positions.
+- Difficulty: the share of positions reachable from the start that can still be won.
+  A low share means many dead ends.
+
+**Rendering and input.** Big holes, clear "can land here" dots when a peg is picked up.
+Animate the jump in an arc.
+
+**Watch out for.** The full classic board is huge for a phone search; keep the state cap
+and stick to boards built backwards.
+
+---
+
+## 25. Tumble Block
+
+> **Built.** Tumble Block is in the collection (`src/games/tumble/`, route `#/tumble`). See
+> the README for how it ended up working. The main differences from the plan below: it is
+> drawn flat from above, with the block's height shown by its raised top and side (no
+> tilted view, so swipes always match the board's own axes); a fall wastes the move but
+> keeps the block where it was instead of restarting the level; and split tiles are left
+> out for now (two separate cubes would need their own moves and solver).
+
+**Idea.** A tall block (one square by two) stands on a path of tiles floating over
+nothing. Swipe to tip it over and roll it. Stand it upright on the hole to finish.
+
+**Rules**
+
+- Swipe tips the block one way. If any part ends up over nothing, it falls and the
+  level restarts.
+- Later tiles: weak tiles that break if the block stands upright on them, switches that
+  open or close bridges, and split tiles that turn the block into two cubes for a few
+  moves.
+- Stars from par moves.
+
+**Generator**
+
+1. Lay a path of tiles with `Rng`, walking the block's own moves so the hole is reached.
+2. Add side tiles and dead ends, then switches and weak tiles in later levels.
+3. Run the solver; keep boards whose shortest answer is long for their size.
+
+**Solver and difficulty**
+
+- A breadth-first search over block position and pose (standing, lying across, lying
+  up and down) plus switch states. This is the same shape as Ice Slide's solver.
+- Difficulty: shortest path length against how many tiles there are, and how many times
+  the answer has to move away from the hole.
+
+**Rendering and input.** A simple tilted view drawn on the canvas (no 3D library), or
+flat from above with a shadow for "standing". Swipe input from Ice Slide.
+
+**Watch out for.** Diagonal swipes on a tilted view are confusing; map swipe directions
+to the board's own axes and show arrows on the first levels.
+
+---
+
+## 26. Cave Glider
+
+> **Built.** Cave Glider is in the collection (`src/games/glider/`, route `#/glider`). See
+> the README for how it ended up working. The main differences from the plan below: the
+> cave is a smooth random walk sampled every unit (not chunks), with its slope and bend
+> capped from the glider's own climb, sink and speed rather than checked chunk by chunk;
+> a test pilot flying 3,000 units on every seed is the passability check. Gems sit
+> near the walls and only count towards bests, not a separate score.
+
+**Idea.** A small glider flies through a cave that scrolls past. Hold to climb, let go
+to sink. Don't touch the walls. Endless, with a best distance.
+
+**Rules**
+
+- One input only: finger down climbs, finger up sinks.
+- The cave narrows and twists more the further you go. Stars or gems to collect add
+  points but sit near the walls.
+- One life; a run is short, so restarting is instant.
+
+**Course.** Generate the cave in chunks from a seeded `Rng`, as Lane Dodger builds its
+course (`src/games/lanes/core/course.ts`): the centre line wanders, the gap shrinks with
+distance, and every chunk is checked to be passable at the glider's climb and sink rates.
+
+**Rendering and input.** Fixed time step so every phone feels the same. Parallax rock
+layers in the theme colours. Pause when the app is hidden or help opens.
+
+**Watch out for.** Climb and sink speeds decide whether the game feels fair; make them
+constants, test that every chunk can be passed, and keep the glider away from the left
+edge so there is room to see what's coming.
+
+---
+
+## 27. Code Breaker
+
+> **Built.** Code Breaker is in the collection (`src/games/codes/`, route `#/codes`). See
+> the Code Breaker section of the README for how it ended up working. The main
+> differences from the plan below: there is no guess limit (stars only), and par is the
+> solver's average for the level's size rather than its count for the one code, since a
+> single code can fall to a lucky guess.
+
+**Idea.** A hidden row of coloured pegs. Make a guess; you are told how many pegs are the
+right colour in the right place and how many are the right colour in the wrong place.
+Find the code in as few guesses as you can.
+
+**Rules**
+
+- Pick colours for each slot and press Check. The answer appears as filled and hollow
+  dots next to the row.
+- Levels add slots (3 to 6), colours (4 to 8), and later allow repeated colours.
+- A guess limit; stars from guesses used against par.
+
+**Generator.** The code for level N comes from `Rng` seeded with N.
+
+**Solver and difficulty**
+
+- For small sizes, keep the list of codes still possible and pick the guess that leaves
+  the fewest in the worst case. That gives par.
+- Difficulty: par guesses and the size of the code space.
+- Hints: show one code that still fits every answer so far.
+
+**Rendering and input.** Colour pegs also carry a symbol for colour-blind play. Tap a
+slot, then a colour, or tap colours in order to fill slots left to right.
+
+**Watch out for.** The worst-case search gets slow at 6 slots and 8 colours; run it in
+the level worker and cap the work.
+
+---
+
+## 28. Pair Flip
+
+> **Built.** Pair Flip is in the collection (`src/games/flip/`, route `#/flip`). See the
+> README for how it ended up working. The main differences from the plan below: swapped
+> cards slide past each other in plain view (every third miss) rather than one card
+> shuffling unseen; look-alike pictures share a shape and colour and differ in style;
+> there is no timer bonus star (best times are kept instead); and par is three misses
+> per four pairs.
+
+**Idea.** Cards lie face down. Flip two at a time; a match stays up, a miss turns back.
+Find every pair.
+
+**Rules**
+
+- Stars from misses against the number of pairs.
+- Later levels: bigger grids, cards that look alike, a card that swaps places with
+  another after every few misses, and a timer for a bonus star.
+
+**Generator.** Deal with `Rng` seeded by the level number. No solver is needed; par is
+a fixed number of misses per grid size.
+
+**Rendering and input.** Flip animation about 200 ms. Pictures are simple shapes in the
+theme colours. A short pause before a miss turns back, which the player can skip with a
+tap.
+
+**Watch out for.** Very cheap to build; a good first game for someone new to the code.
+
+---
+
+## 29. Cage Sums
+
+> **Built.** Cage Sums is in the collection (`src/games/cages/`, route `#/cages`). See the
+> README for how it ended up working. The main differences from the plan below: it uses
+> Number Place's hearts and free hints (so stars come from mistakes, not hints and
+> checks); boards are kept only when the reasoning solver finishes them rather than
+> repaired by splitting cages; sizes run 4 to 8, since cage labels get too small at 9;
+> and every attempt has a work budget so the hardest 8x8 boards still build quickly.
+
+**Idea.** A square grid where every row and column has each number once, as in Number
+Place. The grid is split into outlined cages, each with a target and a sign. The numbers
+in a cage must make the target with that sign.
+
+**Rules**
+
+- Sizes 4 to 8. Cages with + or x can hold any number of cells; - and / cages hold two.
+- Notes, undo, checks and hints work as in Number Place.
+- Stars: hints and checks used.
+
+**Generator**
+
+1. Build a full Latin square with `Rng` (shuffle rows, columns and symbols of a base
+   square).
+2. Grow cages by joining neighbouring cells at random, sizes one to four.
+3. Pick a sign for each cage that fits its cells and gives a target.
+4. Run the solver; if the answer is not unique, split or re-sign a cage and try again.
+
+**Solver and difficulty**
+
+- For each cage, list the number sets that make the target, then combine with the row
+  and column rules. Reuse Number Place's candidate tracking
+  (`src/games/numbers/core/`).
+- Difficulty: how many cage combinations had to be tried, and which rules were needed.
+
+**Rendering and input.** Cage outlines in bold, target and sign in the cage's top-left
+cell. Number pad from Number Place.
+
+**Watch out for.** Single-cell cages give a number away; use at most one or two per
+board.
