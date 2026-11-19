@@ -348,4 +348,16 @@ export const HELP: Record<string, Help> = {
       'Pictures differ by shape and style (solid, ring or twin), so you can play without telling colours apart.',
     ],
   },
+  fence: {
+    goal: 'Draw one closed fence along the dotted lines between dots. Each number says how many of its square\'s four sides the fence uses.',
+    tips: [
+      'Draw one closed fence along the dotted lines. Each number says how many of its four sides the fence uses.',
+      "Switch to Cross, or hold a line, to mark where the fence can't go. A wrong mark costs a heart.",
+      'The fence is a single loop: it never branches, never crosses itself and never splits in two.',
+      'Every square is inside the fence or outside. A fence between two squares puts them on different sides.',
+      'Crosses fill in by themselves round a 0, at a dot with two fences, and round a number that has all its fence.',
+      'Drag along the lines to mark several at once. A stroke stops at the first mistake.',
+      'Hints are free: each one reveals a line that can be worked out from the board as it is.',
+    ],
+  },
 };

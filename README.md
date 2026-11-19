@@ -46,6 +46,7 @@ Real-time games pause while it is open.
 | Peg Jump | Jump pegs over each other to take them off; finish with one peg on the ring. |
 | Tumble Block | Swipe to tip a tall block end over end; stand it upright in the hole. |
 | Pair Flip | Turn cards over two at a time and find every matching pair. |
+| Fence Loop | Draw one closed fence along the dotted lines; each number counts its square's sides. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -1591,6 +1592,69 @@ swapping cards:
 The cards are plain HTML buttons that flip with CSS (no canvas), and the flip is
 skipped when the device asks for reduced motion.
 
+## Fence Loop
+
+A grid of dots with numbers in some of the squares between them. Draw one closed fence
+along the lines between dots. Each number says how many of its square's four sides the
+fence uses. The fence is a single loop: it never branches, never crosses itself and
+never splits in two. Every board has exactly one answer.
+
+### Rules
+
+- **Marking:** tap a line (anywhere near it) to mark it, as fence or as a cross (no fence)
+  depending on the Fence / Cross switch under the board. Hold a line for a moment to use
+  the other mark. Drag along the lines to mark several in one stroke.
+- **Hearts:** every mark is checked straight away, as in Star Battle. A wrong one shows
+  what the line really is (in red), costs one of three hearts and ends the stroke. Out of
+  hearts: keep going for no stars, or restart.
+- **Crosses for free:** every line round a 0, the rest of any dot that has two fences,
+  and the rest of a numbered square that has all its fence cross themselves out.
+  Numbers fade once their square has all its fence.
+- **Stars** equal the hearts left when the whole fence is drawn (crosses aren't needed).
+- **Hints:** 3 per level, free. Each one reveals a line the steps below can work out
+  from the board as it is, preferring fence.
+
+### Levels
+
+Levels 1 to 3 are tutorials (4x4 and 5x5). After that, level N is generated from N as the
+seed, so everyone gets the same board. Boards grow from 5x5 to 8x10 over the first 35
+levels, then vary. Inside and outside is introduced on level 8, and trial and error is
+needed from level 20.
+
+The generator (`src/games/fence/core/levels.ts`) grows a blob of squares from one square,
+adding neighbours only where the blob stays free of holes and never touches itself only
+at a corner, so its outline is one loop: the answer. Every square gets its count, then
+clues are taken away in a seeded random order. A removal stays only if the reasoning
+solver can still finish the board, and the board's score is no higher than the level
+calls for. Trial and error is slow to check, so it only gets a short last pass of
+removals. Every solve has a work budget, so every device builds the same board, mostly
+in well under half a second.
+
+The solver (`src/games/fence/core/solver.ts`) works in waves, always with the easiest
+step that settles anything:
+
+1. **Counting:** a number with all its fence crosses out the rest of its square; one that
+   needs every open side fences them all. A dot with two fences crosses out the rest; a
+   dot with one fence and one open line must use it; a dot with no fence and one open
+   line can't use it.
+2. **One loop:** a line that would close the fence into a loop is crossed out unless that
+   loop would be the whole answer.
+3. **Inside and outside:** every square is inside the fence or out, and beyond the border
+   is out. Fence between two squares puts them on different sides; no fence, the same
+   side. Squares tied together this way settle the lines between them, and a number
+   counts the neighbours on the other side of its square.
+4. **Trial and error:** a line whose one setting leads, by the steps above, to an
+   impossible board takes the other.
+
+| Label | What the board needs |
+| --- | --- |
+| Easy | No trial and error, and at most one wave of inside and outside |
+| Medium | No trial and error, two or more waves of inside and outside |
+| Hard | Trial and error, once or twice |
+| Super Hard | Trial and error, three or more times |
+
+Hover the label in game to see the hardest step.
+
 ## Development
 
 ```bash
@@ -1602,7 +1666,7 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1`, `shapes.v1`, `pairs.v1`, `cages.v1`, `pegs.v1`, `tumble.v1`, `flip.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1`, `shapes.v1`, `pairs.v1`, `cages.v1`, `pegs.v1`, `tumble.v1`, `flip.v1`, `fence.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 

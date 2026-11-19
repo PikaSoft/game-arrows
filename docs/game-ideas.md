@@ -32,7 +32,7 @@ and art for each one and don't copy a specific existing game.
 | 18 | ~~[Island Bridges](#18-island-bridges)~~ | Deduction | Logic | Medium | **Built** (`src/games/bridges/`) |
 | 19 | ~~[Mirror Beam](#19-mirror-beam)~~ | Rotate tiles | Closest | Small | **Built** (`src/games/beams/`) |
 | 20 | ~~[Shape Fit](#20-shape-fit)~~ | Place pieces | Endless | Small | **Built** (`src/games/shapes/`) |
-| 21 | [Fence Loop](#21-fence-loop) | Deduction | Logic | Medium to large | |
+| 21 | ~~[Fence Loop](#21-fence-loop)~~ | Deduction | Logic | Medium to large | **Built** (`src/games/fence/`) |
 | 22 | ~~[Layer Pairs](#22-layer-pairs)~~ | Match free tiles | Closest | Medium | **Built** (`src/games/pairs/`) |
 | 23 | ~~[Two Tones](#23-two-tones)~~ | Deduction | Logic | Small | **Built** (`src/games/tones/`) |
 | 24 | ~~[Peg Jump](#24-peg-jump)~~ | Jump puzzle | Closest | Small | **Built** (`src/games/pegs/`) |
@@ -920,6 +920,13 @@ continues it, as Merge Tiles does.
 ---
 
 ## 21. Fence Loop
+
+> **Built.** Fence Loop is in the collection (`src/games/fence/`, route `#/fence`). See the
+> README for how it ended up working. The main differences from the plan below: it uses
+> the hearts model of the other deduction games, with a Fence / Cross switch (hold or
+> drag as in Star Battle) instead of tapping to cycle; instead of a library of named
+> patterns, the solver's third step is inside-and-outside reasoning, which covers most of
+> them, with trial and error after it; and boards fit the screen without zoom (up to 8x10).
 
 **Idea.** A grid of dots with some numbers between them. Draw one closed fence along the
 lines between dots. Each number says how many of the four sides around it the fence
