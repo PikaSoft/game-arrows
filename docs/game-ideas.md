@@ -35,7 +35,7 @@ and art for each one and don't copy a specific existing game.
 | 21 | [Fence Loop](#21-fence-loop) | Deduction | Logic | Medium to large | |
 | 22 | ~~[Layer Pairs](#22-layer-pairs)~~ | Match free tiles | Closest | Medium | **Built** (`src/games/pairs/`) |
 | 23 | ~~[Two Tones](#23-two-tones)~~ | Deduction | Logic | Small | **Built** (`src/games/tones/`) |
-| 24 | [Peg Jump](#24-peg-jump) | Jump puzzle | Closest | Small | |
+| 24 | ~~[Peg Jump](#24-peg-jump)~~ | Jump puzzle | Closest | Small | **Built** (`src/games/pegs/`) |
 | 25 | [Tumble Block](#25-tumble-block) | Roll puzzle | Closest | Small to medium | |
 | 26 | [Cave Glider](#26-cave-glider) | One-tap flyer | Arcade | Small | |
 | 27 | ~~[Code Breaker](#27-code-breaker)~~ | Guess the code | Logic | Small | **Built** (`src/games/codes/`) |
@@ -1040,6 +1040,12 @@ as well as two colours (filled circle, ring) so colour-blind players can play.
 ---
 
 ## 24. Peg Jump
+
+> **Built.** Peg Jump is in the collection (`src/games/pegs/`, route `#/pegs`). See the
+> README for how it ended up working. The main differences from the plan below: hints
+> (3 per level) cost a star; finishing with three or more pegs doesn't clear the level;
+> and the label comes from the solver's search effort, since counting every reachable
+> position (the planned measure) is far too slow on boards with 20 pegs.
 
 **Idea.** Pegs sit in holes on a board. Jump a peg over a neighbour into an empty hole;
 the jumped peg is removed. Finish with one peg left.

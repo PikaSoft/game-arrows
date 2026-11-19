@@ -43,6 +43,7 @@ Real-time games pause while it is open.
 | Shape Fit | Drag pieces onto an 8x8 board; full rows and columns clear. Endless. |
 | Layer Pairs | Clear a layered pile of tiles two matching free tiles at a time. |
 | Cage Sums | Each number once per row and column; the numbers in each cage make its target. |
+| Peg Jump | Jump pegs over each other to take them off; finish with one peg on the ring. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -1439,6 +1440,55 @@ be and works in waves, always with the easiest step that narrows anything:
 
 Hover the label in game to see the step.
 
+## Peg Jump
+
+Pegs sit in holes on a board. Jump a peg over a neighbouring peg (across or up and
+down, never diagonally) into an empty hole just beyond; the jumped peg is taken off.
+Keep going until no jump is left.
+
+### Rules
+
+- **Jumping:** tap a peg to pick it up (the holes it can jump to are marked), then tap
+  one of them. Or drag the peg straight onto the hole. A peg that can't jump gives a
+  small shake; tapping a picked-up peg puts it down.
+- **Finishing:** when no jump is left, the level is cleared if one or two pegs remain.
+  Three or more is not a clear: a screen offers Undo or Restart.
+- **Stars:** one peg on the ringed hole (drawn dashed) is three, one peg anywhere else
+  two, two pegs one. Each hint used costs a star (never below one on a clear).
+- **Undo:** unlimited and free.
+- **Hints:** 3 per level. Each one picks up a peg and rings the hole for a jump that can
+  still finish with one peg on the ring (or, if that's no longer possible, one peg
+  anywhere). If neither is possible from here, it says so for free.
+
+### Levels
+
+Levels 1 to 3 are tutorials (two pegs in a row, then 4 and 6 pegs). After that, level N
+is generated from N as the seed, so everyone gets the same board. Boards grow from 5x5
+to 7x7, and pegs from about 6 to 20, over the first 35 levels, then vary, with the odd
+easier breather.
+
+The board (`src/games/pegs/core/levels.ts`) is the union of one to three centred bars and
+blocks, so it is mirrored both ways (crosses, fat pluses, wide blocks). Each level is
+built backwards from one peg on the ringed hole: a reverse jump takes a peg and puts pegs
+on the two holes behind it, which played forwards is an ordinary jump. So every level
+can be finished with one peg on the ring. The solver (`src/games/pegs/core/solver.ts`) is
+a depth-first search that remembers dead ends, capped by positions (60,000 while
+building, 150,000 for hints); boards that need more are skipped. Of up to 40 boards, the
+one closest to the level's difficulty target is kept.
+
+The difficulty label is the search effort in bits: log2 of the positions the solver
+looks at, trying jumps in a fixed order, before it finds a finish on the ring. A board
+where most jumps lead nowhere takes longer to search, and to think through:
+
+| Label | Search effort |
+| --- | --- |
+| Easy | under 4 bits |
+| Medium | 4 to 6.9 |
+| Hard | 7 to 9.9 |
+| Super Hard | 10 or more |
+
+Hover the label in game to see the number.
+
 ## Development
 
 ```bash
@@ -1450,7 +1500,7 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1`, `shapes.v1`, `pairs.v1`, `cages.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1`, `shapes.v1`, `pairs.v1`, `cages.v1`, `pegs.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 

@@ -314,4 +314,14 @@ export const HELP: Record<string, Help> = {
       'Hints are free: each one fills the next square that can be worked out from the board as it is.',
     ],
   },
+  pegs: {
+    goal: 'Jump a peg over its neighbour into an empty hole; the jumped peg is taken off. Keep going until no jump is left, and finish with as few pegs as you can.',
+    tips: [
+      'Tap a peg, then the empty hole two steps past its neighbour. It jumps over, and the peg it jumps is taken off.',
+      'Finish with one peg on the ringed hole for three stars. One peg anywhere else is two; two pegs left is one.',
+      'Undo is free. A hint shows a jump that can still finish on the ring, for a star.',
+      'Jumps go across or up and down, never diagonally. You can also drag a peg onto its hole.',
+      'Ending with three or more pegs and no jump left does not clear the level: undo and try another way.',
+    ],
+  },
 };

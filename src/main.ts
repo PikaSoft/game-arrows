@@ -17,6 +17,7 @@ import { createMerge } from './games/merge/ui';
 import { createMines } from './games/mines/ui';
 import { createNumbers } from './games/numbers/ui';
 import { createPairs } from './games/pairs/ui';
+import { createPegs } from './games/pegs/ui';
 import { createPicture } from './games/picture/ui';
 import { createTents } from './games/tents/ui';
 import { createTones } from './games/tones/ui';
@@ -281,6 +282,7 @@ games.push(
   createShapes(shell),
   createPairs(shell),
   createCages(shell),
+  createPegs(shell),
 );
 
 document.addEventListener('keydown', (e) => {
