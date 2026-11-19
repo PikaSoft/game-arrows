@@ -256,4 +256,17 @@ export const HELP: Record<string, Help> = {
       'Undo is free, but an undone tap still counts.',
     ],
   },
+  tones: {
+    goal: 'Fill every square orange or blue. Never three of one colour in a row, every row and column half and half, and no two rows (or columns) the same.',
+    tips: [
+      'Fill every square, orange or blue. Never three of one colour in a row, across or down.',
+      'Every row and column holds as many orange as blue. The edge numbers count what each line still needs.',
+      "Tap a square to place the switch's colour; hold it for the other one. A wrong square costs a heart.",
+      'No two rows may be the same, and no two columns. A finished line can rule out a copy.',
+      'Two alike side by side, or with one gap between, means the squares beside or between them are the other colour.',
+      'Drag along a row or column to fill several squares with one colour. A stroke stops at the first mistake.',
+      'Orange is a filled disc and blue a ring, so you can play without telling colours apart.',
+      'Hints are free: each one fills a square that can be worked out from the board as it is.',
+    ],
+  },
 };

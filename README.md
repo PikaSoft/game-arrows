@@ -38,6 +38,7 @@ Real-time games pause while it is open.
 | Star Raiders | Slide your ship and shoot down waves of marching raiders; it fires by itself. Endless. |
 | Code Breaker | Guess the hidden row of colours; each answer says how many pegs are right. |
 | Mirror Beam | Turn mirrors so every beam of light reaches the target of its colour. |
+| Two Tones | Fill the grid with orange and blue: never three in a row, every line half and half. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -1178,6 +1179,60 @@ out at once is quick to search and quick to read; one where they wander far is n
 
 Hover the label in game to see the number.
 
+## Two Tones
+
+Fill every square of an even-sized grid with orange or blue. Three rules:
+
+1. Never three of one colour in a row, across or down.
+2. Every row and every column holds as many orange as blue.
+3. No two rows are the same, and no two columns.
+
+Orange is a filled disc and blue a ring, so the game can be played without telling the
+colours apart. Every board has exactly one answer.
+
+### Rules
+
+- **Marking:** tap a square to fill it with the colour on the Orange / Blue switch under
+  the board. Hold a square for a moment to use the other colour. Drag to fill several
+  squares in one stroke. Keyboard: arrow keys move, 1 or A for orange, 2 or B for blue,
+  Space flips the switch.
+- **Counters:** the numbers right of each row and below each column say how many of each
+  colour that line still needs. They fade at 0.
+- **Hearts:** every square is checked straight away, as in Star Battle. A wrong one shows
+  its real colour (outlined in red), costs one of three hearts and ends the stroke.
+- **Out of hearts:** keep going for no stars, or restart.
+- **Stars** equal the hearts left when the grid is full.
+- **Hints:** 3 per level, free. Each one fills a square the easiest technique that
+  works can settle from the board as it is.
+
+### Levels
+
+Levels 1 to 3 are tutorials (4x4, then two 6x6). After that, level N is generated from N
+as the seed, so everyone gets the same puzzle. Grids grow from 6x6 to 12x12 over the
+first 35 levels, then vary. The no-copies rule is first needed on level 15, and trial and
+error from level 26.
+
+The generator (`src/games/tones/core/levels.ts`) builds a full valid grid row by row from
+the list of valid rows, keeping every column legal and every row and column different.
+It then takes clues away in a seeded random order, keeping a removal only if the
+reasoning solver can still finish with nothing harder than the level calls for. Since
+that solver only ever places squares that are forced, a board it finishes has exactly
+one answer. Of a few tries, a board that really needs the level's hardest technique, with
+the fewest clues, is kept. Trial-and-error boards are slow to check, so they get only a
+short last pass of removals; they take up to about a second to build, in a worker.
+
+The solver (`src/games/tones/core/solver.ts`) works in waves, always trying the easiest
+technique first. The difficulty label is the hardest technique it needs:
+
+| Label | Hardest technique needed |
+| --- | --- |
+| Easy | Pairs and gaps (two alike side by side, or with one gap, fix their neighbours), or counting (a line with half of one colour fills the rest) |
+| Medium | Line logic: of every way left to finish a line, a square that comes out the same in all of them |
+| Hard | No copies: as line logic, ruling out ways that copy a finished line |
+| Super Hard | Trial and error: a square where one colour leads, by the rules above, to a broken board |
+
+Hover the label in game to see the technique.
+
 ## Development
 
 ```bash
@@ -1189,7 +1244,7 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 

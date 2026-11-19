@@ -16,6 +16,7 @@ import { createMines } from './games/mines/ui';
 import { createNumbers } from './games/numbers/ui';
 import { createPicture } from './games/picture/ui';
 import { createTents } from './games/tents/ui';
+import { createTones } from './games/tones/ui';
 import { createWords } from './games/words/ui';
 import { createPipes } from './games/pipes/ui';
 import { createSandglass } from './games/sandglass/ui';
@@ -271,6 +272,7 @@ games.push(
   createRaiders(shell),
   createCodes(shell),
   createBeams(shell),
+  createTones(shell),
 );
 
 document.addEventListener('keydown', (e) => {

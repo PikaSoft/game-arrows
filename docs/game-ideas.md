@@ -34,7 +34,7 @@ and art for each one and don't copy a specific existing game.
 | 20 | [Shape Fit](#20-shape-fit) | Place pieces | Endless | Small | |
 | 21 | [Fence Loop](#21-fence-loop) | Deduction | Logic | Medium to large | |
 | 22 | [Layer Pairs](#22-layer-pairs) | Match free tiles | Closest | Medium | |
-| 23 | [Two Tones](#23-two-tones) | Deduction | Logic | Small | |
+| 23 | ~~[Two Tones](#23-two-tones)~~ | Deduction | Logic | Small | **Built** (`src/games/tones/`) |
 | 24 | [Peg Jump](#24-peg-jump) | Jump puzzle | Closest | Small | |
 | 25 | [Tumble Block](#25-tumble-block) | Roll puzzle | Closest | Small to medium | |
 | 26 | [Cave Glider](#26-cave-glider) | One-tap flyer | Arcade | Small | |
@@ -980,6 +980,14 @@ at small size and in dark mode, and not copied from any traditional tile set.
 ---
 
 ## 23. Two Tones
+
+> **Built.** Two Tones is in the collection (`src/games/tones/`, route `#/tones`). See the
+> README for how it ended up working. The main differences from the plan below: it uses
+> the hearts model of the other deduction games (every square checked straight away,
+> stars from hearts, free hints) instead of hints and checks, input is a colour switch
+> with hold and drag as in Star Battle rather than tapping to cycle, edge counters show
+> what each line still needs, the first tutorial is 4x4, and trial and error is a fifth
+> technique tier for the hardest boards.
 
 **Idea.** Fill a square grid with two colours. No three of one colour in a row, each row
 and column has as many of one colour as the other, and no two rows (or columns) are the

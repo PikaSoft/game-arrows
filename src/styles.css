@@ -265,3 +265,6 @@ button.cb-slot { cursor: pointer; }
 .cb-check:disabled { opacity: 0.45; }
 .cb-reveal { display: flex; justify-content: center; gap: 8px; margin: 6px 0 2px; }
 .cb-reveal svg { width: 34px; height: 34px; }
+
+/* ---------- Two Tones ---------- */
+#to-mode button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
