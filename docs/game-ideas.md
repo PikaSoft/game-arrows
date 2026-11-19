@@ -33,7 +33,7 @@ and art for each one and don't copy a specific existing game.
 | 19 | ~~[Mirror Beam](#19-mirror-beam)~~ | Rotate tiles | Closest | Small | **Built** (`src/games/beams/`) |
 | 20 | ~~[Shape Fit](#20-shape-fit)~~ | Place pieces | Endless | Small | **Built** (`src/games/shapes/`) |
 | 21 | [Fence Loop](#21-fence-loop) | Deduction | Logic | Medium to large | |
-| 22 | [Layer Pairs](#22-layer-pairs) | Match free tiles | Closest | Medium | |
+| 22 | ~~[Layer Pairs](#22-layer-pairs)~~ | Match free tiles | Closest | Medium | **Built** (`src/games/pairs/`) |
 | 23 | ~~[Two Tones](#23-two-tones)~~ | Deduction | Logic | Small | **Built** (`src/games/tones/`) |
 | 24 | [Peg Jump](#24-peg-jump) | Jump puzzle | Closest | Small | |
 | 25 | [Tumble Block](#25-tumble-block) | Roll puzzle | Closest | Small to medium | |
@@ -959,6 +959,13 @@ from the start.
 ---
 
 ## 22. Layer Pairs
+
+> **Built.** Layer Pairs is in the collection (`src/games/pairs/`, route `#/pairs`). See the
+> README for how it ended up working. The main differences from the plan below: undo is
+> free and unlimited, so stars come only from hints and shuffles; the HUD counts free
+> tiles that have a match rather than pairs; layouts are generated (mirrored, with
+> straddling upper layers) rather than picked from a list; and the label comes from the
+> share of random playthroughs that get stuck. Piles fit the screen without zoom so far.
 
 **Idea.** A pile of picture tiles stacked in layers. A tile is free when nothing lies on
 top of it and it is open on its left or right. Tap two free tiles with the same picture

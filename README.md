@@ -41,6 +41,7 @@ Real-time games pause while it is open.
 | Two Tones | Fill the grid with orange and blue: never three in a row, every line half and half. |
 | Island Bridges | Join numbered islands with straight bridges that never cross, until every island is linked. |
 | Shape Fit | Drag pieces onto an 8x8 board; full rows and columns clear. Endless. |
+| Layer Pairs | Clear a layered pile of tiles two matching free tiles at a time. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -1327,6 +1328,62 @@ game ends because of how the board was filled, not because of an unlucky deal. I
 simulation, a player who prefers clearing lines and otherwise places pieces snugly lasts
 a median of about 150 pieces; one placing at random lasts about 17.
 
+## Layer Pairs
+
+A pile of picture tiles in layers. A tile is free when nothing lies on it (even partly)
+and its left or right side is open. Tap a free tile, then a free tile with the same
+picture, to lift both off. Clear the table.
+
+### Rules
+
+- **Picking:** the first tap lifts a tile a little; tapping it again puts it down, and
+  tapping a free tile with a different picture picks that one instead. Covered tiles
+  are dimmed and give a small shake when tapped.
+- **Every pile can be cleared**, but some pairs lead to a dead end: when a picture has
+  four free copies, which two go first can matter.
+- **Undo:** unlimited and free.
+- **Hints:** 3 per level. Each one points at a pair that still leads to a clear table (or
+  says there is no way out from here, for free). Each hint used costs a star.
+- **Shuffles:** 3 per level. A shuffle deals the pictures still on the table again so that
+  they can all be cleared. Each costs a star. When no free pair is left, a screen offers
+  Undo, Shuffle or Restart.
+- **Stars:** three, minus one for each hint or shuffle used, never below one. Best times
+  are kept.
+- **HUD:** how many free tiles have a free match right now, and how many tiles are left.
+- **Pictures** are 8 shapes, each in its own colour, in 3 styles (solid, ring, or two
+  small ones), so every picture can be told apart by shape and style alone. They are
+  plain shapes, not taken from any traditional tile set.
+
+### Levels
+
+Levels 1 to 3 are tutorials (one layer, then two). After that, level N is generated from
+N as the seed, so everyone gets the same pile. Piles grow from a 5x4 base with two layers
+to 8x7 with three or four over the first 35 levels (up to about 116 tiles), then vary.
+
+The layout (`src/games/pairs/core/levels.ts`) is mirrored left to right: a bottom block
+of tiles with some edge tiles left out, then layers that sit either straight on the
+tiles below or straddling four of them, only where every part rests on a tile. Pictures
+are dealt backwards (`src/games/pairs/core/solver.ts`): again and again two tiles that
+are free in what is left get the same picture and are lifted off. Played forwards, those
+pairs in reverse order clear the pile, so every deal can be cleared. Of up to 30 deals,
+the one closest to the level's difficulty target is kept. More different pictures make
+dead ends more likely (fewer matches to choose from), so the number of pictures grows
+with the levels too.
+
+The difficulty label is the share of 60 random playthroughs (each taking any free pair
+at random) that get stuck:
+
+| Label | Random playthroughs that get stuck |
+| --- | --- |
+| Easy | under 20% |
+| Medium | 20% to 44% |
+| Hard | 45% to 69% |
+| Super Hard | 70% or more |
+
+Hover the label in game to see the number. Hints search for a way to clear the rest
+(depth first, trying first the pairs that uncover the most, remembering dead ends),
+capped by steps; on the biggest piles that takes well under a tenth of a second.
+
 ## Development
 
 ```bash
@@ -1338,7 +1395,7 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1`, `shapes.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1`, `shapes.v1`, `pairs.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 

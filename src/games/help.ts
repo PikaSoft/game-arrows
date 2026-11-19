@@ -292,4 +292,15 @@ export const HELP: Record<string, Help> = {
       'Undo once per game. A game in progress is kept, so you can leave and continue later.',
     ],
   },
+  pairs: {
+    goal: 'Clear the pile two at a time: tap two free tiles with the same picture. A tile is free when nothing covers it and its left or right side is open.',
+    tips: [
+      'Tap two matching free tiles to clear them. A tile is free when nothing lies on it and its left or right side is open.',
+      'Tiles on top cover the ones below. Free tiles are bright; covered ones are dim.',
+      'Some pairs lead to a dead end. Undo is free; each hint or shuffle costs a star.',
+      'Every pile can be cleared. When a picture has four free copies, think about which pair to take.',
+      'A hint points at a pair that still leads to a clear table. A shuffle deals the tiles left so they can all be cleared.',
+      'Pictures differ by shape and style (solid, ring or twin), so you can play without telling colours apart.',
+    ],
+  },
 };
