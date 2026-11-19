@@ -42,6 +42,7 @@ Real-time games pause while it is open.
 | Island Bridges | Join numbered islands with straight bridges that never cross, until every island is linked. |
 | Shape Fit | Drag pieces onto an 8x8 board; full rows and columns clear. Endless. |
 | Layer Pairs | Clear a layered pile of tiles two matching free tiles at a time. |
+| Cage Sums | Each number once per row and column; the numbers in each cage make its target. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -1384,6 +1385,60 @@ Hover the label in game to see the number. Hints search for a way to clear the r
 (depth first, trying first the pairs that uncover the most, remembering dead ends),
 capped by steps; on the biggest piles that takes well under a tenth of a second.
 
+## Cage Sums
+
+Fill a square grid so that every row and every column holds each number from 1 to the
+grid's size exactly once. The grid is split into outlined cages, each with a target and a
+sign in its corner: the numbers in the cage must make the target with that sign. For −
+and ÷ (always two squares), take the smaller number from, or into, the larger one. A
+cage with no sign is a single square showing its own number. A number may repeat in a
+cage, as long as the two are not in the same row or column. Every board has exactly one
+answer.
+
+### Rules
+
+Entering numbers, notes, hearts, stars and hints work as in Number Place (the same
+session and number pad, `src/games/cages/game/session.ts`):
+
+- **Entering numbers:** tap a square, then a number on the pad. Keyboard: numbers, arrow
+  keys to move, N for notes, Backspace to clear notes.
+- **Notes:** switch to Notes to pencil in what a square could be. They sit below the
+  cage's label.
+- **Hearts:** every number is checked straight away; a wrong one isn't placed and costs
+  one of three hearts. Out of hearts: keep going for no stars, or restart.
+- **Stars** equal the hearts left when the grid is full.
+- **Hints:** 3 per level, free. Each one fills the next square the steps below can work
+  out from the board as it is.
+
+### Levels
+
+Levels 1 to 3 are tutorials (4x4 with sums only, 4x4 with every sign, then 5x5). After
+that, level N is generated from N as the seed, so everyone gets the same board. Grids
+grow from 5x5 to 8x8 over the first 35 levels, then vary, with smaller ones back now and
+then as breathers. Pairs and pointing are first needed on level 10, and trial and error
+from level 24.
+
+The generator (`src/games/cages/core/levels.ts`) shuffles the rows, columns and numbers
+of a simple Latin square, splits it into cages of two to four squares (with at most one
+or two single squares), and gives each cage a sign its numbers allow (− and ÷ are
+favoured for two-square cages when they work). A reasoning solver then has to finish the
+board without guessing, which proves it has one answer. Of up to 120 boards (150 for the
+hardest levels), the first that needs exactly the level's hardest step is kept; if none
+does, the next step up is tried. Each attempt has a work budget (in cage-filling steps,
+not time), so every device builds the same board, mostly in well under a second.
+
+The solver (`src/games/cages/core/solver.ts`) keeps the numbers each square could still
+be and works in waves, always with the easiest step that narrows anything:
+
+| Label | Hardest step needed |
+| --- | --- |
+| Easy | Singles (a settled square clears its row and column; a number with one place left in a line goes there) and cage combinations (a number no working way of filling the cage uses is out) |
+| Medium | Pairs and pointing: two squares in a line with the same two numbers left, or a number every way of filling a cage puts in the same line |
+| Hard | Trial and error: a number that leads, by the steps above, to an impossible board is out |
+| Super Hard | Trial and error, three or more times |
+
+Hover the label in game to see the step.
+
 ## Development
 
 ```bash
@@ -1395,7 +1450,7 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1`, `shapes.v1`, `pairs.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1`, `shapes.v1`, `pairs.v1`, `cages.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 

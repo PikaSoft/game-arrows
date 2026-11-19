@@ -303,4 +303,15 @@ export const HELP: Record<string, Help> = {
       'Pictures differ by shape and style (solid, ring or twin), so you can play without telling colours apart.',
     ],
   },
+  cages: {
+    goal: 'Fill the grid so every row and column has each number once. The numbers in each outlined cage must make its target with its sign.',
+    tips: [
+      'Fill the grid so every row and column has 1 to 4 once each. The numbers in each outlined cage add up to its target.',
+      'A cage can also use −, × or ÷. For − and ÷, take the smaller number from or into the larger one.',
+      'Switch on Notes to pencil in what a square could be. A wrong number costs a heart.',
+      'A number may repeat inside a cage, as long as the two are not in the same row or column.',
+      'A cage with no sign is a single square: it shows its own number.',
+      'Hints are free: each one fills the next square that can be worked out from the board as it is.',
+    ],
+  },
 };

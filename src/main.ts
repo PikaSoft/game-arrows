@@ -3,6 +3,7 @@ import { createArrows } from './games/arrows/ui';
 import { createBeams } from './games/beams/ui';
 import { createBricks } from './games/bricks/ui';
 import { createBridges } from './games/bridges/ui';
+import { createCages } from './games/cages/ui';
 import { createCodes } from './games/codes/ui';
 import { createCrates } from './games/crates/ui';
 import { createFruit } from './games/fruit/ui';
@@ -279,6 +280,7 @@ games.push(
   createBridges(shell),
   createShapes(shell),
   createPairs(shell),
+  createCages(shell),
 );
 
 document.addEventListener('keydown', (e) => {

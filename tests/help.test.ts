@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { beamSpecFor } from '../src/games/beams/core/difficulty';
 import { bricksSpecFor } from '../src/games/bricks/core/difficulty';
 import { bridgesSpecFor } from '../src/games/bridges/core/difficulty';
+import { cagesSpecFor } from '../src/games/cages/core/difficulty';
 import { codesSpecFor } from '../src/games/codes/core/difficulty';
 import { crateSpecFor } from '../src/games/crates/core/difficulty';
 import { iceSpecFor } from '../src/games/ice/core/difficulty';
@@ -23,12 +24,13 @@ import { wordsSpecFor } from '../src/games/words/core/difficulty';
 import { buildLevel } from '../src/games/arrows/core/levels';
 import { HELP } from '../src/games/help';
 
-const IDS = ['arrows', 'sandglass', 'snake', 'snake-trails', 'squeeze', 'pipes', 'lines', 'crates', 'lights', 'ice', 'picture', 'numbers', 'tents', 'mines', 'bricks', 'stack', 'lanes', 'merge', 'words', 'stars', 'loop', 'fruit', 'raiders', 'codes', 'beams', 'tones', 'bridges', 'shapes', 'pairs'];
+const IDS = ['arrows', 'sandglass', 'snake', 'snake-trails', 'squeeze', 'pipes', 'lines', 'crates', 'lights', 'ice', 'picture', 'numbers', 'tents', 'mines', 'bricks', 'stack', 'lanes', 'merge', 'words', 'stars', 'loop', 'fruit', 'raiders', 'codes', 'beams', 'tones', 'bridges', 'shapes', 'pairs', 'cages'];
 
 const SPECS: Record<string, (n: number) => { tip?: string }> = {
   beams: beamSpecFor,
   bricks: bricksSpecFor,
   bridges: bridgesSpecFor,
+  cages: cagesSpecFor,
   codes: codesSpecFor,
   crates: crateSpecFor,
   ice: iceSpecFor,

@@ -40,7 +40,7 @@ and art for each one and don't copy a specific existing game.
 | 26 | [Cave Glider](#26-cave-glider) | One-tap flyer | Arcade | Small | |
 | 27 | ~~[Code Breaker](#27-code-breaker)~~ | Guess the code | Logic | Small | **Built** (`src/games/codes/`) |
 | 28 | [Pair Flip](#28-pair-flip) | Memory | Casual | Small | |
-| 29 | [Cage Sums](#29-cage-sums) | Deduction | Logic | Medium | |
+| 29 | ~~[Cage Sums](#29-cage-sums)~~ | Deduction | Logic | Medium | **Built** (`src/games/cages/`) |
 
 Effort is a rough guide next to Squeeze: small is under half of its code, large is
 more than all of it.
@@ -1190,6 +1190,13 @@ tap.
 ---
 
 ## 29. Cage Sums
+
+> **Built.** Cage Sums is in the collection (`src/games/cages/`, route `#/cages`). See the
+> README for how it ended up working. The main differences from the plan below: it uses
+> Number Place's hearts and free hints (so stars come from mistakes, not hints and
+> checks); boards are kept only when the reasoning solver finishes them rather than
+> repaired by splitting cages; sizes run 4 to 8, since cage labels get too small at 9;
+> and every attempt has a work budget so the hardest 8x8 boards still build quickly.
 
 **Idea.** A square grid where every row and column has each number once, as in Number
 Place. The grid is split into outlined cages, each with a target and a sign. The numbers
