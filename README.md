@@ -44,6 +44,7 @@ Real-time games pause while it is open.
 | Layer Pairs | Clear a layered pile of tiles two matching free tiles at a time. |
 | Cage Sums | Each number once per row and column; the numbers in each cage make its target. |
 | Peg Jump | Jump pegs over each other to take them off; finish with one peg on the ring. |
+| Tumble Block | Swipe to tip a tall block end over end; stand it upright in the hole. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -1489,6 +1490,60 @@ where most jumps lead nowhere takes longer to search, and to think through:
 
 Hover the label in game to see the number.
 
+## Tumble Block
+
+A tall block, one square by two, stands on a path of squares over nothing. Each swipe
+tips it one way: a standing block falls flat across two squares, and a lying one either
+rolls over sideways or stands back up. Stand it upright on the hole to finish.
+
+### Rules
+
+- **Moving:** swipe anywhere on the board, one tip per swipe. Arrow keys and WASD work
+  too; Z undoes.
+- **Wasted moves:** a tip that would leave any part of the block over nothing (or over a
+  closed bridge), or stand it on a cracked square, is wasted: it counts as a move, but the
+  block stays where it was.
+- **Cracked squares** (from level 8) hold a lying block but break under a standing one.
+- **Switches and bridges** (from level 14): tipping onto a switch, with either end of the
+  block, opens its bridges, and doing it again closes them. Each switch has its own
+  colour, and closed bridges show as a dashed outline in that colour. A switch board
+  always needs its switch.
+- **Moves and stars:** each level has a par from the solver: the fewest moves to the hole.
+  Within par is three stars, within par + 25% two, otherwise one. Each hint used costs a
+  star (never below one).
+- **Undo:** unlimited and free: the move doesn't count.
+- **Hints:** 3 per level. Each one shows an arrow for the way a shortest route from here
+  tips next.
+
+### Levels
+
+Levels 1 to 3 are tutorials. After that, level N is generated from N as the seed, so
+everyone gets the same board. Boards grow from about 7x8 to 9x12 over the first 35
+levels, and par from about 6 to 18, then vary, with the odd easier breather.
+
+The generator (`src/games/tumble/core/levels.ts`) grows each board from a random walk of
+the block: every square it touches becomes floor, it starts standing, and the hole is
+where the walk ends standing. Extra squares go round the walk, some plain squares crack,
+and for a switch level a short run of squares the walk reached late becomes bridges
+(closed), with the switch on a square it passed earlier. A breadth-first search over
+the block's square, pose and which bridges are open (`src/games/tumble/core/solver.ts`)
+then finds the true shortest way, which is often not the walk. Of up to 60 boards (200
+with switches), the one closest to the level's difficulty target is kept.
+
+The label comes from par weighted by detours: par plus two for every move of a shortest
+answer that takes the block further from the hole. A board crossed head on is easy; one
+where you must wander away to come back the right way up is not:
+
+| Label | Weighted par |
+| --- | --- |
+| Easy | under 10 |
+| Medium | 10 to 16 |
+| Hard | 17 to 24 |
+| Super Hard | 25 or more |
+
+Hover the label in game to see the numbers. The view is cropped to the squares in use, so
+small boards fill the screen.
+
 ## Development
 
 ```bash
@@ -1500,7 +1555,7 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1`, `shapes.v1`, `pairs.v1`, `cages.v1`, `pegs.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1`, `shapes.v1`, `pairs.v1`, `cages.v1`, `pegs.v1`, `tumble.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 

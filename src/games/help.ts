@@ -324,4 +324,16 @@ export const HELP: Record<string, Help> = {
       'Ending with three or more pegs and no jump left does not clear the level: undo and try another way.',
     ],
   },
+  tumble: {
+    goal: 'Swipe to tip a tall block end over end across the tiles. Stand it upright in the hole to finish.',
+    tips: [
+      'Swipe to tip the block over. Stand it upright on the hole to finish.',
+      "Don't let any part hang over the edge: the block topples off and that move is wasted.",
+      'Reach the hole in par moves or fewer for three stars. Undo is free.',
+      'Cracked squares hold a lying block, but break under a standing one.',
+      'Rolling onto a switch opens or closes the bridges of its colour.',
+      'A block lying down only goes into the hole once it stands up on it. Arrow keys and WASD work too; Z undoes.',
+      'A hint points the way a shortest route tips next. Each hint costs a star.',
+    ],
+  },
 };

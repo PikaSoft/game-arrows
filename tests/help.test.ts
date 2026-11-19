@@ -21,11 +21,12 @@ import { squeezeSpecFor } from '../src/games/squeeze/core/difficulty';
 import { starsSpecFor } from '../src/games/stars/core/difficulty';
 import { tonesSpecFor } from '../src/games/tones/core/difficulty';
 import { tentsSpecFor } from '../src/games/tents/core/difficulty';
+import { tumbleSpecFor } from '../src/games/tumble/core/difficulty';
 import { wordsSpecFor } from '../src/games/words/core/difficulty';
 import { buildLevel } from '../src/games/arrows/core/levels';
 import { HELP } from '../src/games/help';
 
-const IDS = ['arrows', 'sandglass', 'snake', 'snake-trails', 'squeeze', 'pipes', 'lines', 'crates', 'lights', 'ice', 'picture', 'numbers', 'tents', 'mines', 'bricks', 'stack', 'lanes', 'merge', 'words', 'stars', 'loop', 'fruit', 'raiders', 'codes', 'beams', 'tones', 'bridges', 'shapes', 'pairs', 'cages', 'pegs'];
+const IDS = ['arrows', 'sandglass', 'snake', 'snake-trails', 'squeeze', 'pipes', 'lines', 'crates', 'lights', 'ice', 'picture', 'numbers', 'tents', 'mines', 'bricks', 'stack', 'lanes', 'merge', 'words', 'stars', 'loop', 'fruit', 'raiders', 'codes', 'beams', 'tones', 'bridges', 'shapes', 'pairs', 'cages', 'pegs', 'tumble'];
 
 const SPECS: Record<string, (n: number) => { tip?: string }> = {
   beams: beamSpecFor,
@@ -49,6 +50,7 @@ const SPECS: Record<string, (n: number) => { tip?: string }> = {
   stars: starsSpecFor,
   tents: tentsSpecFor,
   tones: tonesSpecFor,
+  tumble: tumbleSpecFor,
   words: wordsSpecFor,
 };
 

@@ -21,6 +21,7 @@ import { createPegs } from './games/pegs/ui';
 import { createPicture } from './games/picture/ui';
 import { createTents } from './games/tents/ui';
 import { createTones } from './games/tones/ui';
+import { createTumble } from './games/tumble/ui';
 import { createWords } from './games/words/ui';
 import { createPipes } from './games/pipes/ui';
 import { createSandglass } from './games/sandglass/ui';
@@ -283,6 +284,7 @@ games.push(
   createPairs(shell),
   createCages(shell),
   createPegs(shell),
+  createTumble(shell),
 );
 
 document.addEventListener('keydown', (e) => {

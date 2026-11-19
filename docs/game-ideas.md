@@ -36,7 +36,7 @@ and art for each one and don't copy a specific existing game.
 | 22 | ~~[Layer Pairs](#22-layer-pairs)~~ | Match free tiles | Closest | Medium | **Built** (`src/games/pairs/`) |
 | 23 | ~~[Two Tones](#23-two-tones)~~ | Deduction | Logic | Small | **Built** (`src/games/tones/`) |
 | 24 | ~~[Peg Jump](#24-peg-jump)~~ | Jump puzzle | Closest | Small | **Built** (`src/games/pegs/`) |
-| 25 | [Tumble Block](#25-tumble-block) | Roll puzzle | Closest | Small to medium | |
+| 25 | ~~[Tumble Block](#25-tumble-block)~~ | Roll puzzle | Closest | Small to medium | **Built** (`src/games/tumble/`) |
 | 26 | [Cave Glider](#26-cave-glider) | One-tap flyer | Arcade | Small | |
 | 27 | ~~[Code Breaker](#27-code-breaker)~~ | Guess the code | Logic | Small | **Built** (`src/games/codes/`) |
 | 28 | [Pair Flip](#28-pair-flip) | Memory | Casual | Small | |
@@ -1078,6 +1078,13 @@ and stick to boards built backwards.
 ---
 
 ## 25. Tumble Block
+
+> **Built.** Tumble Block is in the collection (`src/games/tumble/`, route `#/tumble`). See
+> the README for how it ended up working. The main differences from the plan below: it is
+> drawn flat from above, with the block's height shown by its raised top and side (no
+> tilted view, so swipes always match the board's own axes); a fall wastes the move but
+> keeps the block where it was instead of restarting the level; and split tiles are left
+> out for now (two separate cubes would need their own moves and solver).
 
 **Idea.** A tall block (one square by two) stands on a path of tiles floating over
 nothing. Swipe to tip it over and roll it. Stand it upright on the hole to finish.
