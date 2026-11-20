@@ -14,7 +14,7 @@ interface Pop {
 const ABOVE = 0.46;
 const BELOW = 0.06;
 /** Spare width either side so the bucket's corners stay on screen when it leans. */
-const SIDE = 0.05;
+const SIDE = 0.09;
 const POP_MS = 380;
 const GROW_MS = 140;
 

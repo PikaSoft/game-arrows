@@ -23,7 +23,7 @@ export const DEALT_TIERS = 5;
 /** Bonus for popping two of the largest fruit. */
 export const POP_BONUS = 100;
 /** Most the bucket can lean when the phone is tipped, in degrees. */
-export const MAX_TILT_DEG = 4;
+export const MAX_TILT_DEG = 8;
 const MAX_TILT = (MAX_TILT_DEG * Math.PI) / 180;
 
 export const FRUITS = ['Blueberry', 'Raspberry', 'Lime', 'Plum', 'Lemon', 'Orange', 'Apple', 'Grapefruit', 'Coconut', 'Melon'] as const;
