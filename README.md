@@ -50,6 +50,7 @@ Real-time games pause while it is open.
 | Pair Flip | Turn cards over two at a time and find every matching pair. |
 | Fence Loop | Draw one closed fence along the dotted lines; each number counts its square's sides. |
 | Cave Glider | Hold to climb, let go to sink, through a winding cave. Endless. |
+| Hop Across | Hop a chick over a busy road and along logs in a stream to fill the nests. Endless. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -1689,6 +1690,49 @@ caps on 20 caves of 3,000 units, and fly a simple test pilot (hold when below th
 centre a moment ahead, let go when above) 3,000 units to top speed on every seed
 without touching a wall.
 
+## Hop Across
+
+A chick sets off from the bottom of the screen and hops up over a five-lane road, rests
+on the grass in the middle, then crosses a stream on drifting logs and lily pads to the
+nests on the far bank. Fill all four nests to go up a level; each level is a little
+faster. Endless: three lives for the whole game, and the best score is kept.
+
+### Rules
+
+- **Hopping:** swipe (or press an arrow key or WASD) to hop one cell that way; a tap or
+  Space hops forward. The first swipe starts the game. A hop pressed while the last one
+  is still in the air waits and then goes, so quick double swipes are never lost.
+- **Road:** cars and trucks cost a life. The middle bank and the start are safe.
+- **Stream:** stand on a log or lily pad and it carries you. Open water, or being
+  carried off the side, costs a life. On the water you hop from wherever you are; back
+  on land the chick lines up with the grid again.
+- **Lily pads:** from level 3 one river lane is a line of lily-pad rafts (two lanes from
+  level 7). Each raft wobbles for just under a second, then dips under for 1.2 s, every
+  5 s.
+- **Nests:** land in an empty nest. The hedge between nests, or a full nest, costs a
+  life.
+- **Time:** each life has 30 seconds, shown by the bar above the board.
+- **Points:** 10 for each row further up than the chick has been this life, 50 for a
+  nest plus 2 for every second left, and 200 for filling all four.
+- **Bests:** best score, furthest level and nests filled in total are kept. The pause
+  button (or P), opening a card or leaving the tab pauses the game.
+
+### Levels
+
+Level N's lanes are built from N as the seed (`src/games/hop/core/lanes.ts`), so level
+N is the same for everyone. Each lane runs its cars, logs or rafts round a loop longer
+than the board (the board plus four cells each side), so whatever leaves one side comes
+back on the other, and every position is a function of time alone. Lanes take turns
+going left and right. Lane speeds are multiplied by 1 + 0.1 per level, up to double at
+level 11. Road gaps are at least 2 cells and wider in faster lanes, with more trucks as
+the levels go on; river gaps are at most 3.2 cells, and logs get shorter at levels 4 and 6.
+
+The rules (`src/games/hop/core/sim.ts`) run in fixed steps of 1/120 s with no drawing
+or timing. Because the lanes depend only on time, a breadth-first search over 1/8 s
+beats (`src/games/hop/core/planner.ts`) finds a sure way into a nest, and following its
+plan plays out exactly. The tests use it to fill all four nests on levels 1 to 25
+without losing a life, and check the lane gaps on levels 1 to 40.
+
 ## Development
 
 ```bash
@@ -1700,7 +1744,7 @@ npm run build    # production build in dist/
 
 Built with Vite, TypeScript and Canvas 2D. There are no runtime dependencies. Progress
 and settings are stored in the browser's localStorage (`arrow-escape.v1`,
-`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1`, `shapes.v1`, `pairs.v1`, `cages.v1`, `pegs.v1`, `tumble.v1`, `flip.v1`, `fence.v1`, `glider.v1` and `pocket-puzzles.settings.v1`).
+`sandglass.v1`, `snake.v1`, `snake-trails.v1`, `squeeze.v1`, `pipes.v1`, `lines.v1`, `crates.v1`, `lights.v1`, `ice.v1`, `picture.v1`, `numbers.v1`, `tents.v1`, `mines.v1`, `bricks.v1`, `stack.v1`, `lanes.v1`, `merge.v1`, `words.v1`, `stars.v1`, `loop.v1`, `fruit.v1`, `codes.v1`, `beams.v1`, `tones.v1`, `bridges.v1`, `shapes.v1`, `pairs.v1`, `cages.v1`, `pegs.v1`, `tumble.v1`, `flip.v1`, `fence.v1`, `glider.v1`, `hop.v1` and `pocket-puzzles.settings.v1`).
 
 ### Layout
 

@@ -372,4 +372,17 @@ export const HELP: Record<string, Help> = {
       'Space, Up or W work as hold too. P (or the pause button) pauses; so does leaving the tab or opening a card.',
     ],
   },
+  hop: {
+    goal: 'Hop a chick across the road and the stream into the nests on the far bank. Fill all four nests to go up a level. You have three lives.',
+    tips: [
+      'Swipe or use the arrow keys to hop. A tap hops forward. Swipe to start.',
+      'Cars and trucks are dangerous; the grass in the middle and at the start is safe.',
+      'In the stream, stand on logs and lily pads; they carry you along. The water, or being carried off the side, costs a life.',
+      'Lily pads with a wobble are about to dip under for a moment. Get off them in time.',
+      'Land right in an empty nest. The hedge between nests, or a nest already full, costs a life.',
+      'Each life has 30 seconds, shown by the bar above the board. Seconds left when you reach a nest are worth extra points.',
+      'Points: 10 for each new row, 50 for a nest, and 200 for filling every nest. Each level is a little faster.',
+      'P (or the pause button) pauses; so does leaving the tab or opening a card.',
+    ],
+  },
 };
