@@ -202,6 +202,7 @@ export function createHop(shell: Shell): GameModule {
 
   // ---------- Input ----------
   // Swipe (or arrow keys, WASD) to hop that way; a tap hops forward. The first one starts.
+  // One swipe is one hop: a long drag doesn't keep hopping.
   function hop(d: Dir) {
     const s = sim;
     if (!s || phase === 'over' || modalOpen()) return;
@@ -221,7 +222,7 @@ export function createHop(shell: Shell): GameModule {
     renderer.hop(s.lastDir);
     sfx.blip();
   }
-  attachSwipe($('#ha-stage'), (d) => hop(d as Dir), () => hop(0));
+  attachSwipe($('#ha-stage'), (d) => hop(d as Dir), () => hop(0), { once: true });
   document.addEventListener('keydown', (e) => {
     if (!sim || !$('#ha-game').classList.contains('active') || modalOpen()) return;
     const d = keyDir(e.key);

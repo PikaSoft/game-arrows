@@ -7,8 +7,14 @@ const SWIPE_PX = 18;
  * Swipe anywhere on `el` to steer. A turn fires as soon as the finger has moved far enough,
  * then the anchor moves to the finger, so one continuous drag can make several turns.
  * A press that never moved far enough is a tap.
+ * With `once`, a press makes at most one move: the finger has to lift before the next swipe.
  */
-export function attachSwipe(el: HTMLElement, onDir: (d: Dir) => void, onTap: () => void): void {
+export function attachSwipe(
+  el: HTMLElement,
+  onDir: (d: Dir) => void,
+  onTap: () => void,
+  opts: { once?: boolean } = {},
+): void {
   let press: { id: number; x: number; y: number; moved: boolean } | null = null;
   el.addEventListener('pointerdown', (e) => {
     if (press) return;
@@ -21,6 +27,7 @@ export function attachSwipe(el: HTMLElement, onDir: (d: Dir) => void, onTap: () 
   });
   el.addEventListener('pointermove', (e) => {
     if (!press || press.id !== e.pointerId) return;
+    if (opts.once && press.moved) return;
     const dx = e.clientX - press.x;
     const dy = e.clientY - press.y;
     if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_PX) return;
