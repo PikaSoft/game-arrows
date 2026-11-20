@@ -244,6 +244,7 @@ export const HELP: Record<string, Help> = {
       'Each colour has its own shape, so you can play without telling colours apart.',
       'The bulb fills the row with a code that fits every answer so far. Each hint costs a star.',
       'Guesses fill from the bottom up. Long press a filled slot to lock it in: it fills itself on every guess after. Long press again (or press L) to unlock.',
+      'Long press a colour below the board to grey it out once you know it is not in the code. Long press again (or Shift and its number) to bring it back.',
     ],
   },
   beams: {
