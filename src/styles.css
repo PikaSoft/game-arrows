@@ -213,6 +213,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
   box-shadow: 0 4px 16px rgba(0,0,0,0.2); text-align: center;
 }
 
+/* Hop Across: the time bar for the current life, and the lives in the HUD. */
+.hop-time { height: 6px; margin: 4px 12px 2px; border-radius: 999px; background: color-mix(in srgb, var(--line) 15%, transparent); overflow: hidden; }
+.hop-time i { display: block; height: 100%; width: 100%; background: var(--accent); border-radius: inherit; transition: width 0.1s linear; }
+.hop-time i.low { background: var(--danger, #c9473d); }
+.hop-lives { color: var(--heart, #e0475b); letter-spacing: 1px; }
+
 /* Picture Grid: the Fill / Cross switch under the board. */
 .mode-bar { display: flex; justify-content: center; align-items: center; padding: 6px 0 calc(10px + env(safe-area-inset-bottom)); }
 
