@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { BOUNCE_LEVELS, FruitSim, H, MAX_TILT_DEG, OVERFLOW_S, POP_BONUS, RADII, STEP_HZ, TOP_TIER, W, pointsFor } from '../src/games/fruit/core/sim';
 import { sidewaysTip, tiltFromPhone } from '../src/games/fruit/game/tilt';
+import { SHAKE_MIN, shakeStrength } from '../src/games/fruit/game/shake';
 import { FRUIT_KEY, loadFruit, noteBests, recordGame, resetFruit, saveFruit } from '../src/games/fruit/game/storage';
 
 /** Run the bucket for a while. */
@@ -211,16 +212,16 @@ describe('storage', () => {
       removeItem: (k: string) => mem.delete(k),
     };
     const p = loadFruit();
-    expect(p).toEqual({ bestScore: 0, bestFruit: -1, games: 0, saved: null, bounce: 'low', tilt: true });
+    expect(p).toEqual({ bestScore: 0, bestFruit: -1, games: 0, saved: null, bounce: 'low', tilt: true, shake: true });
     p.saved = new FruitSim(1).save();
     saveFruit(p);
     expect(loadFruit().saved?.seed).toBe(1);
     noteBests(p, 30, 4);
     recordGame(p, 20, 6);
-    expect(p).toEqual({ bestScore: 30, bestFruit: 6, games: 1, saved: null, bounce: 'low', tilt: true });
+    expect(p).toEqual({ bestScore: 30, bestFruit: 6, games: 1, saved: null, bounce: 'low', tilt: true, shake: true });
     expect(JSON.parse(mem.get(FRUIT_KEY)!).bestScore).toBe(30);
     resetFruit(p);
-    expect(loadFruit()).toEqual({ bestScore: 0, bestFruit: -1, games: 0, saved: null, bounce: 'low', tilt: true });
+    expect(loadFruit()).toEqual({ bestScore: 0, bestFruit: -1, games: 0, saved: null, bounce: 'low', tilt: true, shake: true });
   });
 });
 
@@ -348,5 +349,47 @@ describe('tilt', () => {
     expect(sidewaysTip({ beta: 10, gamma: 0 }, 270)).toBeCloseTo(-10);
     expect(sidewaysTip({ beta: 0, gamma: 10 }, 180)).toBeCloseTo(-10);
     expect(sidewaysTip({ beta: null, gamma: 10 }, 0)).toBeNull();
+  });
+});
+
+describe('shake', () => {
+  test('a shake makes landed fruit hop, then they settle again', () => {
+    const sim = new FruitSim(1);
+    dropTier(sim, 2, 0.3);
+    dropTier(sim, 4, 0.7);
+    run(sim, 4);
+    const before = sim.bodies.map((b) => b.y);
+    sim.shake(1);
+    let lowest = Infinity;
+    for (let i = 0; i < STEP_HZ / 2; i++) {
+      sim.step();
+      lowest = Math.min(lowest, ...sim.bodies.map((b, k) => b.y - before[k]));
+    }
+    expect(lowest).toBeLessThan(-0.02);
+    // A little, not a launch: nothing leaves the bucket.
+    expect(lowest).toBeGreaterThan(-0.4);
+    run(sim, 6);
+    expect(speed(sim)).toBeLessThan(0.05);
+    expect(sim.over).toBe(false);
+  });
+
+  test('a falling fruit is not kicked, and a weak or bad shake does nothing', () => {
+    const sim = new FruitSim(1);
+    dropTier(sim, 1, 0.5);
+    const [b] = sim.bodies;
+    sim.shake(1);
+    expect(b.vy).toBe(0);
+    b.landed = true;
+    sim.shake(0);
+    sim.shake(NaN);
+    expect(b.vy).toBe(0);
+  });
+
+  test('gentle movement is not a shake; harder shakes are stronger', () => {
+    expect(shakeStrength(SHAKE_MIN - 1)).toBe(0);
+    expect(shakeStrength(NaN)).toBe(0);
+    expect(shakeStrength(SHAKE_MIN)).toBeGreaterThan(0);
+    expect(shakeStrength(SHAKE_MIN + 10)).toBeGreaterThan(shakeStrength(SHAKE_MIN));
+    expect(shakeStrength(1000)).toBe(1);
   });
 });

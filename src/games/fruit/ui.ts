@@ -4,6 +4,7 @@ import { BOUNCE_LEVELS, BounceLevel, FRUITS, FruitSim, SavedFruit, STEP_HZ, Step
 import { FruitProgress, loadFruit, noteBests, recordGame, resetFruit, saveFruit } from './game/storage';
 import { FruitRenderer } from './render/renderer';
 import { PhoneTilt } from './game/tilt';
+import { PhoneShake } from './game/shake';
 
 /** How far one press of an arrow key moves the fruit in hand (bucket widths). */
 const KEY_STEP = 0.04;
@@ -82,10 +83,12 @@ export function createFruit(shell: Shell): GameModule {
   }
   $('#fd-play').addEventListener('click', () => {
     tilt.ask();
+    shaker.ask();
     begin(null);
   });
   $('#fd-continue').addEventListener('click', () => {
     tilt.ask();
+    shaker.ask();
     begin(progress.saved);
   });
   $('#fd-back').addEventListener('click', () => {
@@ -127,6 +130,13 @@ export function createFruit(shell: Shell): GameModule {
   /** Tipping the phone leans the bucket a few degrees. */
   const tilt = new PhoneTilt();
   let lean = 0;
+  /** Shaking the phone makes the landed fruit hop. */
+  const shaker = new PhoneShake((strength) => {
+    const s = sim;
+    if (!s || s.over || !progress.shake || modalOpen() || document.visibilityState !== 'visible') return;
+    s.shake(strength);
+    shell.vibrate(10);
+  });
 
   function begin(saved: SavedFruit | null) {
     closeModal();
@@ -140,6 +150,7 @@ export function createFruit(shell: Shell): GameModule {
     lean = 0;
     sim.setTilt(0);
     tilt.start();
+    shaker.start();
     acc = 0;
     last = performance.now();
     show('game');
@@ -153,6 +164,7 @@ export function createFruit(shell: Shell): GameModule {
     cancelAnimationFrame(raf);
     raf = 0;
     tilt.stop();
+    shaker.stop();
   }
 
   /** Keep the game in progress so it can be continued later. */
@@ -250,6 +262,7 @@ export function createFruit(shell: Shell): GameModule {
   stage.addEventListener('pointerdown', (e) => {
     if (e.button > 0 || !sim || sim.over) return;
     tilt.ask();
+    shaker.ask();
     aiming = e.pointerId;
     try {
       stage.setPointerCapture(e.pointerId);
@@ -339,13 +352,20 @@ export function createFruit(shell: Shell): GameModule {
       html: `<div class="setting"><span>Bounciness</span><select class="select" id="fd-bounce">${BOUNCE_OPTIONS.map(
         ([id, label]) => `<option value="${id}" ${id === progress.bounce ? 'selected' : ''}>${label}</option>`,
       ).join('')}</select></div>
-      <div class="setting"><span>Tip phone to lean bucket</span><button class="switch" role="switch" id="fd-tilt" aria-checked="${progress.tilt}"></button></div>`,
+      <div class="setting"><span>Tip phone to lean bucket</span><button class="switch" role="switch" id="fd-tilt" aria-checked="${progress.tilt}"></button></div>
+      <div class="setting"><span>Shake phone to bounce fruit</span><button class="switch" role="switch" id="fd-shake" aria-checked="${progress.shake}"></button></div>`,
       bind: (card) => {
         card.querySelector<HTMLButtonElement>('#fd-tilt')!.addEventListener('click', (e) => {
           progress.tilt = !progress.tilt;
           (e.currentTarget as HTMLElement).setAttribute('aria-checked', String(progress.tilt));
           saveFruit(progress);
           if (progress.tilt) tilt.ask();
+        });
+        card.querySelector<HTMLButtonElement>('#fd-shake')!.addEventListener('click', (e) => {
+          progress.shake = !progress.shake;
+          (e.currentTarget as HTMLElement).setAttribute('aria-checked', String(progress.shake));
+          saveFruit(progress);
+          if (progress.shake) shaker.ask();
         });
         card.querySelector<HTMLSelectElement>('#fd-bounce')!.addEventListener('change', (e) => {
           const v = (e.target as HTMLSelectElement).value;
