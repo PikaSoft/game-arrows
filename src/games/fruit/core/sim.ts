@@ -25,6 +25,8 @@ export const POP_BONUS = 100;
 /** Most the bucket can lean when the phone is tipped, in degrees. */
 export const MAX_TILT_DEG = 8;
 const MAX_TILT = (MAX_TILT_DEG * Math.PI) / 180;
+/** Upward speed a full-strength shake gives a fruit (bucket depths per second). */
+export const SHAKE_KICK = 1.1;
 
 export const FRUITS = ['Blueberry', 'Raspberry', 'Lime', 'Plum', 'Lemon', 'Orange', 'Apple', 'Grapefruit', 'Coconut', 'Melon'] as const;
 export const RADII = [0.042, 0.054, 0.068, 0.084, 0.103, 0.126, 0.153, 0.186, 0.222, 0.262] as const;
@@ -118,6 +120,8 @@ export class FruitSim {
   private cooldown = 0;
   /** Steps a landed fruit has been above the rim without a break. */
   private overflow = 0;
+  /** Shakes so far, which varies how each one scatters the fruit. */
+  private shakes = 0;
 
   constructor(readonly seed: number) {
     this.rng = new Rng(seed);
@@ -134,6 +138,26 @@ export class FruitSim {
   setTilt(rad: number): void {
     if (!Number.isFinite(rad)) return;
     this.tilt = Math.max(-MAX_TILT, Math.min(MAX_TILT, rad));
+  }
+
+  /**
+   * Jolt the bucket, as when the phone is shaken: every fruit that has landed hops up a
+   * little, with a small push to one side. `strength` runs from 0 to 1. Small fruit hop a
+   * touch higher than big ones. A live input, so it does not change what fruit are dealt.
+   */
+  shake(strength: number): void {
+    if (this.over || !Number.isFinite(strength) || strength <= 0) return;
+    const k = Math.min(1, strength) * SHAKE_KICK;
+    this.shakes++;
+    for (const b of this.bodies) {
+      if (!b.landed) continue;
+      // A spread that differs per fruit and per shake, without touching the dealing rng.
+      const h = (((b.id * 0.618034 + this.shakes * 0.414214) % 1) + 1) % 1;
+      const light = 1 - 0.35 * (b.tier / TOP_TIER);
+      b.vy -= k * light * (0.7 + 0.3 * h);
+      b.vx += k * light * (h - 0.5) * 0.5;
+      b.spin += (h - 0.5) * 6 * k;
+    }
   }
 
   /** True when a fruit is in hand and can be dropped. */
