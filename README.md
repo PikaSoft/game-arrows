@@ -1092,6 +1092,10 @@ they never say which pegs they mean. Find the code in as few guesses as you can.
   the next empty slot. Tap a slot to select it, and tap it again to empty it. The undo
   button clears the last peg. Check is enabled once the row is full. On a keyboard, keys
   1 to 8 pick colours, Backspace clears, the arrow keys move the selection and Enter checks.
+- **Ruling out colours:** long press a colour in the palette to grey it out and cross it
+  through once you know it is not in the code; long press again to bring it back. Shift
+  plus its number key does the same. It is only a note: a greyed colour can still be
+  placed. The marks clear when the level restarts.
 - **Colour-blind play:** every colour also has its own white shape (dot, triangle, square,
   diamond, plus, ring, bar, cross).
 - **Repeats:** from level 10, most codes may use a colour more than once. Guesses may

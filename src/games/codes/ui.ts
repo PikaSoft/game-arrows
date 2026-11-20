@@ -123,6 +123,8 @@ export function createCodes(shell: Shell): GameModule {
   let loadToken = 0;
   let lastTick = performance.now();
   let winShown = false;
+  /** Colours the player has greyed out on the palette as not in the code. */
+  const ruledOut = new Set<number>();
 
   async function startLevel(n: number) {
     closeModal();
@@ -154,12 +156,20 @@ export function createCodes(shell: Shell): GameModule {
     winShown = false;
     lastTick = performance.now();
     $('#cb-tip').textContent = level.tip ?? '';
-    $('#cb-palette').innerHTML = Array.from(
-      { length: level.colours },
-      (_, c) => `<button class="cb-peg-btn" data-colour="${c}" aria-label="${PEG_NAMES[c]} (key ${c + 1})">${pegSvg(c)}</button>`,
-    ).join('');
+    ruledOut.clear();
+    renderPalette();
     $('#cb-palette').style.setProperty('--cols', String(Math.ceil(level.colours / (level.colours > 6 ? 2 : 1))));
     render();
+  }
+
+  function renderPalette() {
+    if (!session) return;
+    $('#cb-palette').innerHTML = Array.from({ length: session.level.colours }, (_, c) => {
+      const out = ruledOut.has(c);
+      return `<button class="cb-peg-btn${out ? ' out' : ''}" data-colour="${c}" aria-label="${PEG_NAMES[c]} (key ${c + 1})${
+        out ? ', ruled out' : ''
+      }">${pegSvg(c)}</button>`;
+    }).join('');
   }
 
   /**
@@ -269,19 +279,66 @@ export function createCodes(shell: Shell): GameModule {
     render();
   }
 
-  $('#cb-palette').addEventListener('click', (e) => {
+  /**
+   * Long press on anything matching `selector` inside `el` calls `onLong`. Returns a function the
+   * click handler calls first: it is true (once) when the click ends a long press and should be ignored.
+   */
+  const LONG_PRESS_MS = 450;
+  function longPress(el: HTMLElement, selector: string, onLong: (target: HTMLElement) => void): () => boolean {
+    let timer = 0;
+    let start: { x: number; y: number } | null = null;
+    let suppress = false;
+    const cancel = () => {
+      clearTimeout(timer);
+      start = null;
+    };
+    el.addEventListener('pointerdown', (e) => {
+      suppress = false;
+      cancel();
+      const t = (e.target as HTMLElement).closest<HTMLElement>(selector);
+      if (!t || !session || modalOpen()) return;
+      start = { x: e.clientX, y: e.clientY };
+      timer = window.setTimeout(() => {
+        start = null;
+        suppress = true;
+        onLong(t);
+      }, LONG_PRESS_MS);
+    });
+    el.addEventListener('pointermove', (e) => {
+      if (start && Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10) cancel();
+    });
+    for (const ev of ['pointerup', 'pointercancel', 'pointerleave'] as const) el.addEventListener(ev, cancel);
+    el.addEventListener('contextmenu', (e) => {
+      if ((e.target as HTMLElement).closest(selector)) e.preventDefault();
+    });
+    return () => {
+      const s = suppress;
+      suppress = false;
+      return s;
+    };
+  }
+
+  // A long press on a palette colour greys it out as ruled out (or brings it back). It is only a
+  // note for the player: a ruled-out colour can still be placed.
+  function toggleRuledOut(colour: number) {
+    if (!session || modalOpen()) return;
+    const out = !ruledOut.has(colour);
+    if (out) ruledOut.add(colour);
+    else ruledOut.delete(colour);
+    sfx.unlock();
+    sfx.blip();
+    shell.vibrate(out ? [10, 40, 10] : 10);
+    renderPalette();
+  }
+  const palette = $('#cb-palette');
+  const paletteLongPressed = longPress(palette, '[data-colour]', (b) => toggleRuledOut(Number(b.dataset.colour)));
+  palette.addEventListener('click', (e) => {
+    if (paletteLongPressed()) return;
     const b = (e.target as HTMLElement).closest<HTMLElement>('[data-colour]');
     if (b) place(Number(b.dataset.colour));
   });
+
   // A long press on a filled slot locks it in (or unlocks it); locked colours fill the next guess.
-  const LONG_PRESS_MS = 450;
-  let pressTimer = 0;
-  let pressStart: { x: number; y: number } | null = null;
-  let suppressClick = false;
-  const cancelPress = () => {
-    clearTimeout(pressTimer);
-    pressStart = null;
-  };
   function toggleLock(i: number) {
     const s = session;
     if (!s || modalOpen() || !s.toggleLock(i)) return;
@@ -291,31 +348,9 @@ export function createCodes(shell: Shell): GameModule {
     render();
   }
   const board = $('#cb-board');
-  board.addEventListener('pointerdown', (e) => {
-    suppressClick = false;
-    cancelPress();
-    const b = (e.target as HTMLElement).closest<HTMLElement>('[data-slot]');
-    if (!b || !session || modalOpen()) return;
-    const i = Number(b.dataset.slot);
-    pressStart = { x: e.clientX, y: e.clientY };
-    pressTimer = window.setTimeout(() => {
-      pressStart = null;
-      suppressClick = true;
-      toggleLock(i);
-    }, LONG_PRESS_MS);
-  });
-  board.addEventListener('pointermove', (e) => {
-    if (pressStart && Math.hypot(e.clientX - pressStart.x, e.clientY - pressStart.y) > 10) cancelPress();
-  });
-  for (const ev of ['pointerup', 'pointercancel', 'pointerleave'] as const) board.addEventListener(ev, cancelPress);
-  board.addEventListener('contextmenu', (e) => {
-    if ((e.target as HTMLElement).closest('[data-slot]')) e.preventDefault();
-  });
+  const boardLongPressed = longPress(board, '[data-slot]', (b) => toggleLock(Number(b.dataset.slot)));
   board.addEventListener('click', (e) => {
-    if (suppressClick) {
-      suppressClick = false;
-      return;
-    }
+    if (boardLongPressed()) return;
     const b = (e.target as HTMLElement).closest<HTMLElement>('[data-slot]');
     const s = session;
     if (!b || !s || modalOpen()) return;
@@ -346,6 +381,9 @@ export function createCodes(shell: Shell): GameModule {
       e.preventDefault();
     } else if (e.key === 'Backspace' || e.key === 'Delete') {
       erase();
+      e.preventDefault();
+    } else if (e.shiftKey && /^Digit[1-8]$/.test(e.code) && Number(e.code.slice(5)) <= s.level.colours) {
+      toggleRuledOut(Number(e.code.slice(5)) - 1);
       e.preventDefault();
     } else if (e.key === 'l' || e.key === 'L') {
       toggleLock(s.cursor);
