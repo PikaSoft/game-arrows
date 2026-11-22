@@ -222,7 +222,7 @@ function sweepIdle(delayMs: number) {
   const gap = Math.max(30, Math.min(90, 1500 / list.length));
   list.forEach(({ arrow, distToEdge }, i) => {
     const at = delayMs + i * gap;
-    renderer.addExit(arrow, distToEdge, at, 450);
+    renderer.addExit(arrow, distToEdge, at);
     if (i < 12) setTimeout(() => sfx.whoosh(0.08), at);
   });
   if (s.shouldAutoFinish()) autoFinish();
@@ -237,7 +237,7 @@ function autoFinish() {
   // whole sequence stays under about two and a half seconds.
   const gap = Math.max(45, Math.min(120, 2500 / Math.max(1, list.length)));
   list.forEach(({ arrow, distToEdge }, i) => {
-    renderer.addExit(arrow, distToEdge, i * gap, 450);
+    renderer.addExit(arrow, distToEdge, i * gap);
     setTimeout(() => sfx.whoosh(0.12), i * gap);
   });
   if (list.length) toast('All clear! Finishing up…');
