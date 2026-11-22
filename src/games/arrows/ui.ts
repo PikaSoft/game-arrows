@@ -166,6 +166,7 @@ function beginSession(level: Level) {
   renderer.setBoard(session.board);
   renderer.resize();
   $('#tip').textContent = level.tip ?? '';
+  sweepIdle(250);
   updateHud();
   updateFitButton();
 }
@@ -200,6 +201,7 @@ function handleTap(x: number, y: number) {
     renderer.addExit(res.arrow, res.distToEdge);
     renderer.hintId = s.hintId;
     sfx.whoosh();
+    sweepIdle(120);
     if (s.shouldAutoFinish()) autoFinish();
     updateHud();
   } else if (res.kind === 'blocked') {
@@ -209,6 +211,21 @@ function handleTap(x: number, y: number) {
     updateHud(res.lostHeart);
     if (res.outOfHearts) setTimeout(showOutOfHearts, 450);
   }
+}
+
+/** Send off arrows that are free and in nobody's way, after a short pause. */
+function sweepIdle(delayMs: number) {
+  const s = session!;
+  const list = s.sweepIdle();
+  if (!list.length) return;
+  renderer.hintId = s.hintId;
+  const gap = Math.max(30, Math.min(90, 1500 / list.length));
+  list.forEach(({ arrow, distToEdge }, i) => {
+    const at = delayMs + i * gap;
+    renderer.addExit(arrow, distToEdge, at, 450);
+    if (i < 12) setTimeout(() => sfx.whoosh(0.08), at);
+  });
+  if (s.shouldAutoFinish()) autoFinish();
 }
 
 function autoFinish() {

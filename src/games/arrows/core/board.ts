@@ -70,6 +70,29 @@ export class Board {
     return out;
   }
 
+  /** Ids of arrows that sit anywhere in another arrow's exit line, so are in its way. */
+  blocking(): Set<number> {
+    const out = new Set<number>();
+    for (const a of this.arrows.values()) {
+      const head = a.cells[a.cells.length - 1];
+      const d = DELTA[a.dir];
+      for (let x = head.x + d.x, y = head.y + d.y; this.inside(x, y); x += d.x, y += d.y) {
+        const id = this.grid[y * this.w + x];
+        if (id !== -1 && id !== a.id) out.add(id);
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Free arrows that are in no other arrow's way. Taking them off changes nothing for
+   * the rest of the board, so the game clears them on its own.
+   */
+  idleArrows(): Arrow[] {
+    const blocking = this.blocking();
+    return this.freeArrows().filter((a) => !blocking.has(a.id));
+  }
+
   remove(id: number): Arrow | undefined {
     const a = this.arrows.get(id);
     if (!a) return undefined;

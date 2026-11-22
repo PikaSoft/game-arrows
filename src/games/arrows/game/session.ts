@@ -80,6 +80,19 @@ export class Session {
     return d;
   }
 
+  /**
+   * Remove every arrow that is free and in no other arrow's way. Removing one of them
+   * never frees or unblocks anything else, so a single pass catches them all. Tutorials
+   * are left alone so new players get to tap every arrow themselves.
+   */
+  sweepIdle(): { arrow: Arrow; distToEdge: number }[] {
+    if (this.autoFinishing || this.level.difficulty === 'Tutorial') return [];
+    const idle = this.board.idleArrows();
+    // Nearest to the edge first, as in auto-finish.
+    idle.sort((a, b) => this.board.distToEdge(a) - this.board.distToEdge(b));
+    return idle.map((a) => ({ arrow: a, distToEdge: this.exit(a) }));
+  }
+
   /** True when arrows remain and every one of them can leave now. */
   shouldAutoFinish(): boolean {
     return this.remaining > 0 && this.freeCount === this.remaining;
