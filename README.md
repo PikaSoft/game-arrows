@@ -67,6 +67,8 @@ following its own path. Clear every arrow to finish the level.
 - **Out of hearts:** keep going for no stars, or restart.
 - **Stars** equal the hearts left when the board is cleared.
 - **Auto-finish:** once every remaining arrow is free, the rest leave on their own.
+- **Auto-clear:** from level 6 on, any arrow that can leave and is not in another arrow's
+  way leaves on its own, at the start and after every move. Only arrows that matter stay.
 - **Hints:** 3 per level. Each one highlights an arrow that can leave now (preferring
   one that unblocks others).
 - **HUD:** shows how many arrows are free right now and how many are left, plus a timer

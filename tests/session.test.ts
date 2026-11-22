@@ -53,4 +53,42 @@ describe('session', () => {
     expect(s.hints).toBe(0);
     expect(s.useHint()).toBeNull();
   });
+
+  test('free arrows in nobody\'s way clear themselves', () => {
+    const s = new Session(level);
+    expect(s.board.idleArrows().map((a) => a.id)).toEqual([3]);
+    // Arrow 2 is free but blocks 1, so it stays for the player.
+    expect(s.sweepIdle().map((r) => r.arrow.id)).toEqual([3]);
+    expect(s.remaining).toBe(3);
+    expect(s.sweepIdle()).toEqual([]);
+    // Freeing 1 leaves it blocking 0; removing 1 then frees 0, which blocks no one.
+    s.tap(2);
+    expect(s.sweepIdle()).toEqual([]);
+    s.tap(1);
+    expect(s.sweepIdle().map((r) => r.arrow.id)).toEqual([0]);
+    expect(s.won).toBe(true);
+  });
+
+  test('an arrow counts as blocking even behind a nearer blocker', () => {
+    // 0 points right at 1 then 2; 1 and 2 point up and are free.
+    const s = new Session({
+      number: 98,
+      w: 4,
+      h: 2,
+      difficulty: 'Easy',
+      arrows: [
+        { id: 0, cells: [{ x: 0, y: 1 }], dir: 'R' },
+        { id: 1, cells: [{ x: 1, y: 1 }], dir: 'U' },
+        { id: 2, cells: [{ x: 2, y: 1 }], dir: 'U' },
+        { id: 3, cells: [{ x: 3, y: 0 }], dir: 'U' },
+      ],
+    });
+    expect(s.sweepIdle().map((r) => r.arrow.id)).toEqual([3]);
+  });
+
+  test('tutorials are not swept', () => {
+    const s = new Session({ ...level, difficulty: 'Tutorial' });
+    expect(s.sweepIdle()).toEqual([]);
+    expect(s.remaining).toBe(4);
+  });
 });
