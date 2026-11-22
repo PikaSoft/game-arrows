@@ -19,6 +19,8 @@ export class Session {
   continued = false;
   /** Player input is locked while the remaining arrows auto-finish. */
   autoFinishing = false;
+  /** True once the player has sent off an arrow themselves. Nothing leaves on its own before then. */
+  playerMoved = false;
   elapsedMs = 0;
   hintId: number | null = null;
   private freeCache: number | null = null;
@@ -60,7 +62,10 @@ export class Session {
     const arrow = this.board.arrows.get(id);
     if (!arrow) return { kind: 'none' };
     const block = this.board.blocker(arrow);
-    if (!block) return { kind: 'exit', arrow, distToEdge: this.exit(arrow) };
+    if (!block) {
+      this.playerMoved = true;
+      return { kind: 'exit', arrow, distToEdge: this.exit(arrow) };
+    }
     const lostHeart = this.hearts > 0 && !this.continued;
     if (lostHeart) this.hearts--;
     return {
@@ -83,19 +88,20 @@ export class Session {
   /**
    * Remove every arrow that is free and in no other arrow's way. Removing one of them
    * never frees or unblocks anything else, so a single pass catches them all. Tutorials
-   * are left alone so new players get to tap every arrow themselves.
+   * are left alone so new players get to tap every arrow themselves, and nothing is
+   * swept until the player has removed at least one arrow on their own.
    */
   sweepIdle(): { arrow: Arrow; distToEdge: number }[] {
-    if (this.autoFinishing || this.level.difficulty === 'Tutorial') return [];
+    if (!this.playerMoved || this.autoFinishing || this.level.difficulty === 'Tutorial') return [];
     const idle = this.board.idleArrows();
     // Nearest to the edge first, as in auto-finish.
     idle.sort((a, b) => this.board.distToEdge(a) - this.board.distToEdge(b));
     return idle.map((a) => ({ arrow: a, distToEdge: this.exit(a) }));
   }
 
-  /** True when arrows remain and every one of them can leave now. */
+  /** True when the player has made a move, arrows remain and every one of them can leave now. */
   shouldAutoFinish(): boolean {
-    return this.remaining > 0 && this.freeCount === this.remaining;
+    return this.playerMoved && this.remaining > 0 && this.freeCount === this.remaining;
   }
 
   /** Remove all remaining arrows (they are all free). Returns them with exit distances. */

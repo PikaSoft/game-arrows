@@ -57,13 +57,15 @@ describe('session', () => {
   test('free arrows in nobody\'s way clear themselves', () => {
     const s = new Session(level);
     expect(s.board.idleArrows().map((a) => a.id)).toEqual([3]);
-    // Arrow 2 is free but blocks 1, so it stays for the player.
-    expect(s.sweepIdle().map((r) => r.arrow.id)).toEqual([3]);
-    expect(s.remaining).toBe(3);
+    // Nothing is swept until the player removes an arrow themselves.
     expect(s.sweepIdle()).toEqual([]);
-    // Freeing 1 leaves it blocking 0; removing 1 then frees 0, which blocks no one.
+    expect(s.remaining).toBe(4);
+    // Arrow 2 is free but blocks 1, so it stays for the player; 3 blocks no one.
     s.tap(2);
+    expect(s.sweepIdle().map((r) => r.arrow.id)).toEqual([3]);
+    expect(s.remaining).toBe(2);
     expect(s.sweepIdle()).toEqual([]);
+    // Removing 1 frees 0, which blocks no one.
     s.tap(1);
     expect(s.sweepIdle().map((r) => r.arrow.id)).toEqual([0]);
     expect(s.won).toBe(true);
@@ -81,9 +83,29 @@ describe('session', () => {
         { id: 1, cells: [{ x: 1, y: 1 }], dir: 'U' },
         { id: 2, cells: [{ x: 2, y: 1 }], dir: 'U' },
         { id: 3, cells: [{ x: 3, y: 0 }], dir: 'U' },
+        { id: 4, cells: [{ x: 0, y: 0 }], dir: 'U' },
       ],
     });
+    s.tap(4);
     expect(s.sweepIdle().map((r) => r.arrow.id)).toEqual([3]);
+  });
+
+  test('nothing auto-finishes before the player has moved', () => {
+    const s = new Session({
+      number: 97,
+      w: 3,
+      h: 1,
+      difficulty: 'Easy',
+      arrows: [
+        { id: 0, cells: [{ x: 0, y: 0 }], dir: 'U' },
+        { id: 1, cells: [{ x: 2, y: 0 }], dir: 'U' },
+      ],
+    });
+    expect(s.freeCount).toBe(2);
+    expect(s.shouldAutoFinish()).toBe(false);
+    expect(s.sweepIdle()).toEqual([]);
+    s.tap(0);
+    expect(s.shouldAutoFinish()).toBe(true);
   });
 
   test('tutorials are not swept', () => {
