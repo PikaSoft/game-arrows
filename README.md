@@ -51,6 +51,7 @@ Real-time games pause while it is open.
 | Fence Loop | Draw one closed fence along the dotted lines; each number counts its square's sides. |
 | Cave Glider | Hold to climb, let go to sink, through a winding cave. Endless. |
 | Hop Across | Hop a chick over a busy road and along logs in a stream to fill the nests. Endless. |
+| Block Fall | Steer falling pieces of four blocks; full rows clear. Endless. |
 
 Ideas for more games, with notes on building each one, are in
 [docs/game-ideas.md](docs/game-ideas.md).
@@ -1738,6 +1739,44 @@ or timing. Because the lanes depend only on time, a breadth-first search over 1/
 beats (`src/games/hop/core/planner.ts`) finds a sure way into a nest, and following its
 plan plays out exactly. The tests use it to fill all four nests on levels 1 to 25
 without losing a life, and check the lane gaps on levels 1 to 40.
+
+## Block Fall
+
+Pieces of four blocks fall one at a time into a well 10 wide and 20 tall. Move and turn
+each one as it falls; a row filled from side to side clears and everything above drops
+down. Endless: the game ends when a new piece has no room at the top, and the best score
+is kept.
+
+### Rules
+
+- **Pieces:** the seven shapes of four blocks. They come in shuffled sets of seven, so
+  every shape turns up once in each set and none is ever kept away for long. Next shows
+  the coming three.
+- **Touch:** drag sideways to move one column per block width, drag down to drop faster
+  (1 point a row), flick down to drop at once (2 points a row), and flick up to hold. A
+  tap turns the piece clockwise; a tap on the left third turns it anticlockwise. The first
+  step of a drag fixes it as sideways or downward, so moving never drops the piece by
+  accident.
+- **Keys:** arrows or A/D move, Up, W or X turns, Z turns back, Down drops faster, Space
+  drops at once, C or Shift holds, P pauses.
+- **Turning:** a piece that doesn't fit after turning tries a few nearby spots (off the
+  wall, the floor or the pile) before giving up.
+- **Hold:** put the piece aside, or swap it with the one already there. Once per piece.
+- **Landing:** the outline shows where the piece will land. A piece on the pile locks
+  half a second after it stops; moving or turning it restarts that, up to 15 times per
+  piece (reaching a lower row gives them back).
+- **Points:** 100, 300, 500 or 800 for 1 to 4 rows at once, times the level. Four rows
+  straight after another four scores half as much again. Each clear after a clear adds
+  50 x the run x the level.
+- **Levels:** every 10 rows. A piece falls one row every
+  (0.8 - 0.007 x (level - 1))^(level - 1) seconds, from 1 s at level 1 to near instant by
+  level 15; it stops getting faster at level 20.
+- **Bests:** best score, most rows and highest level are kept. The pause button (or P),
+  opening a card or leaving the tab pauses the game.
+
+The rules (`src/games/fall/core/sim.ts`) have no drawing or timing of their own; the UI
+passes in the time each frame. `src/games/fall/core/pieces.ts` holds the shapes and the
+turning offsets.
 
 ## Development
 
