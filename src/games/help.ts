@@ -386,4 +386,17 @@ export const HELP: Record<string, Help> = {
       'P (or the pause button) pauses; so does leaving the tab or opening a card.',
     ],
   },
+  fall: {
+    goal: 'Steer falling pieces of four blocks into the well. Fill a row from side to side and it clears. The game ends when the pile reaches the top.',
+    tips: [
+      'Drag sideways to move, tap to turn, drag down to drop faster, flick down to drop at once. Tap to start.',
+      'Tapping the left third of the board turns the piece the other way. Pieces slide off the walls and the floor to turn when they can.',
+      'Flick up to put the piece aside in Hold and take it back later. You can do that once per piece.',
+      'The outline at the bottom shows where the piece will land. Next shows the three pieces after it.',
+      'A piece on the pile locks half a second after it stops falling; moving or turning it buys a little more time.',
+      'Points: 100, 300, 500 or 800 for 1 to 4 rows at once, times the level. Four rows straight after four rows scores half as much again, and clears in a row add a combo bonus.',
+      'Every 10 rows is a new level, and the pieces fall faster.',
+      'Keys: arrows or A and D to move, Up, W or X to turn, Z to turn back, Down to drop faster, Space to drop at once, C or Shift to hold, P to pause.',
+    ],
+  },
 };
